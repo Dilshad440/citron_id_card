@@ -91,6 +91,7 @@ class _MyTextStyle extends TextStyle {
   _MyTextStyle get black => _MyTextStyle(copyWith(color: AppColors.black));
 
   _MyTextStyle get grey => _MyTextStyle(copyWith(color: AppColors.grey));
+  _MyTextStyle get teal => _MyTextStyle(copyWith(color: AppColors.teal));
 
   _MyTextStyle get white => _MyTextStyle(copyWith(color: AppColors.white));
 

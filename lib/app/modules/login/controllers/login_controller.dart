@@ -1,3 +1,4 @@
+import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -18,6 +19,8 @@ class LoginController extends GetxController {
       Get.snackbar('Error', 'Please select user type');
       return;
     }
+
+    Get.toNamed(AppRoutes.idCard);
 
     // TODO: API call
   }

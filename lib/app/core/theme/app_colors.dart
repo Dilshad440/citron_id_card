@@ -8,6 +8,8 @@ class AppColors {
   static const grey = Colors.grey;
   static const white = Colors.white;
   static const teal = Colors.teal;
+  static const orange = Colors.orange;
+  static const purple = Colors.purple;
 
   static const primaryColor = Color(0xffc4cae9);
 }
