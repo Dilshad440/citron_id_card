@@ -16,8 +16,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: "SalonPro Vendor App",
-      initialRoute: AppRoutes.idCard,
-      initialBinding: IdCardBinding(),
+      initialRoute: AppRoutes.login,
+      initialBinding: LoginBinding(),
       getPages: AppPages.pages,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.teal, useMaterial3: true),
