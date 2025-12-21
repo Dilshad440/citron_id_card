@@ -131,7 +131,7 @@ class LoginView extends GetView<LoginController> {
 
                           const SizedBox(height: 6),
 
-                          AppTextStyle.body.small.grey.text(
+                          AppTextStyle.body.small.black.text(
                             'Login to your account',
                           ),
 
