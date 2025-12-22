@@ -38,7 +38,6 @@ class IdCardView extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: AppColors.primaryColor,
       appBar: const CommonAppBar(
         title: 'Student ID Cards',
         backgroundColor: AppColors.primaryColor,
@@ -87,7 +86,7 @@ class _StudentIdCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.primaryColor),
+        border: Border.all(color: AppColors.borderColor),
         gradient: LinearGradient(
           colors: AppColors.generateGradientColors(),
           begin: Alignment.topLeft,

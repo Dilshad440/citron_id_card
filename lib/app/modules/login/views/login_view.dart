@@ -1,5 +1,6 @@
 import 'package:citron_id_card/app/core/components/app_buttons.dart';
 import 'package:citron_id_card/app/core/constant/asset_constant.dart';
+import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -192,7 +193,12 @@ class LoginView extends GetView<LoginController> {
 
             const SizedBox(height: 28),
 
-            AppButton(text: "Login", onPressed: () {}),
+            AppButton(
+              text: "Login",
+              onPressed: () {
+                Get.toNamed(AppRoutes.idCard);
+              },
+            ),
           ],
         ),
       ),
