@@ -8,6 +8,7 @@ class StudentIdModel {
   final String dob;
   final String mobile;
   final String photoUrl;
+   bool isExpanded;
 
   StudentIdModel({
     required this.admissionNo,
@@ -19,5 +20,6 @@ class StudentIdModel {
     required this.dob,
     required this.mobile,
     required this.photoUrl,
+    required this.isExpanded,
   });
 }
