@@ -12,6 +12,17 @@ class LoginController extends GetxController {
 
   final selectedUserType = ''.obs;
 
+  RxBool isPasswordVisible = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+  }
+
+  void togglePasswordVisibility() {
+    isPasswordVisible.value = !isPasswordVisible.value;
+  }
+
   void onLogin() {
     if (!formKey.currentState!.validate()) return;
 

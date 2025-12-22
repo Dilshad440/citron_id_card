@@ -6,40 +6,72 @@ import '../theme/app_text_style.dart';
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
-    this.backgroundColor = AppColors.teal,
+    this.backgroundColor = AppColors.primaryColor,
     required this.text,
     required this.onPressed,
-    this.textColor = AppColors.white,
+    this.textColor,
     this.height = 40,
     this.width,
+    this.icon,
   });
 
   final VoidCallback onPressed;
   final String text;
   final Color backgroundColor;
-  final Color textColor;
+  final Color? textColor;
   final double? width;
   final double height;
+  final Widget? icon;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
       width: width ?? MediaQuery.of(context).size.width,
       height: height,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadiusGeometry.circular(8),
-          ),
-          backgroundColor: backgroundColor,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: AppColors.generateGradientColors(),
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
         ),
-        onPressed: onPressed,
-        child: Text(
-          text,
-          style: AppTextStyle.body.medium.black.semiBold.copyWith(
-            color: textColor,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 22,
+            offset: const Offset(0, 12),
           ),
-        ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(8),
+                ),
+                backgroundColor: AppColors.generateGradientColors()[1],
+              ),
+              onPressed: onPressed,
+              child: Text(
+                text,
+                style: AppTextStyle.body.medium.semiBold.copyWith(
+                  color: textColor ?? AppColors.textOnGradient,
+                ),
+              ),
+            ),
+          ),
+          if (icon != null) ...[
+            SizedBox(width: 8),
+            Icon(
+              Icons.arrow_forward,
+              color: AppColors.textOnGradient,
+              size: 18,
+            ),
+          ],
+        ],
       ),
     );
   }

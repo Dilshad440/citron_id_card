@@ -41,7 +41,7 @@ class IdCardView extends StatelessWidget {
       backgroundColor: AppColors.primaryColor,
       appBar: const CommonAppBar(
         title: 'Student ID Cards',
-        backgroundColor: AppColors.teal,
+        backgroundColor: AppColors.primaryColor,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndDocked,
       floatingActionButton: SizedBox(
@@ -87,9 +87,9 @@ class _StudentIdCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.teal),
+        border: Border.all(color: AppColors.primaryColor),
         gradient: LinearGradient(
-          colors: [AppColors.teal.withOpacity(0.1), AppColors.white],
+          colors: AppColors.generateGradientColors(),
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -111,7 +111,7 @@ class _StudentIdCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.teal,
+                  color: AppColors.primaryColor,
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(18),
                   ),
@@ -121,7 +121,7 @@ class _StudentIdCard extends StatelessWidget {
                   children: [
                     Text(
                       "Canossa Ayodhya English School",
-                      style: AppTextStyle.title.medium.white.bold,
+                      style: AppTextStyle.title.medium.textColor.bold,
                     ),
                   ],
                 ),
@@ -138,7 +138,7 @@ class _StudentIdCard extends StatelessWidget {
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     value: 'edit',
-                    child: Text('Edit', style: AppTextStyle.title.medium.teal),
+                    child: Text('Edit', style: AppTextStyle.title.medium.primaryColor),
                   ),
                   PopupMenuItem(
                     value: 'delete',
@@ -162,15 +162,15 @@ class _StudentIdCard extends StatelessWidget {
                     /// PHOTO
                     CircleAvatar(
                       radius: 50,
-                      backgroundColor: AppColors.teal.withOpacity(0.3),
+                      backgroundColor: AppColors.primaryColor.withOpacity(0.3),
                       backgroundImage: NetworkImage(student.photoUrl),
                     ),
                     const SizedBox(width: 14),
-                    AppTextStyle.body.large.black.bold.text(
+                    AppTextStyle.body.large.textColor.bold.text(
                       'Admission: ${student.admissionNo}',
                     ),
                     const SizedBox(height: 4),
-                    AppTextStyle.body.medium.black.bold.text(
+                    AppTextStyle.body.medium.textColor.bold.text(
                       'Class: ${student.classSection}',
                     ),
                   ],
@@ -190,7 +190,7 @@ class _StudentIdCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.teal,
+              color: AppColors.primaryColor,
               borderRadius: const BorderRadius.vertical(
                 // top: Radius.circular(18),
                 bottom: Radius.circular(18),
@@ -224,14 +224,14 @@ class _StudentIdCard extends StatelessWidget {
         children: [
           SizedBox(
             width: 90,
-            child: AppTextStyle.body.small.black.semiBold.text(label),
+            child: AppTextStyle.body.small.textColor.semiBold.text(label),
           ),
           SizedBox(
             width: 20,
-            child: AppTextStyle.body.small.black.semiBold.text(":"),
+            child: AppTextStyle.body.small.textColor.semiBold.text(":"),
           ),
 
-          Expanded(child: AppTextStyle.body.small.black.semiBold.text(value)),
+          Expanded(child: AppTextStyle.body.small.textColor.semiBold.text(value)),
         ],
       ),
     );
@@ -285,9 +285,9 @@ class _StudentIdCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 18, color: AppColors.white),
+            Icon(icon, size: 18, color: AppColors.textPrimary),
             const SizedBox(width: 6),
-            AppTextStyle.body.small.white.bold.text(label),
+            AppTextStyle.body.small.textColor.bold.text(label),
           ],
         ),
       ),

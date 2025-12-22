@@ -8,7 +8,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     required this.title,
     this.actions,
-    this.backgroundColor = AppColors.teal,
+    this.backgroundColor = AppColors.primaryColor,
     this.centerTile = true,
   });
 
@@ -23,7 +23,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: actions,
       backgroundColor: backgroundColor,
       centerTitle: centerTile,
-      title: Text(title, style: AppTextStyle.title.large.white),
+      title: Text(title, style: AppTextStyle.title.large.textColor),
     );
   }
 

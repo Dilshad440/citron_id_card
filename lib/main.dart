@@ -1,3 +1,4 @@
+import 'package:citron_id_card/app/core/theme/app_theme.dart';
 import 'package:citron_id_card/app/modules/id_card/bindings/id_card_binding.dart';
 import 'package:citron_id_card/app/modules/login/bindings/login_binding.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
       initialBinding: LoginBinding(),
       getPages: AppPages.pages,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.teal, useMaterial3: true),
+      theme: AppTheme.getAppTheme(),
       themeMode: ThemeMode.system,
     );
   }

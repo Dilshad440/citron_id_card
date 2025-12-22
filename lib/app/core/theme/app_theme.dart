@@ -8,6 +8,7 @@ class AppTheme {
 
   static ThemeData getAppTheme() {
     return ThemeData(
+      scaffoldBackgroundColor: AppColors.textOnGradient,
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.primaryColor,
         centerTitle: true,
@@ -17,10 +18,8 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           alignment: Alignment.center,
-          backgroundColor: AppColors.teal,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-          ),
+          backgroundColor: Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         ),
       ),
     );

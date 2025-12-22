@@ -88,15 +88,21 @@ class _MyTextStyle extends TextStyle {
 
   _MyTextStyle get red => _MyTextStyle(copyWith(color: AppColors.red));
 
-  _MyTextStyle get black => _MyTextStyle(copyWith(color: AppColors.black));
+  // _MyTextStyle get black => _MyTextStyle(copyWith(color: AppColors.black));
+  _MyTextStyle get mutedTextColor => _MyTextStyle(copyWith(color: AppColors.textSecondary));
 
-  _MyTextStyle  textHeight(double? height) => _MyTextStyle(copyWith(height: height));
+  _MyTextStyle get textColor =>
+      _MyTextStyle(copyWith(color: AppColors.textPrimary));
 
-  _MyTextStyle get grey => _MyTextStyle(copyWith(color: AppColors.grey));
+  _MyTextStyle textHeight(double? height) =>
+      _MyTextStyle(copyWith(height: height));
 
-  _MyTextStyle get teal => _MyTextStyle(copyWith(color: AppColors.teal));
+  // _MyTextStyle get grey => _MyTextStyle(copyWith(color: AppColors.grey));
 
-  _MyTextStyle get white => _MyTextStyle(copyWith(color: AppColors.white));
+  // _MyTextStyle get white => _MyTextStyle(copyWith(color: AppColors.white));
+
+  _MyTextStyle get primaryColor =>
+      _MyTextStyle(copyWith(color: AppColors.primaryColor));
 
   _MyTextStyle get extraBold =>
       _MyTextStyle(copyWith(fontWeight: FontWeight.w800));

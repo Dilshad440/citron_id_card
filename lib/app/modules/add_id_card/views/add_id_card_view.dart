@@ -51,7 +51,7 @@ class AddIdCardView extends GetView<AddIdCardController> {
             height: 200,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.teal),
+              border: Border.all(color: AppColors.primaryColor),
             ),
             child: Obx(() {
               if (controller.selectedImage.value != null) {

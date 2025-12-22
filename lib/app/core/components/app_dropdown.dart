@@ -36,35 +36,27 @@ class AppDropdown<T> extends StatelessWidget {
       onChanged: onChanged,
 
       /// SAME text style as AppTextField input
-      style: AppTextStyle.body.medium.black.medium,
+      style: AppTextStyle.body.medium.textColor.medium,
 
       decoration: InputDecoration(
         prefixIcon: prefix,
         filled: true,
-        fillColor: AppColors.teal.withOpacity(0.1),
+        fillColor: AppColors.borderColor.withOpacity(0.9),
 
         isDense: true,
         counter: const SizedBox.shrink(),
 
         /// EXACT SAME padding as AppTextField
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 3,
-        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 1),
 
         labelText: labelText,
-        labelStyle: AppTextStyle.title.small.black.regular,
+        labelStyle: AppTextStyle.title.small.mutedTextColor.regular,
         errorStyle: AppTextStyle.body.small.red.regular,
 
         enabledBorder: _border(),
-        focusedBorder: _border(
-          color: AppColors.teal,
-          width: 1.3,
-        ),
-        errorBorder: _border(color: AppColors.red),
-        focusedErrorBorder: _border(
-          color: AppColors.red,
-          width: 1.3,
-        ),
+        focusedBorder: _border(color: AppColors.primaryColor, width: 1.3),
+        errorBorder: _border(color: Colors.red),
+        focusedErrorBorder: _border(color: Colors.red, width: 1.3),
       ),
 
       /// 🔥 HINT (style FIXED & aligned)
@@ -72,47 +64,45 @@ class AppDropdown<T> extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: Text(
           hintText ?? '',
-          style: AppTextStyle.body.small.black.regular,
+          style: AppTextStyle.body.small.mutedTextColor.regular,
           overflow: TextOverflow.ellipsis,
         ),
       ),
 
       /// 🔥 SELECTED VALUE (style LOCKED)
       selectedItemBuilder: (context) {
-        return items.map(
-              (item) {
-            return Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                item.toString(),
-                style: AppTextStyle.body.small.black.medium,
-                overflow: TextOverflow.ellipsis,
-              ),
-            );
-          },
-        ).toList();
+        return items.map((item) {
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              item.toString(),
+              style: AppTextStyle.body.small.textColor.medium,
+              overflow: TextOverflow.ellipsis,
+            ),
+          );
+        }).toList();
       },
 
       /// Dropdown items
       items: items
           .map(
             (item) => DropdownMenuItem<T>(
-          value: item,
-          child: Text(
-            item.toString(),
-            style: AppTextStyle.body.medium.black.medium,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      )
+              value: item,
+              child: Text(
+                item.toString(),
+                style: AppTextStyle.body.medium.textColor.medium,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          )
           .toList(),
 
       /// Dropdown popup styling
       dropdownStyleData: DropdownStyleData(
         maxHeight: maxHeight,
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.borderColor,
           borderRadius: BorderRadius.circular(8),
         ),
         elevation: 8,
@@ -120,10 +110,7 @@ class AppDropdown<T> extends StatelessWidget {
 
       /// SAME density as textfield
       menuItemStyleData: const MenuItemStyleData(
-        padding: EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 10,
-        ),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       ),
 
       /// SAME height as AppTextField
@@ -139,14 +126,11 @@ class AppDropdown<T> extends StatelessWidget {
     );
   }
 
-  OutlineInputBorder _border({
-    Color? color,
-    double width = 1,
-  }) {
+  OutlineInputBorder _border({Color? color, double width = 1}) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
       borderSide: BorderSide(
-        color: (color ?? AppColors.teal).withOpacity(0.6),
+        color: (color ?? AppColors.primaryColor).withOpacity(0.6),
         width: width,
       ),
     );
