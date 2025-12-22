@@ -10,6 +10,7 @@ class AppColors {
   static const teal = Colors.teal;
   static const orange = Colors.orange;
   static const purple = Colors.purple;
+  static const yellow = Colors.yellow;
 
   static const primaryColor = Color(0xffc4cae9);
 }

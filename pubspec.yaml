@@ -37,6 +37,9 @@ dependencies:
   dio: ^5.9.0
   get: ^4.7.3
   dropdown_button2: ^2.3.9
+  image_picker:
+  permission_handler:
+  image_cropper: 
 
 dev_dependencies:
   flutter_test:

@@ -13,6 +13,7 @@ class AppTextField extends StatelessWidget {
     this.onChanged,
     this.prefix,
     this.maxLines = 1,
+    this.isFilled=false,
   });
 
   final Function(String val)? onChanged;
@@ -22,6 +23,7 @@ class AppTextField extends StatelessWidget {
   final String? hintText;
   final Widget? prefix;
   final int maxLines;
+  final bool isFilled;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +41,7 @@ class AppTextField extends StatelessWidget {
 
       decoration: InputDecoration(
         prefixIcon: prefix,
-        filled: true,
+        filled: isFilled,
         fillColor: AppColors.teal.withOpacity(0.1),
 
         /// ⬇ Reduced vertical padding (key change)

@@ -1,3 +1,4 @@
+import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -41,6 +42,19 @@ class IdCardView extends StatelessWidget {
       appBar: const CommonAppBar(
         title: 'Student ID Cards',
         backgroundColor: AppColors.teal,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndDocked,
+      floatingActionButton: SizedBox(
+        height: 40,
+        child: FloatingActionButton.extended(
+          isExtended: true,
+          highlightElevation: 12,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          onPressed: () {
+            Get.toNamed(AppRoutes.addIdCard);
+          },
+          label: Text("Add Student"),
+        ),
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
