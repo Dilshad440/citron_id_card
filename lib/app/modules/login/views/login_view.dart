@@ -1,4 +1,5 @@
 import 'package:citron_id_card/app/core/components/app_buttons.dart';
+import 'package:citron_id_card/app/core/components/two_line_element.dart';
 import 'package:citron_id_card/app/core/constant/asset_constant.dart';
 import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
@@ -34,71 +35,15 @@ class LoginView extends GetView<LoginController> {
 
   Widget _buildStack(BoxConstraints constraints) {
     final maxHeight = constraints.maxHeight;
-    final double topHeight = maxHeight * 0.27;
+    final double topHeight = maxHeight * 0.23;
 
     return Stack(
       children: [
         /// 🌿 TOP GRADIENT
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: Container(
-            height: topHeight,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: AppColors.generateGradientColors(),
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(48),
-                bottomRight: Radius.circular(48),
-              ),
-              image: DecorationImage(
-                image: AssetImage(AssetConstant.hill),
-                fit: BoxFit.fill,
-                alignment: Alignment.topCenter,
-                opacity: 0.18,
-              ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(AssetConstant.idCard, height: 80),
-                const SizedBox(height: 12),
-                AppTextStyle.display.large.textColor.bold.text(
-                  "ID Card Generator",
-                ),
-                const SizedBox(height: 6),
-                AppTextStyle.body.medium.textColor.regular.text(
-                  "Create & Manage ID Cards",
-                ),
-              ],
-            ),
-          ),
-        ),
+        _topCard(topHeight),
 
         /// 🌿 BOTTOM GRADIENT
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: Container(
-            height: topHeight,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: AppColors.generateGradientColors(),
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(48),
-                topRight: Radius.circular(48),
-              ),
-            ),
-          ),
-        ),
+        _bottomCard(topHeight),
 
         /// 🧾 CENTER LOGIN CARD
         Align(
@@ -115,6 +60,92 @@ class LoginView extends GetView<LoginController> {
           ),
         ),
       ],
+    );
+  }
+
+  Positioned _bottomCard(double topHeight) {
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        height: topHeight,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: AppColors.generateGradientColors(),
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(48),
+            topRight: Radius.circular(48),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.borderColor, width: 1.5),
+              ),
+              child: CircleAvatar(radius: 45),
+            ),
+            SizedBox(height: 10),
+            Text(
+              "Powered By Citron Software",
+              style: AppTextStyle.title.medium.regular.textOnGradient,
+            ),
+            Text(
+              "© ${DateTime.now().year} Citron Software. All rights reserved.",
+              style: AppTextStyle.title.small.lightWeight.italic.copyWith(
+                color: AppColors.borderColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Positioned _topCard(double topHeight) {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        height: topHeight,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: AppColors.generateGradientColors(),
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(48),
+            bottomRight: Radius.circular(48),
+          ),
+          image: DecorationImage(
+            image: AssetImage(AssetConstant.hill),
+            fit: BoxFit.fill,
+            alignment: Alignment.topCenter,
+            opacity: 0.18,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(AssetConstant.idCard, height: 80),
+            const SizedBox(height: 12),
+            AppTextStyle.display.large.textColor.bold.text("ID Card Generator"),
+            const SizedBox(height: 6),
+            AppTextStyle.body.medium.textColor.regular.text(
+              "Create & Manage ID Cards",
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -149,45 +180,54 @@ class LoginView extends GetView<LoginController> {
 
             /// User Type
             Obx(
-              () => AppDropdown<String>(
-                hintText: "Select user type",
-                value: controller.selectedUserType.value.isEmpty
-                    ? null
-                    : controller.selectedUserType.value,
-                items: controller.userTypes,
-                onChanged: (val) =>
-                    controller.selectedUserType.value = val ?? '',
-                validator: (val) => val == null ? 'Select user type' : null,
+              () => TwoLineElement(
+                title: "User Type",
+                child: AppDropdown<String>(
+                  hintText: "Select user type",
+                  value: controller.selectedUserType.value.isEmpty
+                      ? null
+                      : controller.selectedUserType.value,
+                  items: controller.userTypes,
+                  onChanged: (val) =>
+                      controller.selectedUserType.value = val ?? '',
+                  validator: (val) => val == null ? 'Select user type' : null,
+                ),
               ),
             ),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 10),
 
-            AppTextField(
-              controller: controller.usernameController,
-              hintText: "Enter username",
-              validator: (val) => val!.isEmpty ? "Username required" : null,
+            TwoLineElement(
+              title: "Username",
+              child: AppTextField(
+                controller: controller.usernameController,
+                hintText: "Enter username",
+                validator: (val) => val!.isEmpty ? "Username required" : null,
+              ),
             ),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 10),
 
             Obx(
-              () => AppTextField(
-                controller: controller.passwordController,
-                isObsecure: controller.isPasswordVisible.value,
-                hintText: "Enter password",
-                suffix: IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  onPressed: controller.togglePasswordVisibility,
-                  icon: Icon(
-                    controller.isPasswordVisible.value
-                        ? Icons.visibility_off
-                        : Icons.visibility,
-                    size: 20,
+              () => TwoLineElement(
+                title: "Password",
+                child: AppTextField(
+                  controller: controller.passwordController,
+                  isObsecure: controller.isPasswordVisible.value,
+                  hintText: "Enter password",
+                  suffix: IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: controller.togglePasswordVisibility,
+                    icon: Icon(
+                      controller.isPasswordVisible.value
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      size: 20,
+                    ),
                   ),
+                  validator: (val) => val!.isEmpty ? "Password required" : null,
                 ),
-                validator: (val) => val!.isEmpty ? "Password required" : null,
               ),
             ),
 
@@ -196,8 +236,11 @@ class LoginView extends GetView<LoginController> {
             AppButton(
               text: "Login",
               onPressed: () {
-                Get.toNamed(AppRoutes.idCard);
+                if (controller.formKey.currentState!.validate()) {
+                  Get.toNamed(AppRoutes.idCard);
+                }
               },
+              icon: Icon(Icons.arrow_forward),
             ),
           ],
         ),

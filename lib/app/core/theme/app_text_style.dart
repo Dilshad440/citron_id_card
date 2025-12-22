@@ -94,6 +94,9 @@ class _MyTextStyle extends TextStyle {
   _MyTextStyle get textColor =>
       _MyTextStyle(copyWith(color: AppColors.textPrimary));
 
+  _MyTextStyle get textOnGradient =>
+      _MyTextStyle(copyWith(color: AppColors.textOnGradient));
+
   _MyTextStyle textHeight(double? height) =>
       _MyTextStyle(copyWith(height: height));
 

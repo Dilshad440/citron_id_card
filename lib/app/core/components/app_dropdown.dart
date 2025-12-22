@@ -47,7 +47,7 @@ class AppDropdown<T> extends StatelessWidget {
         counter: const SizedBox.shrink(),
 
         /// EXACT SAME padding as AppTextField
-        contentPadding: const EdgeInsets.symmetric(vertical: 1),
+        contentPadding: const EdgeInsets.symmetric(vertical: 3),
 
         labelText: labelText,
         labelStyle: AppTextStyle.title.small.mutedTextColor.regular,
@@ -90,7 +90,7 @@ class AppDropdown<T> extends StatelessWidget {
               value: item,
               child: Text(
                 item.toString(),
-                style: AppTextStyle.body.medium.textColor.medium,
+                style: AppTextStyle.body.small.textColor.medium,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

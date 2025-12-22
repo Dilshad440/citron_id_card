@@ -43,35 +43,34 @@ class AppButton extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadiusGeometry.circular(8),
-                ),
-                backgroundColor: AppColors.generateGradientColors()[1],
-              ),
-              onPressed: onPressed,
-              child: Text(
-                text,
-                style: AppTextStyle.body.medium.semiBold.copyWith(
-                  color: textColor ?? AppColors.textOnGradient,
-                ),
-              ),
-            ),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadiusGeometry.circular(8),
           ),
-          if (icon != null) ...[
-            SizedBox(width: 8),
-            Icon(
-              Icons.arrow_forward,
-              color: AppColors.textOnGradient,
-              size: 18,
+          backgroundColor: AppColors.generateGradientColors()[1],
+        ),
+        onPressed: onPressed,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              text,
+              style: AppTextStyle.body.medium.semiBold.copyWith(
+                color: textColor ?? AppColors.textOnGradient,
+              ),
             ),
+            if (icon != null) ...[
+              SizedBox(width: 8),
+              Icon(
+                Icons.arrow_forward,
+                color: AppColors.textOnGradient,
+                size: 18,
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

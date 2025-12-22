@@ -26,7 +26,9 @@ class TwoLineElement extends StatelessWidget {
           children: [
             Text(
               title,
-              style: AppTextStyle.body.small.bold.italic.textHeight(0),
+              style: AppTextStyle.body.small.textColor.bold.italic.textHeight(
+                1.5,
+              ),
             ),
             if (isRequired) ...[
               Text(" *", style: AppTextStyle.title.medium.red.textHeight(0)),

@@ -12,9 +12,8 @@ class AppTextField extends StatelessWidget {
     this.labelText,
     this.onChanged,
     this.prefix,
-    this.maxLines = 1,
-    this.isFilled = false,
     this.suffix,
+    this.maxLines = 1,
     this.isObsecure = false,
   });
 
@@ -26,7 +25,6 @@ class AppTextField extends StatelessWidget {
   final Widget? prefix;
   final Widget? suffix;
   final int maxLines;
-  final bool isFilled;
   final bool isObsecure;
 
   @override
@@ -40,36 +38,41 @@ class AppTextField extends StatelessWidget {
       autofocus: false,
       cursorColor: AppColors.primaryColor,
       autovalidateMode: AutovalidateMode.onUserInteraction,
-
-      /// Medium but compact text
       style: AppTextStyle.body.medium.textColor.medium,
 
       decoration: InputDecoration(
         prefixIcon: prefix,
-        constraints: suffix != null ? BoxConstraints(maxHeight: 40) : null,
-        suffixIcon: suffix,
+
+        /// ✅ FIX: control suffix size
+        suffixIcon: suffix == null
+            ? null
+            : SizedBox(width: 38, height: 38, child: Center(child: suffix)),
+
+        suffixIconConstraints: const BoxConstraints(
+          minHeight: 38,
+          minWidth: 38,
+        ),
 
         filled: true,
         fillColor: AppColors.borderColor.withOpacity(0.9),
 
-        /// ⬇ Reduced vertical padding (key change)
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 10,
+        ),
 
-        /// Texts
         labelText: labelText,
         hintText: hintText,
         labelStyle: AppTextStyle.title.small.mutedTextColor.regular,
         hintStyle: AppTextStyle.body.small.mutedTextColor.regular,
         errorStyle: AppTextStyle.body.small.red.regular,
 
-        /// Borders (unchanged theme)
         enabledBorder: _border(),
         focusedBorder: _border(color: AppColors.borderColor, width: 1.3),
         errorBorder: _border(color: AppColors.red),
         focusedErrorBorder: _border(color: AppColors.red, width: 1.3),
 
-        counter: const SizedBox.shrink(),
-        isDense: true, // 🔥 Important for compact height
+        isDense: true,
       ),
     );
   }
