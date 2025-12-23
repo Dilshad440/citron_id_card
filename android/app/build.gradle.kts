@@ -42,3 +42,9 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")   // needed for uCrop
+    implementation("com.squareup.okio:okio:3.6.0")        // needed for uCrop
+}
