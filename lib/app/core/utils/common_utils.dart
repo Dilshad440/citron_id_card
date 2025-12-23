@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -77,20 +79,9 @@ class CommonUtils {
                           ),
                         ),
                         onTap: () async {
-                          final image = await picker.pickImage(
-                            source: ImageSource.camera,
-                          );
-
-                          final isGranted = await checkCameraPermission();
-                          if (isGranted) {
-                            if (image != null) {
-                              final croppedImage = await cropImage(image.path);
-                              onImageSelected(croppedImage!);
-                            }
-                            Navigator.pop(context);
-                          } else {
-                            await Permission.camera.request();
-                          }
+                          final xFile = await pickImage();
+                          if (xFile == null) return;
+                          onImageSelected.call(xFile);
                         },
                       ),
                     ),
@@ -128,20 +119,11 @@ class CommonUtils {
                           ),
                         ),
                         onTap: () async {
-                          final isGranted = await checkStoragePermission();
-                          if (isGranted) {
-                            final image = await picker.pickImage(
-                              source: ImageSource.gallery,
-                            );
-                            if (image != null) {
-                              final croppedImage = await cropImage(image.path);
-                              onImageSelected(croppedImage!);
-                            }
-
-                            Navigator.pop(context);
-                          } else {
-                            await Permission.photos.request();
-                          }
+                          final xFile = await pickImage(
+                            source: ImageSource.gallery,
+                          );
+                          if (xFile == null) return;
+                          onImageSelected.call(xFile);
                         },
                       ),
                     ),
@@ -163,18 +145,67 @@ class CommonUtils {
     );
   }
 
-  static Future<bool> checkStoragePermission() async {
-    var status = await Permission.photos.request();
+  static Future<bool> checkPermission(ImageSource source) async {
+    Permission permission;
 
-    if (status.isGranted) return true;
+    if (source == ImageSource.camera) {
+      permission = Permission.camera;
+    } else {
+      // Gallery
+      if (Platform.isIOS) {
+        permission = Permission.photos;
+      } else {
+        permission = Permission.storage; // Android (safe fallback)
+      }
+    }
+
+    final status = await permission.status;
+
+    if (status.isGranted) {
+      return true;
+    }
+
+    if (status.isDenied) {
+      final result = await permission.request();
+      return result.isGranted;
+    }
+
+    if (status.isPermanentlyDenied) {
+      await openAppSettings();
+      return false;
+    }
+
     return false;
   }
 
-  static Future<bool> checkCameraPermission() async {
-    var status = await Permission.camera.request();
+  static Future<XFile?> pickImage({
+    ImageSource source = ImageSource.camera,
+  }) async {
+    final isGranted = await checkPermission(source);
 
-    if (status.isGranted) return true;
-    return false;
+    if (!isGranted) {
+      final status = await Permission.camera.request();
+      if (!status.isGranted) {
+        return null; // permission denied
+      }
+    }
+
+    final image = await ImagePicker().pickImage(
+      source: source,
+      imageQuality: 85,
+    );
+
+    if (image == null) {
+      return null; // user cancelled camera
+    }
+
+    final croppedImage = await cropImage(image.path);
+
+    if (croppedImage == null) {
+      return null; // user cancelled crop
+    }
+
+    return croppedImage;
   }
 
   static Future<XFile?> cropImage(String path) async {

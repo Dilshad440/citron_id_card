@@ -90,7 +90,10 @@ class LoginView extends GetView<LoginController> {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.borderColor, width: 1.5),
               ),
-              child: CircleAvatar(radius: 45),
+              child: CircleAvatar(
+                radius: 45,
+                backgroundImage: AssetImage(AssetConstant.logo),
+              ),
             ),
             SizedBox(height: 10),
             Text(

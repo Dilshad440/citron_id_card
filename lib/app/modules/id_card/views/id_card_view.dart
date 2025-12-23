@@ -2,8 +2,6 @@ import 'package:citron_id_card/app/modules/id_card/controllers/id_card_controlle
 import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../../core/components/common_appbbar.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_style.dart';
 import '../model/student_id_model.dart';
@@ -105,11 +103,11 @@ class _StudentIdCard extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.borderColor),
         color: AppColors.generateGradientColors().first,
-        gradient: LinearGradient(
-          colors: AppColors.generateGradientColors(),
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        // gradient: LinearGradient(
+        //   colors: AppColors.generateGradientColors(),
+        //   begin: Alignment.topLeft,
+        //   end: Alignment.bottomRight,
+        // ),
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
@@ -129,11 +127,11 @@ class _StudentIdCard extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: AppColors.primaryColor,
-                  gradient: LinearGradient(
-                    colors: AppColors.generateGradientColors(),
-                    end: Alignment.topRight,
-                    begin: Alignment.topLeft,
-                  ),
+                  // gradient: LinearGradient(
+                  //   colors: AppColors.generateGradientColors(),
+                  //   end: Alignment.topRight,
+                  //   begin: Alignment.topLeft,
+                  // ),
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(18),
                   ),
@@ -260,11 +258,11 @@ class _StudentIdCard extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: AppColors.primaryColor,
-                  gradient: LinearGradient(
-                    colors: AppColors.generateGradientColors(),
-                    end: Alignment.topLeft,
-                    begin: Alignment.topRight,
-                  ),
+                  // gradient: LinearGradient(
+                  //   colors: AppColors.generateGradientColors(),
+                  //   end: Alignment.topLeft,
+                  //   begin: Alignment.topRight,
+                  // ),
                   borderRadius: const BorderRadius.vertical(
                     // top: Radius.circular(18),
                     bottom: Radius.circular(18),
@@ -309,63 +307,6 @@ class _StudentIdCard extends StatelessWidget {
             child: AppTextStyle.body.small.textColor.semiBold.text(value),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _chip(String label, String value, Color bgColor, Color textColor) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: bgColor.withOpacity(0.3),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Text(
-        '$label: $value',
-        style: AppTextStyle.body.small.copyWith(
-          color: textColor,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Widget _actionButton(
-    String label,
-    Color color,
-    IconData icon,
-    VoidCallback onTap,
-  ) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [color.withOpacity(0.8), color]),
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.3),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 18, color: AppColors.textPrimary),
-            const SizedBox(width: 6),
-            AppTextStyle.body.small.textColor.bold.text(label),
-          ],
-        ),
       ),
     );
   }
