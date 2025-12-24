@@ -4,12 +4,21 @@ import '../modules/id_card/bindings/id_card_binding.dart';
 import '../modules/id_card/views/id_card_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/splash/bindings/splash_binding.dart';
+import '../modules/splash/views/splash_view.dart';
 import 'package:get/get.dart';
 
 import 'app_routes.dart';
 
 class AppPages {
   static final pages = <GetPage>[
+    GetPage(
+      name: AppRoutes.splash,
+      page: () => const SplashView(),
+      binding: SplashBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
     GetPage(
       name: AppRoutes.login,
       page: () => const LoginView(),
