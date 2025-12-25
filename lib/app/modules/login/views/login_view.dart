@@ -35,7 +35,8 @@ class LoginView extends GetView<LoginController> {
 
   Widget _buildStack(BoxConstraints constraints) {
     final maxHeight = constraints.maxHeight;
-    final double topHeight = maxHeight * 0.23;
+    final double topHeight = maxHeight * 0.24;
+    final double bottomHeight = maxHeight * 0.22;
 
     return Stack(
       children: [
@@ -43,7 +44,7 @@ class LoginView extends GetView<LoginController> {
         _topCard(topHeight),
 
         /// 🌿 BOTTOM GRADIENT
-        _bottomCard(topHeight),
+        _bottomCard(bottomHeight),
 
         /// 🧾 CENTER LOGIN CARD
         Align(
@@ -54,7 +55,7 @@ class LoginView extends GetView<LoginController> {
               left: 20,
               right: 20,
               top: 24,
-              bottom: 24 + MediaQuery.of(Get.context!).viewInsets.bottom,
+              bottom: MediaQuery.of(Get.context!).viewInsets.bottom,
             ),
             child: _loginCard(),
           ),
@@ -139,6 +140,7 @@ class LoginView extends GetView<LoginController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const SizedBox(height: 20),
             Image.asset(AssetConstant.idCard, height: 80),
             const SizedBox(height: 12),
             AppTextStyle.display.large.textColor.bold.text("ID Card Generator"),
@@ -179,7 +181,7 @@ class LoginView extends GetView<LoginController> {
             AppTextStyle.display.large.textColor.bold.text("Welcome Back"),
             const SizedBox(height: 6),
             AppTextStyle.body.medium.textColor.text("Login to your account"),
-            const SizedBox(height: 28),
+            const SizedBox(height: 20),
 
             /// User Type
             Obx(
@@ -240,7 +242,12 @@ class LoginView extends GetView<LoginController> {
               text: "Login",
               onPressed: () {
                 if (controller.formKey.currentState!.validate()) {
-                  Get.toNamed(AppRoutes.idCard);
+                  final userType = controller.selectedUserType.value;
+                  if (userType.toLowerCase() == "parent") {
+                    Get.toNamed(AppRoutes.enterAdmissionNumber);
+                  } else {
+                    Get.toNamed(AppRoutes.idCard);
+                  }
                 }
               },
               icon: Icon(Icons.arrow_forward),

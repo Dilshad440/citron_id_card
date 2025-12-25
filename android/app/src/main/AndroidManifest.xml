@@ -3,6 +3,7 @@
 
     <!-- Android 13+ (API 33+) -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <!-- Android 12 and below -->
     <uses-permission

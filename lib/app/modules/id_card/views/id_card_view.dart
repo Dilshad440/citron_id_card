@@ -1,3 +1,4 @@
+import 'package:citron_id_card/app/core/components/background_gradient.dart';
 import 'package:citron_id_card/app/modules/id_card/controllers/id_card_controller.dart';
 import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
@@ -16,67 +17,45 @@ class IdCardView extends GetView<IdCardController> {
       //   title: 'Student ID Cards',
       //   backgroundColor: AppColors.primaryColor,
       // ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndDocked,
-      floatingActionButton: SizedBox(
-        height: 40,
-        child: FloatingActionButton.extended(
-          isExtended: true,
-          highlightElevation: 12,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          onPressed: () {
-            Get.toNamed(AppRoutes.addIdCard);
-          },
-          label: Text("Add Student"),
-        ),
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: AppColors.generateGradientColors(),
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    icon: Icon(Icons.arrow_back),
-                  ),
-                  Text(
-                    "Student Id Card",
-                    style: AppTextStyle.title.large.textColor,
-                  ),
-                ],
-              ),
-              Expanded(
-                child: GetBuilder<IdCardController>(
-                  id: "idCard",
-                  builder: (controller) {
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.all(16),
-                      itemCount: controller.idCards?.length,
-                      itemBuilder: (_, index) {
-                        final students = controller.idCards?[index];
-                        return _StudentIdCard(
-                          student: students!,
-                          onEdit: () {},
-                          onDelete: () {},
-                          onExpand: (val) => controller.expandCard(index, val),
-                        );
-                      },
-                    );
+      body: BackgroundGradient(
+        child: Column(
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Get.back();
                   },
+                  icon: Icon(Icons.arrow_back),
                 ),
+                Text(
+                  "Student Id Card",
+                  style: AppTextStyle.title.large.textColor,
+                ),
+              ],
+            ),
+            Expanded(
+              child: GetBuilder<IdCardController>(
+                id: "idCard",
+                builder: (controller) {
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: controller.idCards?.length,
+                    itemBuilder: (_, index) {
+                      final students = controller.idCards?[index];
+                      return _StudentIdCard(
+                        student: students!,
+                        onEdit: () {},
+                        onDelete: () {},
+                        onExpand: (val) => controller.expandCard(index, val),
+                      );
+                    },
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

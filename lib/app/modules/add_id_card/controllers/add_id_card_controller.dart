@@ -16,7 +16,7 @@ class AddIdCardController extends GetxController {
 
   final formKey = GlobalKey<FormState>();
   final ScrollController scrollController = ScrollController();
-
+  final TextEditingController admissionController = TextEditingController();
 
   @override
   void onInit() {
@@ -86,6 +86,4 @@ class AddIdCardController extends GetxController {
     }
     return null;
   }
-
-
 }

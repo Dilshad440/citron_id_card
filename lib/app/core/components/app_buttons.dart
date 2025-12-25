@@ -6,7 +6,7 @@ import '../theme/app_text_style.dart';
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
-    this.backgroundColor = AppColors.primaryColor,
+    this.backgroundColor,
     required this.text,
     required this.onPressed,
     this.textColor,
@@ -17,7 +17,7 @@ class AppButton extends StatelessWidget {
 
   final VoidCallback onPressed;
   final String text;
-  final Color backgroundColor;
+  final Color? backgroundColor;
   final Color? textColor;
   final double? width;
   final double height;
@@ -34,7 +34,7 @@ class AppButton extends StatelessWidget {
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.12),
@@ -48,7 +48,7 @@ class AppButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadiusGeometry.circular(8),
           ),
-          backgroundColor: AppColors.generateGradientColors()[1],
+          backgroundColor:backgroundColor?? AppColors.generateGradientColors()[1],
         ),
         onPressed: onPressed,
         child: Row(

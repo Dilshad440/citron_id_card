@@ -1,3 +1,5 @@
+import 'package:citron_id_card/app/modules/add_id_card/views/enter_admission_number_view.dart';
+
 import '../modules/add_id_card/bindings/add_id_card_binding.dart';
 import '../modules/add_id_card/views/add_id_card_view.dart';
 import '../modules/id_card/bindings/id_card_binding.dart';
@@ -40,5 +42,12 @@ class AppPages {
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
     ),
-];
+    GetPage(
+      name: AppRoutes.enterAdmissionNumber,
+      page: () => const EnterAdmissionNumberView(),
+      binding: AddIdCardBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+  ];
 }

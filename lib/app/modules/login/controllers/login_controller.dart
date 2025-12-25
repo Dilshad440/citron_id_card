@@ -8,7 +8,7 @@ class LoginController extends GetxController {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
 
-  final userTypes = ['Admin', 'Teacher', 'Student'];
+  final userTypes = ['Admin', 'Teacher', 'Student','Parent'];
 
   final selectedUserType = ''.obs;
 

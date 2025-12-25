@@ -1,4 +1,5 @@
 import 'package:citron_id_card/app/core/theme/app_theme.dart';
+import 'package:citron_id_card/app/modules/add_id_card/bindings/add_id_card_binding.dart';
 import 'package:citron_id_card/app/modules/login/bindings/login_binding.dart';
 import 'package:citron_id_card/app/modules/splash/bindings/splash_binding.dart';
 import 'package:flutter/material.dart';

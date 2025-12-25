@@ -1,5 +1,6 @@
 import 'package:citron_id_card/app/core/components/app_buttons.dart';
 import 'package:citron_id_card/app/core/components/app_textfield.dart';
+import 'package:citron_id_card/app/core/components/background_gradient.dart';
 import 'package:citron_id_card/app/core/components/common_appbbar.dart';
 import 'package:citron_id_card/app/core/components/two_line_element.dart';
 import 'package:citron_id_card/app/core/constant/asset_constant.dart';
@@ -33,97 +34,66 @@ class AddIdCardView extends GetView<AddIdCardController> {
                 print("API call");
                 return;
               }
-
-              // 🔥 WAIT for validation UI to render
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                for (final field in fields) {
-                  final error = field.validator?.call(field.controller.text);
-                  if (error != null) {
-                    final context = field.fieldKey.currentContext;
-                    if (context != null) {
-                      Scrollable.ensureVisible(
-                        context,
-                        duration: const Duration(milliseconds: 500),
-                        curve: Curves.easeInOut,
-                        alignment: 0.2, // keeps field slightly below top
-                      );
-                    }
-                    break;
-                  }
-                }
-              });
             },
-
           ),
         ),
       ],
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: AppColors.generateGradientColors(),
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    icon: Icon(Icons.arrow_back),
-                  ),
-                  Text(
-                    "Student Id Card",
-                    style: AppTextStyle.title.large.textColor,
-                  ),
-                ],
-              ),
-              Expanded(
-                child: Form(
-                  key: controller.formKey,
-                  child: ListView(
-                    controller: controller.scrollController,
+      body: BackgroundGradient(
+        child: Column(
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  icon: Icon(Icons.arrow_back),
+                ),
+                Text(
+                  "Student Id Card",
+                  style: AppTextStyle.title.large.textColor,
+                ),
+              ],
+            ),
+            Expanded(
+              child: Form(
+                key: controller.formKey,
+                child: ListView(
+                  controller: controller.scrollController,
 
-                    shrinkWrap: true,
-                    padding: EdgeInsets.all(16),
-                    children: [
-                      ...IdCardFieldModel.getFields(controller)
-                          .map(
-                            (e) => Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 6.0,
-                              ),
-                              child: TwoLineElement(
-                                title: e.title,
-                                child: AppTextField(
-                                  hintText: e.hint,
-                                  validator: e.validator,
-                                  controller: e.controller,
-                                  key: e.fieldKey,
-                                ),
+                  shrinkWrap: true,
+                  padding: EdgeInsets.all(16),
+                  children: [
+                    ...IdCardFieldModel.getFields(controller)
+                        .map(
+                          (e) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6.0),
+                            child: TwoLineElement(
+                              title: e.title,
+                              child: AppTextField(
+                                hintText: e.hint,
+                                validator: e.validator,
+                                controller: e.controller,
+                                key: e.fieldKey,
                               ),
                             ),
-                          )
-                          .toList(),
+                          ),
+                        )
+                        .toList(),
 
-                      SizedBox(height: 12),
-                      GetBuilder<AddIdCardController>(
-                        id: controller.builderId,
-                        builder: (controller) {
-                          return _ImageCard(controller: controller);
-                          ;
-                        },
-                      ),
-                    ],
-                  ),
+                    SizedBox(height: 12),
+                    GetBuilder<AddIdCardController>(
+                      id: controller.builderId,
+                      builder: (controller) {
+                        return _ImageCard(controller: controller);
+                        ;
+                      },
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
