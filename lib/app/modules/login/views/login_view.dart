@@ -1,6 +1,6 @@
 import 'package:citron_id_card/app/core/components/app_buttons.dart';
 import 'package:citron_id_card/app/core/components/two_line_element.dart';
-import 'package:citron_id_card/app/core/constant/asset_constant.dart';
+import 'package:citron_id_card/app/core/constants/asset_constant.dart';
 import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

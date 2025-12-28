@@ -3,7 +3,7 @@ import 'package:citron_id_card/app/core/components/app_textfield.dart';
 import 'package:citron_id_card/app/core/components/background_gradient.dart';
 import 'package:citron_id_card/app/core/components/common_appbbar.dart';
 import 'package:citron_id_card/app/core/components/two_line_element.dart';
-import 'package:citron_id_card/app/core/constant/asset_constant.dart';
+import 'package:citron_id_card/app/core/constants/asset_constant.dart';
 import 'package:citron_id_card/app/core/theme/app_colors.dart';
 import 'package:citron_id_card/app/core/theme/app_text_style.dart';
 import 'package:citron_id_card/app/core/utils/common_utils.dart';

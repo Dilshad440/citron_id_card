@@ -1,4 +1,4 @@
-import 'package:citron_id_card/app/core/constant/asset_constant.dart';
+import 'package:citron_id_card/app/core/constants/asset_constant.dart';
 import 'package:citron_id_card/app/core/theme/app_colors.dart';
 import 'package:citron_id_card/app/core/theme/app_text_style.dart';
 import 'package:flutter/material.dart';
