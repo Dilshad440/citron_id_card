@@ -1,3 +1,4 @@
+import 'package:citron_id_card/app/modules/login/views/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'app/config/app_config.dart';
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
       initialRoute: AppRoutes.login,
       initialBinding: LoginBinding(),
       theme: AppTheme.getAppTheme(),
-      home: const _DefaultHome(),
+      home: const LoginView(),
     );
   }
 }
