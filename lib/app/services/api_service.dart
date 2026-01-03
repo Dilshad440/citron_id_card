@@ -57,4 +57,18 @@ class ApiService {
     }
   }
 
+  Future<Response> uploadPhoto({
+    required String base64,
+    required int stdId,
+  }) async {
+    try {
+      final response = await client.dio.post(
+        ApiConstants.uploadPhoto,
+        data: {"IdRecordId": stdId, "Base64Photo": base64},
+      );
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

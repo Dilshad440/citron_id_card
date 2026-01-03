@@ -11,7 +11,7 @@ class OverlayIdCardLoader extends StatelessWidget {
     required this.isLoading,
   });
 
-  final Widget child;
+  final Widget Function(bool isLoading) child;
   final bool isLoading;
 
   @override
@@ -23,7 +23,7 @@ class OverlayIdCardLoader extends StatelessWidget {
       appIcon: SpinKitWaveSpinner(
         color: AppColors.generateGradientColors().last,
       ),
-      child: isLoading ? SizedBox() : child,
+      child: child.call(isLoading),
     );
   }
 }

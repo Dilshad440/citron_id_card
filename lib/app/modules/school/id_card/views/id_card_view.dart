@@ -1,5 +1,6 @@
 import 'package:citron_id_card/app/core/components/background_gradient.dart';
 import 'package:citron_id_card/app/core/components/overlay_loader.dart';
+import 'package:citron_id_card/app/core/utils/common_utils.dart';
 import 'package:citron_id_card/app/modules/shared/home/controllers/home_controller.dart';
 import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
@@ -38,25 +39,29 @@ class IdCardView extends GetView<IdCardController> {
                 builder: (controller) {
                   return OverlayIdCardLoader(
                     isLoading: controller.isLoading.value,
-                    child:
-                        !controller.isLoading.value &&
-                            controller.schoolIds!.isEmpty
-                        ? Center(child: Text("Data not found"))
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            padding: const EdgeInsets.all(16),
-                            itemCount: controller.schoolIds?.length,
-                            itemBuilder: (_, index) {
-                              final students = controller.schoolIds?[index];
-                              return _StudentIdCard(
-                                student: students!,
-                                onEdit: () {},
-                                onDelete: () {},
-                                onExpand: (val) =>
-                                    controller.expandCard(index, val),
-                              );
-                            },
-                          ),
+                    child: (isLoading) {
+                      if (isLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (!isLoading && controller.schoolIds == null) {
+                        return const Center(child: Text("No Data Found"));
+                      }
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.all(16),
+                        itemCount: controller.schoolIds?.length,
+                        itemBuilder: (_, index) {
+                          final students = controller.schoolIds?[index];
+                          return _StudentIdCard(
+                            student: students,
+                            onEdit: () {},
+                            onDelete: () {},
+                            onExpand: (val) =>
+                                controller.expandCard(index, val),
+                          );
+                        },
+                      );
+                    },
                   );
                 },
               ),
@@ -68,15 +73,15 @@ class IdCardView extends GetView<IdCardController> {
   }
 }
 
-class _StudentIdCard extends StatelessWidget {
+class _StudentIdCard extends GetView<IdCardController> {
   const _StudentIdCard({
-    required this.student,
+    this.student,
     required this.onEdit,
     required this.onDelete,
     required this.onExpand,
   });
 
-  final Records student;
+  final Records? student;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final Function(bool val) onExpand;
@@ -162,24 +167,61 @@ class _StudentIdCard extends StatelessWidget {
           ExpansionTile(
             showTrailingIcon: false,
             onExpansionChanged: onExpand,
-            initiallyExpanded: student.isExpanded ?? false,
+            initiallyExpanded: student?.isExpanded ?? false,
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 /// PHOTO
-                if (student.isExpanded ?? false) ...[
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: AppColors.primaryColor.withOpacity(0.3),
-                    backgroundImage: NetworkImage(student.photo ?? ""),
+                if (student?.isExpanded ?? false) ...[
+                  Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      GetBuilder<IdCardController>(
+                        id: "photo",
+                        builder: (controller) {
+                          return CircleAvatar(
+                            radius: 50,
+                            backgroundColor: AppColors.primaryColor.withOpacity(
+                              0.3,
+                            ),
+                            backgroundImage: controller.selectedImg != null
+                                ? FileImage(controller.selectedImg!)
+                                : NetworkImage(student?.photo ?? ""),
+                          );
+                        },
+                      ),
+
+                      // Edit Icon
+                      Positioned(
+                        bottom: 2,
+                        right: 2,
+                        child: InkWell(
+                          onTap: () {
+                            controller.pickImage(student!.id!);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.edit,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(width: 14),
                   AppTextStyle.body.large.textColor.bold.text(
-                    'Admission: ${student.data?.admNo}',
+                    'Admission: ${student?.data?.admNo}',
                   ),
                   const SizedBox(height: 4),
                   AppTextStyle.body.medium.textColor.bold.text(
-                    'Class: ${student.data?.clas}',
+                    'Class: ${student?.data?.clas}',
                   ),
                 ] else ...[
                   Row(
@@ -189,7 +231,7 @@ class _StudentIdCard extends StatelessWidget {
                         backgroundColor: AppColors.primaryColor.withOpacity(
                           0.3,
                         ),
-                        backgroundImage: NetworkImage(student.photo ?? ""),
+                        backgroundImage: NetworkImage(student?.photo ?? ""),
                       ),
                       SizedBox(width: 20),
                       Expanded(
@@ -199,17 +241,17 @@ class _StudentIdCard extends StatelessWidget {
                           children: [
                             _infoRow(
                               "Admission No",
-                              student.data?.admNo ?? "",
+                              student?.data?.admNo ?? "",
                               bottomPadding: 0,
                             ),
                             _infoRow(
                               "Name",
-                              student.data?.studentName ?? "",
+                              student?.data?.studentName ?? "",
                               bottomPadding: 0,
                             ),
                             _infoRow(
                               "Class",
-                              student.data?.clas ?? "",
+                              student?.data?.clas ?? "",
                               bottomPadding: 0,
                             ),
                           ],
@@ -229,7 +271,7 @@ class _StudentIdCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _infoRow('Name', student.data?.studentName ?? ""),
+                    _infoRow('Name', student?.data?.studentName ?? ""),
                     // _infoRow('Mother', student.motherName),
                     _infoRow('D.O.B', "NA"),
                     _infoRow('Mobile', "NA"),

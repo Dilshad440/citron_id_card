@@ -22,18 +22,20 @@ class LoginView extends GetView<LoginController> {
       body: Obx(
         () => OverlayIdCardLoader(
           isLoading: controller.isLoading.value,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+          child: (isLoading) {
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-              return AnimatedPadding(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOut,
-                padding: EdgeInsets.only(bottom: bottomInset),
-                child: _buildStack(constraints),
-              );
-            },
-          ),
+                return AnimatedPadding(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOut,
+                  padding: EdgeInsets.only(bottom: bottomInset),
+                  child: _buildStack(constraints),
+                );
+              },
+            );
+          },
         ),
       ),
     );
