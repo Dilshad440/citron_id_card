@@ -1,19 +1,29 @@
-import 'package:citron_id_card/app/modules/login/views/login_view.dart';
+import 'package:citron_id_card/app/config/local/shared_prefs.dart';
+import 'package:citron_id_card/app/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'app/config/app_config.dart';
 import 'app/core/theme/app_theme.dart';
-import 'app/modules/login/bindings/login_binding.dart';
+import 'app/modules/shared/login/bindings/login_binding.dart';
+import 'app/modules/shared/login/model/login_response.dart';
 import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final user = await SharedPrefs.instance.getTypedObject(
+    AppConstants.user,
+    (value) => LoginResponse.fromJson(value),
+  );
+
+  runApp(MyApp(user: user));
   AppConfig.injectDependency();
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, this.user});
+
+  final LoginResponse? user;
 
   @override
   Widget build(BuildContext context) {
@@ -21,10 +31,9 @@ class MyApp extends StatelessWidget {
       title: 'Citron IdCard',
       getPages: AppPages.pages,
       debugShowCheckedModeBanner: false,
-      initialRoute: AppRoutes.login,
-      initialBinding: LoginBinding(),
+      initialRoute:user?.token!=null?AppRoutes.home: AppRoutes.login,
+      initialBinding: LoginBinding(loggedIn: user?.token != null),
       theme: AppTheme.getAppTheme(),
-      home: const LoginView(),
     );
   }
 }

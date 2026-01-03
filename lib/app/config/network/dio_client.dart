@@ -1,9 +1,13 @@
+import 'package:citron_id_card/app/config/local/shared_prefs.dart';
+import 'package:citron_id_card/app/core/constants/app_constants.dart';
 import 'package:dio/dio.dart';
+import '../../modules/shared/login/model/login_response.dart';
 import 'interceptors/auth_interceptor.dart';
 import 'api_constants.dart';
 
 class DioClient {
   static final DioClient _instance = DioClient.getInstance();
+
   factory DioClient() => _instance;
 
   late final Dio dio;
@@ -20,11 +24,24 @@ class DioClient {
     );
     dio = Dio(options);
     dio.interceptors.addAll([
-      LogInterceptor(),
-      AuthInterceptor(tokenProvider: () async {
-        // TODO: Provide auth token here
-        return null;
-      }),
+      LogInterceptor(
+        error: true,
+        request: true,
+        responseBody: true,
+        requestBody: true,
+        requestHeader: true,
+        responseHeader: true,
+      ),
+      AuthInterceptor(
+        tokenProvider: () async {
+          final user = await SharedPrefs.instance.getTypedObject<LoginResponse>(
+            AppConstants.user,
+            (value) => LoginResponse.fromJson(value),
+          );
+          // TODO: Provide auth token here
+          return user?.token;
+        },
+      ),
     ]);
   }
 }

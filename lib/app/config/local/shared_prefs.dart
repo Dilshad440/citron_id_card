@@ -48,11 +48,11 @@ class SharedPrefs {
     }
   }
 
-  Future<bool> setTypedObject<T>(String key, T value, Map<String, dynamic> Function(T) toJson) async {
+  Future<bool> setTypedObject<T>(String key, T value, Map<String, dynamic> Function(T value) toJson) async {
     return setObject(key, toJson(value));
   }
 
-  Future<T?> getTypedObject<T>(String key, T Function(Map<String, dynamic>) fromJson) async {
+  Future<T?> getTypedObject<T>(String key, T Function(Map<String, dynamic>value) fromJson) async {
     final map = await getObject(key);
     if (map == null) return null;
     return fromJson(map);

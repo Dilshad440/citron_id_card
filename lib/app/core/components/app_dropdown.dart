@@ -23,8 +23,8 @@ class AppDropdown<T> extends StatelessWidget {
   final String? hintText;
   final Widget? prefix;
   final double maxHeight;
-  final void Function(T?) onChanged;
-  final String? Function(T?)? validator;
+  final void Function(T? value) onChanged;
+  final String? Function(T? value)? validator;
 
   @override
   Widget build(BuildContext context) {

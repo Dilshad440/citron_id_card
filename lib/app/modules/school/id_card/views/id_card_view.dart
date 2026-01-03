@@ -1,10 +1,12 @@
 import 'package:citron_id_card/app/core/components/background_gradient.dart';
-import 'package:citron_id_card/app/modules/id_card/controllers/id_card_controller.dart';
+import 'package:citron_id_card/app/core/components/overlay_loader.dart';
+import 'package:citron_id_card/app/modules/shared/home/controllers/home_controller.dart';
 import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_style.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_style.dart';
+import '../controllers/id_card_controller.dart';
 import '../model/student_id_model.dart';
 
 class IdCardView extends GetView<IdCardController> {
@@ -13,10 +15,6 @@ class IdCardView extends GetView<IdCardController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: const CommonAppBar(
-      //   title: 'Student ID Cards',
-      //   backgroundColor: AppColors.primaryColor,
-      // ),
       body: BackgroundGradient(
         child: Column(
           children: [
@@ -38,19 +36,27 @@ class IdCardView extends GetView<IdCardController> {
               child: GetBuilder<IdCardController>(
                 id: "idCard",
                 builder: (controller) {
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: controller.idCards?.length,
-                    itemBuilder: (_, index) {
-                      final students = controller.idCards?[index];
-                      return _StudentIdCard(
-                        student: students!,
-                        onEdit: () {},
-                        onDelete: () {},
-                        onExpand: (val) => controller.expandCard(index, val),
-                      );
-                    },
+                  return OverlayIdCardLoader(
+                    isLoading: controller.isLoading.value,
+                    child:
+                        !controller.isLoading.value &&
+                            controller.schoolIds!.isEmpty
+                        ? Center(child: Text("Data not found"))
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.all(16),
+                            itemCount: controller.schoolIds?.length,
+                            itemBuilder: (_, index) {
+                              final students = controller.schoolIds?[index];
+                              return _StudentIdCard(
+                                student: students!,
+                                onEdit: () {},
+                                onDelete: () {},
+                                onExpand: (val) =>
+                                    controller.expandCard(index, val),
+                              );
+                            },
+                          ),
                   );
                 },
               ),
@@ -70,7 +76,7 @@ class _StudentIdCard extends StatelessWidget {
     required this.onExpand,
   });
 
-  final StudentIdModel student;
+  final Records student;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final Function(bool val) onExpand;
@@ -119,7 +125,8 @@ class _StudentIdCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Canossa Ayodhya English School",
+                      Get.find<HomeController>().schoolUser.value?.schoolName ??
+                          "",
                       style: AppTextStyle.title.medium.textColor.bold,
                     ),
                   ],
@@ -155,24 +162,24 @@ class _StudentIdCard extends StatelessWidget {
           ExpansionTile(
             showTrailingIcon: false,
             onExpansionChanged: onExpand,
-            initiallyExpanded: student.isExpanded,
+            initiallyExpanded: student.isExpanded ?? false,
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 /// PHOTO
-                if (student.isExpanded) ...[
+                if (student.isExpanded ?? false) ...[
                   CircleAvatar(
                     radius: 50,
                     backgroundColor: AppColors.primaryColor.withOpacity(0.3),
-                    backgroundImage: NetworkImage(student.photoUrl),
+                    backgroundImage: NetworkImage(student.photo ?? ""),
                   ),
                   const SizedBox(width: 14),
                   AppTextStyle.body.large.textColor.bold.text(
-                    'Admission: ${student.admissionNo}',
+                    'Admission: ${student.data?.admNo}',
                   ),
                   const SizedBox(height: 4),
                   AppTextStyle.body.medium.textColor.bold.text(
-                    'Class: ${student.classSection}',
+                    'Class: ${student.data?.clas}',
                   ),
                 ] else ...[
                   Row(
@@ -182,7 +189,7 @@ class _StudentIdCard extends StatelessWidget {
                         backgroundColor: AppColors.primaryColor.withOpacity(
                           0.3,
                         ),
-                        backgroundImage: NetworkImage(student.photoUrl),
+                        backgroundImage: NetworkImage(student.photo ?? ""),
                       ),
                       SizedBox(width: 20),
                       Expanded(
@@ -192,17 +199,17 @@ class _StudentIdCard extends StatelessWidget {
                           children: [
                             _infoRow(
                               "Admission No",
-                              student.admissionNo,
+                              student.data?.admNo ?? "",
                               bottomPadding: 0,
                             ),
                             _infoRow(
                               "Name",
-                              student.fatherName,
+                              student.data?.studentName ?? "",
                               bottomPadding: 0,
                             ),
                             _infoRow(
                               "Class",
-                              student.classSection,
+                              student.data?.clas ?? "",
                               bottomPadding: 0,
                             ),
                           ],
@@ -222,12 +229,12 @@ class _StudentIdCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _infoRow('Father', student.fatherName),
-                    _infoRow('Mother', student.motherName),
-                    _infoRow('D.O.B', student.dob),
-                    _infoRow('Mobile', student.mobile),
-                    _infoRow('Conveyance', student.conveyance),
-                    _infoRow('Address', student.address),
+                    _infoRow('Name', student.data?.studentName ?? ""),
+                    // _infoRow('Mother', student.motherName),
+                    _infoRow('D.O.B', "NA"),
+                    _infoRow('Mobile', "NA"),
+                    _infoRow('Conveyance', "NA"),
+                    _infoRow('Address', "NA"),
                     const SizedBox(height: 12),
                   ],
                 ),

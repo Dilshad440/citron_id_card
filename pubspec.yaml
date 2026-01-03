@@ -43,6 +43,8 @@ dependencies:
   image_cropper: 
   shared_preferences: ^2.5.4
   get_it: ^9.2.0
+  overlay_loader_with_app_icon: ^0.0.4
+  flutter_spinkit: ^5.2.2
 
 dev_dependencies:
   flutter_test:
