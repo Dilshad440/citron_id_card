@@ -2,6 +2,7 @@ import 'package:citron_id_card/app/core/components/app_buttons.dart';
 import 'package:citron_id_card/app/core/components/app_dropdown.dart';
 import 'package:citron_id_card/app/core/components/app_textfield.dart';
 import 'package:citron_id_card/app/core/components/background_gradient.dart';
+import 'package:citron_id_card/app/core/components/overlay_loader.dart';
 import 'package:citron_id_card/app/core/components/two_line_element.dart';
 import 'package:citron_id_card/app/core/theme/app_text_style.dart';
 import 'package:citron_id_card/app/modules/school/id_card/model/final%20_field_model.dart';
@@ -20,33 +21,88 @@ class FilterView extends StatelessWidget {
     final homeController = Get.find<HomeController>();
     return Scaffold(
       body: BackgroundGradient(
-        child: ListView(
-          children: [
-            SchoolInfoCard(),
-            SizedBox(height: 20),
-            Text("Filter", style: AppTextStyle.display.medium),
-            Form(
-              key: homeController.formKey,
-              child: Column(
-                children: homeController.fieldModel
-                    .map(
-                      (element) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: _GetFieldElements(fieldModel: element),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-            SizedBox(height: 20),
-            AppButton(
-              text: "Filter",
-              onPressed: () {
-                homeController.getFilterResponse();
-
-              },
-            ),
-          ],
+        child: Obx(
+          () => OverlayIdCardLoader(
+            isLoading: homeController.isOverlayLoading.value,
+            child: (isLoading) {
+              return ListView(
+                children: [
+                  SchoolInfoCard(),
+                  SizedBox(height: 20),
+                  Text("Filter", style: AppTextStyle.display.medium),
+                  SizedBox(height: 15),
+                  Form(
+                    key: homeController.formKey,
+                    child: Column(
+                      children: [
+                        TwoLineElement(
+                          title: "Select batch",
+                          child: AppDropdown(
+                            hintText: "Select your batch",
+                            items: homeController.batch,
+                            value: homeController.selectedBatch,
+                            validator: (value) {
+                              if (value == null) {
+                                return "Select your session";
+                              }
+                              return null;
+                            },
+                            onChanged: (value) {
+                              homeController.selectedBatch = value;
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        TwoLineElement(
+                          title: "Select session",
+                          child: AppDropdown(
+                            hintText: "Select your session",
+                            items: homeController.session,
+                            value: homeController.selectedSession,
+                            validator: (value) {
+                              if (value == null) {
+                                return "Select your session";
+                              }
+                              return null;
+                            },
+                            onChanged: (value) {
+                              homeController.selectedSession = value;
+                              homeController.getClassAndSection(value!);
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        ...homeController.fieldModel.map(
+                          (element) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: GetBuilder<HomeController>(
+                              id: "class",
+                              builder: (controller) {
+                                return _GetFieldElements(
+                                  fieldModel: element,
+                                  onChanged: (value, fieldName) {
+                                    element.changedValue = value;
+                                    element.controller.text = value!;
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  AppButton(
+                    text: "Filter",
+                    onPressed: () {
+                      homeController.getFilterResponse();
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -54,33 +110,41 @@ class FilterView extends StatelessWidget {
 }
 
 class _GetFieldElements extends StatelessWidget {
-  const _GetFieldElements({super.key, required this.fieldModel});
+  const _GetFieldElements({
+    super.key,
+    required this.fieldModel,
+    required this.onChanged,
+  });
 
   final FieldModel fieldModel;
+  final void Function(dynamic value, String fieldName) onChanged;
 
   @override
   Widget build(BuildContext context) {
     if (fieldModel.type == FieldType.dropdown) {
+      final items = fieldModel.title.toLowerCase() == "class"
+          ? Get.find<HomeController>().classList
+          : Get.find<HomeController>().sectionList;
       return TwoLineElement(
         title: fieldModel.title,
+        isRequired: false,
         child: AppDropdown<String>(
           hintText: fieldModel.hint,
           value: fieldModel.changedValue,
-          items: fieldModel.items ?? [],
-          validator: fieldModel.validator,
-          onChanged: (value) {
-            fieldModel.changedValue = value;
-            fieldModel.controller.text = value!;
-          },
+          items: items,
+          // validator: fieldModel.validator,
+          onChanged: (value) =>
+              onChanged.call(value, fieldModel.title.toLowerCase()),
         ),
       );
     } else if (fieldModel.type == FieldType.textField) {
       return TwoLineElement(
         title: fieldModel.title,
+        isRequired: false,
         child: AppTextField(
           controller: fieldModel.controller,
           hintText: fieldModel.hint,
-          validator: fieldModel.validator,
+          // validator: fieldModel.validator,
         ),
       );
     }

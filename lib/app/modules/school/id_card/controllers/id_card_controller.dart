@@ -14,7 +14,7 @@ class IdCardController extends GetxController {
 
   IdCardController({required this.source});
 
-  List<Records>? schoolIds;
+  List<StudentIdModel>? schoolIds;
   Map<String, dynamic> data = {};
   RxBool isLoading = false.obs;
   File? selectedImg;
@@ -30,7 +30,7 @@ class IdCardController extends GetxController {
     isLoading.value = true;
     update(["idCard"]);
     final response = await source.getSchoolId(data);
-    schoolIds = response.records;
+    schoolIds = response;
     isLoading.value = false;
     update(["idCard"]);
   }

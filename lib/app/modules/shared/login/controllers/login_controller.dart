@@ -46,11 +46,7 @@ class LoginController extends GetxController {
       );
       isLoading.value = false;
 
-      if (response.user?.userType == 2) {
-        Get.offAllNamed(AppRoutes.idCard);
-      } else if (response.user?.userType == 3) {
-        Get.offAllNamed(AppRoutes.enterAdmissionNumber);
-      }
+      Get.offAllNamed(AppRoutes.home);
     } catch (e) {
       isLoading.value = false;
 

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:citron_id_card/app/config/network/api_constants.dart';
 import 'package:citron_id_card/app/modules/school/id_card/model/student_id_model.dart';
 import 'package:dio/dio.dart';
@@ -45,15 +47,19 @@ class ApiService {
     }
   }
 
-  Future<SchoolIDRes> getSchoolId(Map<String, dynamic> data) async {
+  Future<List<StudentIdModel>> getSchoolId(Map<String, dynamic> data) async {
     try {
-      final response = await client.dio.get(
+      print("STRICT PAYLOAD: ${jsonEncode(data)}"); // Check this log!
+
+      final response = await client.dio.post(
         ApiConstants.schoolIdList,
-        queryParameters: data, // ✅ sends parameters as ?key=value
+        data: data,
       );
-      return SchoolIDRes.fromJson(response.data);
-    } catch (e) {
-      rethrow; // ✅ bubbles up the error
+
+      final List<dynamic> schoolData = response.data;
+      return schoolData.map((v) => StudentIdModel.fromJson(v)).toList();
+    } on DioException catch (e) {
+      rethrow;
     }
   }
 
@@ -68,6 +74,40 @@ class ApiService {
       );
       return response;
     } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<dynamic>> getClassAndSection(String session, int schoolId) async {
+    try {
+      // 1. Fetch Sections
+      final sectionRes = await client.dio.get(
+        ApiConstants.sectionList,
+        queryParameters: {"schoolId": schoolId, "session": session},
+      );
+
+      // Use .map() for cleaner data extraction
+      final List<dynamic> sectionData = sectionRes.data;
+      List<String> sectionList = sectionData
+          .map((v) => v['section_name'].toString())
+          .toList();
+
+      // 2. Fetch Classes (Uncommented and fixed)
+      final classRes = await client.dio.get(
+        ApiConstants.classList,
+        queryParameters: {"schoolId": schoolId, "session": session},
+      );
+
+      final List<dynamic> classData = classRes.data;
+      List<String> classList = classData
+          .map((v) => v['class_name'].toString())
+          .toList();
+
+      // 3. Return as a Map or a nested List so you can identify them
+      return [classList, sectionList];
+    } catch (e) {
+      // Log the error for debugging
+      print("Error in getClassAndSection: $e");
       rethrow;
     }
   }

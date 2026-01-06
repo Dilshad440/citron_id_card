@@ -1,8 +1,6 @@
+import 'package:citron_id_card/app/config/network/api_constants.dart';
 import 'package:citron_id_card/app/core/components/background_gradient.dart';
-import 'package:citron_id_card/app/core/components/overlay_loader.dart';
-import 'package:citron_id_card/app/core/utils/common_utils.dart';
 import 'package:citron_id_card/app/modules/shared/home/controllers/home_controller.dart';
-import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -37,29 +35,24 @@ class IdCardView extends GetView<IdCardController> {
               child: GetBuilder<IdCardController>(
                 id: "idCard",
                 builder: (controller) {
-                  return OverlayIdCardLoader(
-                    isLoading: controller.isLoading.value,
-                    child: (isLoading) {
-                      if (isLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (!isLoading && controller.schoolIds == null) {
-                        return const Center(child: Text("No Data Found"));
-                      }
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.all(16),
-                        itemCount: controller.schoolIds?.length,
-                        itemBuilder: (_, index) {
-                          final students = controller.schoolIds?[index];
-                          return _StudentIdCard(
-                            student: students,
-                            onEdit: () {},
-                            onDelete: () {},
-                            onExpand: (val) =>
-                                controller.expandCard(index, val),
-                          );
-                        },
+                  if (controller.isLoading.value) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (!controller.isLoading.value &&
+                      controller.schoolIds == null) {
+                    return Center(child: Text("No data found!!!"));
+                  }
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: controller.schoolIds?.length,
+                    itemBuilder: (_, index) {
+                      final students = controller.schoolIds?[index];
+                      return _StudentIdCard(
+                        student: students,
+                        onEdit: () {},
+                        onDelete: () {},
+                        onExpand: (val) => controller.expandCard(index, val),
                       );
                     },
                   );
@@ -81,7 +74,7 @@ class _StudentIdCard extends GetView<IdCardController> {
     required this.onExpand,
   });
 
-  final Records? student;
+  final StudentIdModel? student;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final Function(bool val) onExpand;
@@ -186,7 +179,7 @@ class _StudentIdCard extends GetView<IdCardController> {
                             ),
                             backgroundImage: controller.selectedImg != null
                                 ? FileImage(controller.selectedImg!)
-                                : NetworkImage(student?.photo ?? ""),
+                                : NetworkImage("${ApiConstants.baseUrl}${student?.photo}"),
                           );
                         },
                       ),
@@ -221,7 +214,7 @@ class _StudentIdCard extends GetView<IdCardController> {
                   ),
                   const SizedBox(height: 4),
                   AppTextStyle.body.medium.textColor.bold.text(
-                    'Class: ${student?.data?.clas}',
+                    'Class: ${student?.data?.studentClass}',
                   ),
                 ] else ...[
                   Row(
@@ -231,7 +224,7 @@ class _StudentIdCard extends GetView<IdCardController> {
                         backgroundColor: AppColors.primaryColor.withOpacity(
                           0.3,
                         ),
-                        backgroundImage: NetworkImage(student?.photo ?? ""),
+                        backgroundImage: NetworkImage("${ApiConstants.baseUrl}${student?.photo}"),
                       ),
                       SizedBox(width: 20),
                       Expanded(
@@ -251,7 +244,7 @@ class _StudentIdCard extends GetView<IdCardController> {
                             ),
                             _infoRow(
                               "Class",
-                              student?.data?.clas ?? "",
+                              student?.data?.studentClass ?? "",
                               bottomPadding: 0,
                             ),
                           ],

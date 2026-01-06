@@ -1,94 +1,62 @@
-class SchoolIDRes {
-  List<Records>? records;
-
-  SchoolIDRes({this.records});
-
-  SchoolIDRes.fromJson(Map<String, dynamic> json) {
-    if (json['records'] != null) {
-      records = <Records>[];
-      json['records'].forEach((v) {
-        records!.add(new Records.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    if (records != null) {
-      data['records'] = records!.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
-}
-
-class Records {
+class StudentIdModel {
   int? id;
   String? photo;
   int? photoSize;
-  String? updatedOn;
+  DateTime? updatedOn;
   int? updatedBy;
-  Data? data;
-  List<String>? fields;
-  bool? isExpanded;
+  StudentData? data;
+  bool isExpanded;
 
-  Records({
+  StudentIdModel({
     this.id,
     this.photo,
     this.photoSize,
     this.updatedOn,
     this.updatedBy,
     this.data,
-    this.fields,
-    this.isExpanded = false,
+    this.isExpanded=false,
   });
 
-  Records.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    photo = json['photo'];
-    photoSize = json['photo_size'];
-    updatedOn = json['updated_on'];
-    updatedBy = json['updatedBy'];
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
-    fields = json['fields'].cast<String>();
-    isExpanded = false;
-  }
+  factory StudentIdModel.fromJson(Map<String, dynamic> json) => StudentIdModel(
+    id: json["id"],
+    photo: json["photo"],
+    photoSize: json["photo_size"],
+    updatedOn: json["updated_on"] == null
+        ? null
+        : DateTime.parse(json["updated_on"]),
+    updatedBy: json["updatedBy"],
+    data: json["data"] == null ? null : StudentData.fromJson(json["data"]),
+  );
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['photo'] = photo;
-    data['photo_size'] = photoSize;
-    data['updated_on'] = updatedOn;
-    data['updatedBy'] = updatedBy;
-    if (this.data != null) {
-      data['data'] = this.data!.toJson();
-    }
-    data['fields'] = fields;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "photo": photo,
+    "photo_size": photoSize,
+    "updated_on": updatedOn?.toIso8601String(),
+    "updatedBy": updatedBy,
+    "data": data?.toJson(),
+  };
 }
 
-class Data {
-  String? clas;
+class StudentData {
+  String? studentClass; // Renamed from 'Class' to avoid keyword conflict
   String? admNo;
   String? section;
   String? studentName;
 
-  Data({this.clas, this.admNo, this.section, this.studentName});
+  StudentData({this.studentClass, this.admNo, this.section, this.studentName});
 
-  Data.fromJson(Map<String, dynamic> json) {
-    clas = json['Class'];
-    admNo = json['Adm. No'];
-    section = json['Section'];
-    studentName = json['Student Name'];
-  }
+  factory StudentData.fromJson(Map<String, dynamic> json) => StudentData(
+    studentClass: json["Class"],
+    admNo: json["Adm. No"],
+    section: json["Section"],
+    studentName: json["Student Name"],
+  );
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['Class'] = clas;
-    data['Adm. No'] = admNo;
-    data['Section'] = section;
-    data['Student Name'] = studentName;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+    "Class": studentClass,
+    "Adm. No": admNo,
+    "Section": section,
+    "Student Name": studentName,
+  };
 }

@@ -1,16 +1,19 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutterbackgroundremover/backgroundremover.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:path/path.dart' as p;
 
 class CommonUtils {
   static Future<void> showImagePickerBottomSheet({
     required BuildContext context,
-    required Function(XFile file) onImageSelected,
+    required Function(File file) onImageSelected,
   }) {
     final ImagePicker picker = ImagePicker();
     return showDialog(
@@ -81,6 +84,7 @@ class CommonUtils {
                         onTap: () async {
                           final xFile = await pickImage();
                           if (xFile == null) return;
+
                           onImageSelected.call(xFile);
                         },
                       ),
@@ -146,66 +150,48 @@ class CommonUtils {
   }
 
   static Future<bool> checkPermission(ImageSource source) async {
-    Permission permission;
+    // Use specific photo permissions for modern Android (API 33+)
+    Permission permission = (source == ImageSource.camera)
+        ? Permission.camera
+        : (Platform.isIOS ? Permission.photos : Permission.photos);
 
-    if (source == ImageSource.camera) {
-      permission = Permission.camera;
-    } else {
-      // Gallery
-      if (Platform.isIOS) {
-        permission = Permission.photos;
-      } else {
-        permission = Permission.storage; // Android (safe fallback)
-      }
-    }
-
-    final status = await permission.status;
-
-    if (status.isGranted) {
-      return true;
-    }
-
-    if (status.isDenied) {
-      final result = await permission.request();
-      return result.isGranted;
-    }
+    // Simplified logic: request immediately if not granted
+    final status = await permission.request();
 
     if (status.isPermanentlyDenied) {
       await openAppSettings();
       return false;
     }
 
-    return false;
+    return status.isGranted;
   }
 
-  static Future<XFile?> pickImage({
+  static Future<File?> pickImage({
     ImageSource source = ImageSource.camera,
   }) async {
-    final isGranted = await checkPermission(source);
-
-    if (!isGranted) {
-      final status = await Permission.camera.request();
-      if (!status.isGranted) {
-        return null; // permission denied
-      }
-    }
+    if (!await checkPermission(source)) return null;
 
     final image = await ImagePicker().pickImage(
       source: source,
       imageQuality: 85,
     );
 
-    if (image == null) {
-      return null; // user cancelled camera
-    }
+    if (image == null) return null;
 
-    final croppedImage = await cropImage(image.path);
+    final croppedFile = await cropImage(image.path);
+    if (croppedFile == null) return null;
 
-    if (croppedImage == null) {
-      return null; // user cancelled crop
-    }
+    // REMOVE BACKGROUND
+    final removedBgBytes = await FlutterBackgroundRemover.removeBackground(
+      File(croppedFile.path),
+    );
 
-    return croppedImage;
+    // FIX: Convert Uint8List (bytes) to a physical File
+    final tempDir = await getTemporaryDirectory();
+    final fileName = "${DateTime.now().millisecondsSinceEpoch}_no_bg.png";
+    final file = File(p.join(tempDir.path, fileName));
+
+    return await file.writeAsBytes(removedBgBytes);
   }
 
   static Future<XFile?> cropImage(String path) async {
@@ -217,30 +203,13 @@ class CommonUtils {
           toolbarTitle: "Crop Image",
           toolbarColor: Colors.black,
           toolbarWidgetColor: Colors.white,
-          hideBottomControls: false,
+          initAspectRatio: CropAspectRatioPreset.original,
           lockAspectRatio: false,
-          aspectRatioPresets: [
-            CropAspectRatioPreset.original,
-            CropAspectRatioPreset.square,
-            CropAspectRatioPreset.ratio3x2,
-            CropAspectRatioPreset.ratio4x3,
-          ],
         ),
-        IOSUiSettings(
-          title: "Crop Image",
-          aspectRatioPresets: [
-            CropAspectRatioPreset.original,
-            CropAspectRatioPreset.square,
-            CropAspectRatioPreset.ratio3x2,
-            CropAspectRatioPreset.ratio4x3,
-          ],
-        ),
+        IOSUiSettings(title: "Crop Image"),
       ],
     );
 
-    if (cropped != null) {
-      return XFile(cropped.path);
-    }
-    return null;
+    return cropped != null ? XFile(cropped.path) : null;
   }
 }

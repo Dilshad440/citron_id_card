@@ -19,8 +19,13 @@ class HomeController extends GetxController {
 
   Rx<SchoolUserRes?> schoolUser = Rx<SchoolUserRes?>(null);
   RxBool isLoading = false.obs;
+  RxBool isOverlayLoading = false.obs;
   RxBool isParent = false.obs;
   RxList<FieldModel> fieldModel = <FieldModel>[].obs;
+  String? selectedBatch;
+  String? selectedSession;
+  List<String> classList = [];
+  List<String> sectionList = [];
 
   @override
   void onInit() {
@@ -38,7 +43,6 @@ class HomeController extends GetxController {
         jsonDecode(schoolUser.value?.selectedFields ?? ""),
       );
       selectedFields.remove("Student Name");
-      fieldModel.addAll(FieldModel.getStaticFields(this));
       for (var v in selectedFields) {
         final hintText = getFieldType(v) == FieldType.textField
             ? "Enter ${v.toLowerCase()}"
@@ -49,7 +53,7 @@ class HomeController extends GetxController {
             hint: hintText,
             controller: TextEditingController(),
             validator: (value) =>
-                value == null ? "Enter ${v.toLowerCase()}" : null,
+                value == null || value.isEmpty ? hintText : null,
             keyboardType: TextInputType.text,
             type: getFieldType(v),
           ),
@@ -83,17 +87,61 @@ class HomeController extends GetxController {
   }
 
   void getFilterResponse() {
-    Map<String, dynamic> data = {};
+    if (!(formKey.currentState?.validate() ?? false)) return;
 
-    if (formKey.currentState!.validate()) return;
-    for (var element in fieldModel) {
-      data[element.title.toLowerCase()] = element.controller.text.trim();
-    }
-    data["schoolid"] = schoolUser.value?.schoolId;
-    Get.toNamed(AppRoutes.idCard, arguments: data);
+    // Use a collection for-loop to build the map and filter empty values in one go
+    final filterMap = {
+      for (var element in fieldModel)
+        if (element.controller.text.trim().isNotEmpty)
+          element.title
+              .split(' ')
+              .map((s) => s[0].toUpperCase() + s.substring(1).toLowerCase())
+              .join(' '): element.controller.text
+              .trim(),
+    };
+
+    // Build the request object
+    final req = {
+      "schoolid": schoolUser.value?.schoolId,
+      "session": selectedSession,
+      "batch": selectedBatch,
+      "filterjson": jsonEncode(filterMap),
+    };
+
+    Get.toNamed(AppRoutes.idCard, arguments: req);
   }
 
-  final session = ["2024-2025", "2025-2026", "2026-2027", "2027-2028"];
+  final session = ["2025-2026", "2026-2027", "2027-2028", "2028-2029"];
 
   final batch = ["Batch1", "Batch2", "Batch3", "Batch4", "Batch5"];
+
+  void getClassAndSection(String session) async {
+    try {
+      isOverlayLoading.value = true;
+
+      final response = await service.getClassAndSection(
+        session,
+        schoolUser.value!.schoolId!,
+      );
+
+      // response[0] is the List of Classes
+      // response[1] is the List of Sections
+      if (response.length >= 2) {
+        classList.addAll(List<String>.from(response[0]));
+        sectionList.addAll(List<String>.from(response[1]));
+      }
+
+      isOverlayLoading.value = false;
+      update(["class"]);
+    } catch (e) {
+      isOverlayLoading.value = false;
+      AppSnackBar.show(error: e.toString(), type: SnackBarType.error);
+    }
+  }
+
+  void logout() async {
+    await SharedPrefs.instance.clear();
+    Get.deleteAll(force: true);
+    Get.offAllNamed(AppRoutes.login);
+  }
 }
