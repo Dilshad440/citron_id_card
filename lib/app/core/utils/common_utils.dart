@@ -1,21 +1,58 @@
 import 'dart:io';
 
+import 'package:citron_id_card/app/core/components/overlay_loader.dart';
+import 'package:citron_id_card/app/core/constants/asset_constant.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterbackgroundremover/backgroundremover.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:image_background_remover/image_background_remover.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as p;
 
+import '../theme/app_colors.dart';
+
 class CommonUtils {
+  static bool _isLoading = false;
+
+  static Future<void> show() async {
+    if (_isLoading) return;
+    _isLoading = true;
+
+    // Use Get.dialog for better compatibility with Get.back()
+    await Get.dialog(
+      PopScope(
+        canPop: false, // Replaces WillPopScope in newer Flutter versions
+        child: Center(
+          child: SpinKitWaveSpinner(
+            size: 80,
+            color: AppColors.generateGradientColors().first,
+            child: Image.asset(AssetConstant.logo),
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+      name: "loading-dialog", // Giving it a name helps GetX track it
+    );
+  }
+
+  static void hide() {
+    if (_isLoading) {
+      _isLoading = false;
+
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+    }
+  }
+
   static Future<void> showImagePickerBottomSheet({
     required BuildContext context,
     required Function(File file) onImageSelected,
   }) {
-    final ImagePicker picker = ImagePicker();
     return showDialog(
       context: context,
       builder: (context) {
@@ -82,6 +119,7 @@ class CommonUtils {
                           ),
                         ),
                         onTap: () async {
+                          Get.back();
                           final xFile = await pickImage();
                           if (xFile == null) return;
 
@@ -181,17 +219,19 @@ class CommonUtils {
     final croppedFile = await cropImage(image.path);
     if (croppedFile == null) return null;
 
+    CommonUtils.show();
+    await BackgroundRemover.instance.initializeOrt();
+
     // REMOVE BACKGROUND
-    final removedBgBytes = await FlutterBackgroundRemover.removeBackground(
-      File(croppedFile.path),
-    );
+    final fileBytes = File(croppedFile.path).readAsBytesSync();
+    final result = await BackgroundRemover.instance.removeBgBytes(fileBytes);
 
     // FIX: Convert Uint8List (bytes) to a physical File
     final tempDir = await getTemporaryDirectory();
     final fileName = "${DateTime.now().millisecondsSinceEpoch}_no_bg.png";
     final file = File(p.join(tempDir.path, fileName));
-
-    return await file.writeAsBytes(removedBgBytes);
+    CommonUtils.hide();
+    return await file.writeAsBytes(result);
   }
 
   static Future<XFile?> cropImage(String path) async {

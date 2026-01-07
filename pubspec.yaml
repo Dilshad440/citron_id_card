@@ -45,7 +45,7 @@ dependencies:
   get_it: ^9.2.0
   overlay_loader_with_app_icon: ^0.0.4
   flutter_spinkit: ^5.2.2
-  flutterbackgroundremover: ^0.0.1
+  image_background_remover: ^2.0.0
   path_provider: ^2.1.0
   path: ^1.9.0
 
