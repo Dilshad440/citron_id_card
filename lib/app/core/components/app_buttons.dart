@@ -13,6 +13,7 @@ class AppButton extends StatelessWidget {
     this.height = 40,
     this.width,
     this.icon,
+    this.leadingIcon,
   });
 
   final VoidCallback onPressed;
@@ -22,6 +23,7 @@ class AppButton extends StatelessWidget {
   final double? width;
   final double height;
   final Widget? icon;
+  final Widget? leadingIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -48,13 +50,16 @@ class AppButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadiusGeometry.circular(8),
           ),
-          backgroundColor:backgroundColor?? AppColors.generateGradientColors()[1],
+          backgroundColor:
+              backgroundColor ?? AppColors.generateGradientColors()[1],
         ),
         onPressed: onPressed,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            if (leadingIcon != null) ...[leadingIcon!, SizedBox(width: 8)],
+
             Text(
               text,
               style: AppTextStyle.body.medium.semiBold.copyWith(

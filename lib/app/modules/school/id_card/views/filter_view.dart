@@ -4,6 +4,7 @@ import 'package:citron_id_card/app/core/components/app_textfield.dart';
 import 'package:citron_id_card/app/core/components/background_gradient.dart';
 import 'package:citron_id_card/app/core/components/overlay_loader.dart';
 import 'package:citron_id_card/app/core/components/two_line_element.dart';
+import 'package:citron_id_card/app/core/theme/app_colors.dart';
 import 'package:citron_id_card/app/core/theme/app_text_style.dart';
 import 'package:citron_id_card/app/modules/school/id_card/model/final%20_field_model.dart';
 import 'package:citron_id_card/app/modules/shared/home/views/home_view.dart';
@@ -20,6 +21,18 @@ class FilterView extends StatelessWidget {
   Widget build(BuildContext context) {
     final homeController = Get.find<HomeController>();
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.textOnGradient,
+        tooltip: "Add New Student",
+        child: Icon(
+          Icons.add,
+          color: AppColors.generateGradientColors().last,
+          size: 33,
+        ),
+        onPressed: () {
+          Get.toNamed(AppRoutes.addIdCard);
+        },
+      ),
       body: BackgroundGradient(
         child: Obx(
           () => OverlayIdCardLoader(
@@ -29,7 +42,11 @@ class FilterView extends StatelessWidget {
                 children: [
                   SchoolInfoCard(),
                   SizedBox(height: 20),
-                  Text("Filter", style: AppTextStyle.display.medium),
+                  Row(
+                    children: [
+                      Text("Filter", style: AppTextStyle.display.medium),
+                    ],
+                  ),
                   SizedBox(height: 15),
                   Form(
                     key: homeController.formKey,
