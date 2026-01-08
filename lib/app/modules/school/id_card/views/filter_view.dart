@@ -55,19 +55,24 @@ class FilterView extends StatelessWidget {
                         SizedBox(height: 8),
                         TwoLineElement(
                           title: "Select session",
-                          child: AppDropdown(
-                            hintText: "Select your session",
-                            items: homeController.session,
-                            value: homeController.selectedSession,
-                            validator: (value) {
-                              if (value == null) {
-                                return "Select your session";
-                              }
-                              return null;
-                            },
-                            onChanged: (value) {
-                              homeController.selectedSession = value;
-                              homeController.getClassAndSection(value!);
+                          child: GetBuilder<HomeController>(
+                            id: "class",
+                            builder: (controller) {
+                              return AppDropdown(
+                                hintText: "Select your session",
+                                items: homeController.session,
+                                value: homeController.selectedSession,
+                                validator: (value) {
+                                  if (value == null) {
+                                    return "Select your session";
+                                  }
+                                  return null;
+                                },
+                                onChanged: (value) {
+                                  homeController.selectedSession = value;
+                                  homeController.getClassAndSection(value!);
+                                },
+                              );
                             },
                           ),
                         ),
@@ -122,15 +127,19 @@ class _GetFieldElements extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (fieldModel.type == FieldType.dropdown) {
-      final items = fieldModel.title.toLowerCase() == "class"
+      final bool isClass = fieldModel.title.toLowerCase() == "class";
+      final bool isSection = fieldModel.title.toLowerCase() == "section";
+      final items = isClass
           ? Get.find<HomeController>().classList
           : Get.find<HomeController>().sectionList;
+
+      final value = isClass || isSection ? "All" : fieldModel.changedValue;
       return TwoLineElement(
         title: fieldModel.title,
-        isRequired: false,
+        isRequired: true,
         child: AppDropdown<String>(
           hintText: fieldModel.hint,
-          value: fieldModel.changedValue,
+          value: value,
           items: items,
           // validator: fieldModel.validator,
           onChanged: (value) =>

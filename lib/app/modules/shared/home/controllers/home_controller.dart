@@ -24,11 +24,13 @@ class HomeController extends GetxController {
   RxList<FieldModel> fieldModel = <FieldModel>[].obs;
   String? selectedBatch;
   String? selectedSession;
-  List<String> classList = [];
-  List<String> sectionList = [];
+  List<String> classList = ["All"];
+  List<String> sectionList = ["All"];
 
   @override
   void onInit() {
+    selectedSession = session.first;
+    selectedBatch = batch.first;
     getUserFromLocal();
     getSchoolUserRes();
     super.onInit();
@@ -39,6 +41,7 @@ class HomeController extends GetxController {
       isLoading.value = true;
       final response = await service.getSchoolUsers();
       schoolUser.value = response.first;
+      await getClassAndSection(selectedSession!);
       final selectedFields = List<String>.from(
         jsonDecode(schoolUser.value?.selectedFields ?? ""),
       );
@@ -92,14 +95,14 @@ class HomeController extends GetxController {
     // Use a collection for-loop to build the map and filter empty values in one go
     final filterMap = {
       for (var element in fieldModel)
-        if (element.controller.text.trim().isNotEmpty)
+        if (element.controller.text.trim().isNotEmpty &&
+            element.controller.text.trim().toLowerCase() != 'all')
           element.title
               .split(' ')
               .map((s) => s[0].toUpperCase() + s.substring(1).toLowerCase())
               .join(' '): element.controller.text
               .trim(),
     };
-
     // Build the request object
     final req = {
       "schoolid": schoolUser.value?.schoolId,
@@ -115,7 +118,7 @@ class HomeController extends GetxController {
 
   final batch = ["Batch1", "Batch2", "Batch3", "Batch4", "Batch5"];
 
-  void getClassAndSection(String session) async {
+  Future<void> getClassAndSection(String session) async {
     try {
       isOverlayLoading.value = true;
 

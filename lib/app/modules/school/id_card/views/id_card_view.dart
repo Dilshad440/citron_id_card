@@ -179,7 +179,9 @@ class _StudentIdCard extends GetView<IdCardController> {
                             ),
                             backgroundImage: controller.selectedImg != null
                                 ? FileImage(controller.selectedImg!)
-                                : NetworkImage("${ApiConstants.baseUrl}${student?.photo}"),
+                                : NetworkImage(
+                                    "${ApiConstants.baseUrl}${student?.photo}",
+                                  ),
                           );
                         },
                       ),
@@ -224,7 +226,9 @@ class _StudentIdCard extends GetView<IdCardController> {
                         backgroundColor: AppColors.primaryColor.withOpacity(
                           0.3,
                         ),
-                        backgroundImage: NetworkImage("${ApiConstants.baseUrl}${student?.photo}"),
+                        backgroundImage: NetworkImage(
+                          "${ApiConstants.baseUrl}${student?.photo}",
+                        ),
                       ),
                       SizedBox(width: 20),
                       Expanded(
@@ -265,7 +269,8 @@ class _StudentIdCard extends GetView<IdCardController> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     _infoRow('Name', student?.data?.studentName ?? ""),
-                    // _infoRow('Mother', student.motherName),
+                    _infoRow('Class', student?.data?.studentClass ?? ""),
+                    _infoRow('Section', student?.data?.section ?? ""),
                     _infoRow('D.O.B', "NA"),
                     _infoRow('Mobile', "NA"),
                     _infoRow('Conveyance', "NA"),
@@ -293,10 +298,41 @@ class _StudentIdCard extends GetView<IdCardController> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: Text(
-                        "School Information like mobile, address, website here...",
-                        textAlign: TextAlign.center,
-                        style: AppTextStyle.title.small.textColor,
+                      child: GetBuilder<HomeController>(
+                        builder: (controller) {
+                          final schoolUser = controller.schoolUser.value;
+                          return Column(
+                            children: [
+                              Text(
+                                [
+                                      schoolUser?.address1,
+                                      schoolUser?.address2,
+                                      schoolUser?.address3,
+                                    ]
+                                    .where(
+                                      (e) => e != null && e.trim().isNotEmpty,
+                                    )
+                                    .join(', '),
+                                textAlign: TextAlign.center,
+                                style: AppTextStyle.title.small.textColor,
+                              ),
+                              Text(
+                                "Mob: ${schoolUser?.contactNo?.trim().isNotEmpty == true ? schoolUser!.contactNo : 'NA'}",
+                                style: AppTextStyle.body.small.semiBold.italic
+                                    .copyWith(fontSize: 13),
+                              ),
+                              Text(
+                                "Website: ${schoolUser?.website?.trim().isNotEmpty == true ? schoolUser!.website : 'NA'}",
+
+                                style: AppTextStyle.body.small.semiBold.italic
+                                    .copyWith(
+                                      color: AppColors.textOnGradient,
+                                      fontSize: 12,
+                                    ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ),
                   ],
