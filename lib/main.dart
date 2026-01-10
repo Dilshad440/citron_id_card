@@ -11,13 +11,16 @@ import 'app/routes/app_routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final user = await SharedPrefs.instance.getTypedObject(
-    AppConstants.user,
-    (value) => LoginResponse.fromJson(value),
-  );
-
-  runApp(MyApp(user: user));
   AppConfig.injectDependency();
+
+  await SharedPrefs.instance
+      .getTypedObject(
+        AppConstants.user,
+        (value) => LoginResponse.fromJson(value),
+      )
+      .then((value) {
+        runApp(MyApp(user: value));
+      });
 }
 
 class MyApp extends StatelessWidget {
