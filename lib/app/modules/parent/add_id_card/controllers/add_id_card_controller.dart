@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:citron_id_card/app/core/utils/dialog_utils.dart';
@@ -10,6 +11,7 @@ import '../../../../core/utils/common_utils.dart';
 
 class AddIdCardController extends GetxController {
   final ApiService service;
+
   AddIdCardController({required this.service});
 
   List<IdCardFieldModel> fields = [];
@@ -99,7 +101,17 @@ class AddIdCardController extends GetxController {
         'data': requestData,
       };
 
-      final result = await service.addIdCard(finalRequest);
+      final response = await service.addIdCard(finalRequest);
+
+      final stdId = response.data['id'];
+      final photoBase64 = await _fileToBase64(selectedImage!);
+      final uploadPhotoRes = await service.uploadPhoto(
+        base64: photoBase64,
+        stdId: stdId,
+      );
+      if (uploadPhotoRes.statusCode != 200) {
+        print("Failed to upload photo");
+      }
 
       Future.microtask(() {
         AppSnackBar.show(
@@ -108,12 +120,17 @@ class AddIdCardController extends GetxController {
         );
       });
       DialogUtils.hideLoading();
-      return result;
+      return response.statusCode == 200;
     } catch (e) {
       DialogUtils.hideLoading();
       AppSnackBar.show(error: e, type: SnackBarType.error);
       return false;
     }
+  }
+
+  Future<String> _fileToBase64(File file) async {
+    final bytes = await file.readAsBytes();
+    return base64Encode(bytes);
   }
 
   Future<void> selectImage() async {
@@ -122,7 +139,6 @@ class AddIdCardController extends GetxController {
       onImageSelected: (file) {
         selectedImage = File(file.path);
         update([builderId]);
-        Get.back();
       },
     );
   }

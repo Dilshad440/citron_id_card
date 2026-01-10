@@ -38,7 +38,6 @@ class DioClient {
             AppConstants.user,
             (value) => LoginResponse.fromJson(value),
           );
-          // TODO: Provide auth token here
           return user?.token;
         },
       ),

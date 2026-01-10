@@ -113,14 +113,14 @@ class AddIdCardView extends GetView<AddIdCardController> {
                           ),
                         ),
 
-                        // SizedBox(height: 12),
-                        // GetBuilder<AddIdCardController>(
-                        //   id: controller.builderId,
-                        //   builder: (controller) {
-                        //     return _ImageCard(controller: controller);
+                        SizedBox(height: 12),
+                        GetBuilder<AddIdCardController>(
+                          id: controller.builderId,
+                          builder: (controller) {
+                            return _ImageCard(controller: controller);
 
-                        //   },
-                        // ),
+                          },
+                        ),
                       ],
                     );
                   },

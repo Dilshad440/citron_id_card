@@ -44,12 +44,12 @@ class ApiService {
     }
   }
 
-  Future<bool> addIdCard(Map<String, dynamic> request) async {
+  Future<Response<dynamic>> addIdCard(Map<String, dynamic> request) async {
     final response = await client.dio.post(
       ApiConstants.addIdCard,
       data: request,
     );
-    return response.statusCode == 200;
+    return response;
   }
 
   Future<List<SchoolUserRes>> getSchoolUsers() async {
