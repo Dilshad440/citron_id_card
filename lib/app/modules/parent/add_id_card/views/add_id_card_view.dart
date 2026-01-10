@@ -26,10 +26,13 @@ class AddIdCardView extends GetView<AddIdCardController> {
           child: AppButton(
             text: "Submit",
             onPressed: () async {
-              final result = await controller.onSubmit();
-              if (result) {
-                Get.back();
+              if(controller.formKey.currentState!.validate()){
+                final result = await controller.onSubmit();
+                if (result) {
+                  Get.back();
+                }
               }
+
             },
           ),
         ),

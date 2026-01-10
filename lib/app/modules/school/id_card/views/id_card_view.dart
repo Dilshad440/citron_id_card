@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:citron_id_card/app/config/network/api_constants.dart';
 import 'package:citron_id_card/app/core/components/background_gradient.dart';
 import 'package:citron_id_card/app/modules/shared/home/controllers/home_controller.dart';
@@ -183,16 +185,11 @@ class _StudentIdCard extends GetView<IdCardController> {
                       GetBuilder<IdCardController>(
                         id: "photo",
                         builder: (controller) {
-                          return CircleAvatar(
-                            radius: 50,
-                            backgroundColor: AppColors.primaryColor.withOpacity(
-                              0.3,
-                            ),
-                            backgroundImage: student?.selectedImg != null
-                                ? FileImage(student!.selectedImg!)
-                                : NetworkImage(
-                                    "${ApiConstants.baseUrl}${student?.photo}",
-                                  ),
+                          return UserAvatar(
+                            radius: 45,
+                            iconSize: 60,
+                            imageUrl: student?.photo,
+                            file: student?.selectedImg,
                           );
                         },
                       ),
@@ -221,7 +218,7 @@ class _StudentIdCard extends GetView<IdCardController> {
                       ),
                     ],
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(height: 14),
                   AppTextStyle.body.large.textColor.bold.text(
                     'Admission: ${student?.data?.admNo}',
                   ),
@@ -232,17 +229,12 @@ class _StudentIdCard extends GetView<IdCardController> {
                 ] else ...[
                   Row(
                     children: [
-                      CircleAvatar(
+                      UserAvatar(
+                        file: student?.selectedImg,
+                        imageUrl: student?.photo,
                         radius: 35,
-                        backgroundColor: AppColors.primaryColor.withOpacity(
-                          0.3,
-                        ),
-                        backgroundImage: student?.selectedImg != null
-                            ? FileImage(student!.selectedImg!)
-                            : NetworkImage(
-                                "${ApiConstants.baseUrl}${student?.photo}",
-                              ),
                       ),
+
                       SizedBox(width: 20),
                       Expanded(
                         child: Column(
@@ -377,6 +369,74 @@ class _StudentIdCard extends GetView<IdCardController> {
             child: AppTextStyle.body.small.textColor.semiBold.text(value),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class UserAvatar extends StatelessWidget {
+  final File? file;
+  final String? imageUrl;
+  final double radius;
+  final double? iconSize;
+
+  const UserAvatar({
+    super.key,
+    this.file,
+    this.imageUrl,
+    this.radius = 35,
+    this.iconSize = 50,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final double size = radius * 2;
+
+    return ClipOval(
+      child: Container(
+        width: size,
+        height: size,
+        padding: EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppColors.generateGradientColors().last.withOpacity(0.7),
+        ),
+        child: _buildImage(),
+      ),
+    );
+  }
+
+  Widget _buildImage() {
+    // 1️⃣ Local file image
+    if (file != null) {
+      return ClipOval(child: Image.file(file!, fit: BoxFit.cover));
+    }
+
+    // 2️⃣ Network image
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
+      return ClipOval(
+        child: Image.network(
+          "${ApiConstants.baseUrl}${imageUrl!}",
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _placeholderIcon();
+          },
+        ),
+      );
+    }
+
+    // 3️⃣ Default placeholder
+    return _placeholderIcon();
+  }
+
+  Widget _placeholderIcon() {
+    return ClipOval(
+      child: Center(
+        child: Icon(
+          Icons.person,
+          size: iconSize,
+          color: AppColors.generateGradientColors().first,
+        ),
       ),
     );
   }

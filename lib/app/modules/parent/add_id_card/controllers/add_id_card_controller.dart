@@ -75,8 +75,6 @@ class AddIdCardController extends GetxController {
   Future<bool> onSubmit() async {
     try {
       DialogUtils.showLoading();
-      final isValid = formKey.currentState?.validate() ?? false;
-      if (!isValid) return false;
 
       final homeController = Get.find<HomeController>();
       final schoolUser = homeController.schoolUser.value;
