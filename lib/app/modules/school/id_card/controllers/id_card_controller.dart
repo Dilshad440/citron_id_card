@@ -17,7 +17,6 @@ class IdCardController extends GetxController {
   List<StudentIdModel>? schoolIds;
   Map<String, dynamic> data = {};
   RxBool isLoading = false.obs;
-  File? selectedImg;
 
   @override
   void onInit() {
@@ -40,7 +39,7 @@ class IdCardController extends GetxController {
     update(['idCard']);
   }
 
-  void pickImage(int stdId) {
+  void pickImage(int stdId, int index) {
     CommonUtils.showImagePickerBottomSheet(
       context: Get.context!,
       onImageSelected: (file) async {
@@ -55,10 +54,11 @@ class IdCardController extends GetxController {
             base64: base64,
           );
           if (response.statusCode == 200) {
-            selectedImg = pickedFile;
-            update(["photo"]);
+            schoolIds?[index].selectedImg = pickedFile;
           }
+
           isLoading.value = false;
+          update(["photo"]);
           update(["idCard"]);
         } catch (e) {
           isLoading.value = false;

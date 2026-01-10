@@ -1,3 +1,5 @@
+import 'dart:io';
+
 class StudentIdModel {
   int? id;
   String? photo;
@@ -6,6 +8,7 @@ class StudentIdModel {
   int? updatedBy;
   StudentData? data;
   bool isExpanded;
+  File? selectedImg;
 
   StudentIdModel({
     this.id,
@@ -14,7 +17,8 @@ class StudentIdModel {
     this.updatedOn,
     this.updatedBy,
     this.data,
-    this.isExpanded=false,
+    this.isExpanded = false,
+    this.selectedImg,
   });
 
   factory StudentIdModel.fromJson(Map<String, dynamic> json) => StudentIdModel(

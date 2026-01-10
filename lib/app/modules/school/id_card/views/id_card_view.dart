@@ -50,6 +50,7 @@ class IdCardView extends GetView<IdCardController> {
                       final students = controller.schoolIds?[index];
                       return _StudentIdCard(
                         student: students,
+                        index: index,
                         onEdit: () {},
                         onDelete: () {},
                         onExpand: (val) => controller.expandCard(index, val),
@@ -72,12 +73,14 @@ class _StudentIdCard extends GetView<IdCardController> {
     required this.onEdit,
     required this.onDelete,
     required this.onExpand,
+    required this.index,
   });
 
   final StudentIdModel? student;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final Function(bool val) onExpand;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
@@ -185,8 +188,8 @@ class _StudentIdCard extends GetView<IdCardController> {
                             backgroundColor: AppColors.primaryColor.withOpacity(
                               0.3,
                             ),
-                            backgroundImage: controller.selectedImg != null
-                                ? FileImage(controller.selectedImg!)
+                            backgroundImage: student?.selectedImg != null
+                                ? FileImage(student!.selectedImg!)
                                 : NetworkImage(
                                     "${ApiConstants.baseUrl}${student?.photo}",
                                   ),
@@ -200,7 +203,7 @@ class _StudentIdCard extends GetView<IdCardController> {
                         right: 2,
                         child: InkWell(
                           onTap: () {
-                            controller.pickImage(student!.id!);
+                            controller.pickImage(student!.id!, index);
                           },
                           child: Container(
                             padding: const EdgeInsets.all(6),
@@ -234,9 +237,11 @@ class _StudentIdCard extends GetView<IdCardController> {
                         backgroundColor: AppColors.primaryColor.withOpacity(
                           0.3,
                         ),
-                        backgroundImage: NetworkImage(
-                          "${ApiConstants.baseUrl}${student?.photo}",
-                        ),
+                        backgroundImage: student?.selectedImg != null
+                            ? FileImage(student!.selectedImg!)
+                            : NetworkImage(
+                                "${ApiConstants.baseUrl}${student?.photo}",
+                              ),
                       ),
                       SizedBox(width: 20),
                       Expanded(

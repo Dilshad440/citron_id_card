@@ -219,19 +219,20 @@ class CommonUtils {
     final croppedFile = await cropImage(image.path);
     if (croppedFile == null) return null;
 
-    CommonUtils.show();
-    await BackgroundRemover.instance.initializeOrt();
+    // CommonUtils.show();
+    // await BackgroundRemover.instance.initializeOrt();
 
-    // REMOVE BACKGROUND
-    final fileBytes = File(croppedFile.path).readAsBytesSync();
-    final result = await BackgroundRemover.instance.removeBgBytes(fileBytes);
+    // // REMOVE BACKGROUND
+    // final fileBytes = File(croppedFile.path).readAsBytesSync();
+    // final result = await BackgroundRemover.instance.removeBgBytes(fileBytes);
 
-    // FIX: Convert Uint8List (bytes) to a physical File
-    final tempDir = await getTemporaryDirectory();
-    final fileName = "${DateTime.now().millisecondsSinceEpoch}_no_bg.png";
-    final file = File(p.join(tempDir.path, fileName));
-    CommonUtils.hide();
-    return await file.writeAsBytes(result);
+    // // FIX: Convert Uint8List (bytes) to a physical File
+    // final tempDir = await getTemporaryDirectory();
+    // final fileName = "${DateTime.now().millisecondsSinceEpoch}_no_bg.png";
+    // final file = File(p.join(tempDir.path, fileName));
+    // CommonUtils.hide();
+    return File(croppedFile.path);
+    ;
   }
 
   static Future<XFile?> cropImage(String path) async {

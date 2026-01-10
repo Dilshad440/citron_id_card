@@ -28,19 +28,17 @@ android {
     }
 
     buildTypes {
-        release {
-            // Enable shrinking & obfuscation
-            isMinifyEnabled = true
-            isShrinkResources = true
+     release {
+        isMinifyEnabled = true
+        isShrinkResources = true
 
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+        proguardFiles(
+            getDefaultProguardFile("proguard-android-optimize.txt"),
+            "proguard-rules.pro"
+        )
 
-            // TEMP: debug signing (replace for Play Store)
-            signingConfig = signingConfigs.getByName("debug")
-        }
+        signingConfig = signingConfigs.getByName("debug")
+    }
     }
 }
 
@@ -54,4 +52,7 @@ dependencies {
     // OkHttp (uCrop / networking)
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okio:okio:3.9.0")
+
+    implementation("com.google.android.play:core:1.10.3")
+    implementation("com.google.android.play:core-ktx:1.8.1")
 }

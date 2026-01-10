@@ -11,3 +11,12 @@
 -dontwarn org.xmlpull.v1.XmlSerializer
 -keep class org.xmlpull.v1.* {*;}
 -keep class androidx.appcompat.** { *; }
+
+
+# --- Play Core (REQUIRED for Flutter release builds) ---
+-keep class com.google.android.play.core.** { *; }
+-dontwarn com.google.android.play.core.**
+
+# --- Flutter embedding safety ---
+-keep class io.flutter.embedding.** { *; }
+-dontwarn io.flutter.embedding.**
