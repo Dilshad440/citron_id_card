@@ -30,7 +30,7 @@ class LoginBinding extends Bindings {
     // Home Controller (only if logged in)
     if (loggedIn) {
       Get.put<HomeController>(HomeController(service: Get.find<ApiService>()));
-      Get.put(AddIdCardController());
+      // Get.put(AddIdCardController(service: Get.find<ApiService>()));
     }
   }
 }

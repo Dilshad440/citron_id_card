@@ -36,9 +36,9 @@ class HomeView extends GetView<HomeController> {
         );
       }
 
-      if (controller.isParent.value) {
-        return EnterAdmissionNumberView();
-      }
+      // if (controller.isParent.value) {
+      //   return EnterAdmissionNumberView();
+      // }
       return FilterView();
     });
   }

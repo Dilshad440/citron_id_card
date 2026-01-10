@@ -1,12 +1,11 @@
 import 'package:citron_id_card/app/core/components/app_buttons.dart';
+import 'package:citron_id_card/app/core/components/app_dropdown.dart';
 import 'package:citron_id_card/app/core/components/app_textfield.dart';
 import 'package:citron_id_card/app/core/components/background_gradient.dart';
-import 'package:citron_id_card/app/core/components/common_appbbar.dart';
 import 'package:citron_id_card/app/core/components/two_line_element.dart';
 import 'package:citron_id_card/app/core/constants/asset_constant.dart';
 import 'package:citron_id_card/app/core/theme/app_colors.dart';
 import 'package:citron_id_card/app/core/theme/app_text_style.dart';
-import 'package:citron_id_card/app/core/utils/common_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/add_id_card_controller.dart';
@@ -26,13 +25,10 @@ class AddIdCardView extends GetView<AddIdCardController> {
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: AppButton(
             text: "Submit",
-            onPressed: () {
-              final fields = IdCardFieldModel.getFields(controller);
-
-              final isValid = controller.formKey.currentState!.validate();
-              if (isValid) {
-                print("API call");
-                return;
+            onPressed: () async {
+              final result = await controller.onSubmit();
+              if (result) {
+                Get.back();
               }
             },
           ),
@@ -58,14 +54,51 @@ class AddIdCardView extends GetView<AddIdCardController> {
             Expanded(
               child: Form(
                 key: controller.formKey,
-                child: ListView(
-                  controller: controller.scrollController,
-
-                  shrinkWrap: true,
-                  padding: EdgeInsets.all(16),
-                  children: [
-                    ...IdCardFieldModel.getFields(controller)
-                        .map(
+                child: GetBuilder<AddIdCardController>(
+                  id: controller.fieldUpdate,
+                  builder: (controller) {
+                    return ListView(
+                      controller: controller.scrollController,
+                      shrinkWrap: true,
+                      padding: EdgeInsets.all(16),
+                      children: [
+                        TwoLineElement(
+                          title: "Select batch",
+                          child: AppDropdown<String>(
+                            hintText: "Select your batch",
+                            items: controller.batch,
+                            value: controller.selectedBatch,
+                            validator: (value) {
+                              if (value == null) {
+                                return "Select your session";
+                              }
+                              return null;
+                            },
+                            onChanged: (value) {
+                              controller.selectedBatch = value!;
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        TwoLineElement(
+                          title: "Select session",
+                          child: AppDropdown<String>(
+                            hintText: "Select your session",
+                            items: controller.session,
+                            value: controller.selectedSession,
+                            validator: (value) {
+                              if (value == null) {
+                                return "Select your session";
+                              }
+                              return null;
+                            },
+                            onChanged: (value) {
+                              controller.selectedSession = value!;
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        ...controller.fields.map(
                           (e) => Padding(
                             padding: const EdgeInsets.symmetric(vertical: 6.0),
                             child: TwoLineElement(
@@ -78,18 +111,19 @@ class AddIdCardView extends GetView<AddIdCardController> {
                               ),
                             ),
                           ),
-                        )
-                        .toList(),
+                        ),
 
-                    SizedBox(height: 12),
-                    GetBuilder<AddIdCardController>(
-                      id: controller.builderId,
-                      builder: (controller) {
-                        return _ImageCard(controller: controller);
-                        ;
-                      },
-                    ),
-                  ],
+                        // SizedBox(height: 12),
+                        // GetBuilder<AddIdCardController>(
+                        //   id: controller.builderId,
+                        //   builder: (controller) {
+                        //     return _ImageCard(controller: controller);
+
+                        //   },
+                        // ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),

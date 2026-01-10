@@ -21,18 +21,33 @@ class FilterView extends StatelessWidget {
   Widget build(BuildContext context) {
     final homeController = Get.find<HomeController>();
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.textOnGradient,
-        tooltip: "Add New Student",
-        child: Icon(
-          Icons.add,
-          color: AppColors.generateGradientColors().last,
-          size: 33,
-        ),
-        onPressed: () {
-          Get.toNamed(AppRoutes.addIdCard);
-        },
-      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
+      floatingActionButton: (homeController.schoolUser.value?.canAdd ?? false)
+          ? SizedBox(
+              height: 45,
+              child: FloatingActionButton.extended(
+                backgroundColor: AppColors.textOnGradient,
+                tooltip: "Add New Student",
+                extendedIconLabelSpacing: 5,
+                isExtended: true,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                icon: Icon(
+                  Icons.add,
+                  color: AppColors.generateGradientColors().last,
+                  size: 25,
+                ),
+                label: Text(
+                  "Add Student",
+                  style: AppTextStyle.body.medium.textColor,
+                ),
+                onPressed: () {
+                  Get.toNamed(AppRoutes.addIdCard);
+                },
+              ),
+            )
+          : SizedBox(),
       body: BackgroundGradient(
         child: Obx(
           () => OverlayIdCardLoader(

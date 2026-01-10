@@ -10,6 +10,8 @@ class HomeBinding extends Bindings {
     Get.lazyPut<HomeController>(
       () => HomeController(service: ApiService(client: DioClient())),
     );
-    Get.lazyPut(() => AddIdCardController());
+    // Get.lazyPut(
+    //   () => AddIdCardController(service: ApiService(client: DioClient())),
+    // );
   }
 }

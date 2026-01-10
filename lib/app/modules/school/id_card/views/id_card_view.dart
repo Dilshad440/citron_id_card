@@ -81,6 +81,7 @@ class _StudentIdCard extends GetView<IdCardController> {
 
   @override
   Widget build(BuildContext context) {
+    final schoolUser = Get.find<HomeController>().schoolUser.value;
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
@@ -140,17 +141,24 @@ class _StudentIdCard extends GetView<IdCardController> {
                   }
                 },
                 itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'edit',
-                    child: Text(
-                      'Edit',
-                      style: AppTextStyle.title.medium.primaryColor,
+                  if (schoolUser?.canEdit ?? false) ...[
+                    PopupMenuItem(
+                      value: 'edit',
+                      child: Text(
+                        'Edit',
+                        style: AppTextStyle.title.medium.primaryColor,
+                      ),
                     ),
-                  ),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Text('Delete', style: AppTextStyle.title.medium.red),
-                  ),
+                  ],
+                  if (schoolUser?.canDelete ?? false) ...[
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Text(
+                        'Delete',
+                        style: AppTextStyle.title.medium.red,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],

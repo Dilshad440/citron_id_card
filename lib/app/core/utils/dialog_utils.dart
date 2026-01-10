@@ -30,8 +30,8 @@ class DialogUtils {
   }
 
   static void hideLoading() {
-    if (Get.isDialogOpen ?? false) {
-      Get.back();
+    if (Get.isDialogOpen == true) {
+      Navigator.pop(Get.context!);
     }
   }
 }

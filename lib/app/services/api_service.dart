@@ -32,6 +32,26 @@ class ApiService {
     }
   }
 
+  Future<List<String>> getSelectedFields(int schoolId) async {
+    try {
+      final response = await client.dio.get('/api/idfields/$schoolId/selected');
+
+      final List<dynamic> data = response.data['selectedFieldNames'];
+
+      return data.map((e) => e.toString()).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> addIdCard(Map<String, dynamic> request) async {
+    final response = await client.dio.post(
+      ApiConstants.addIdCard,
+      data: request,
+    );
+    return response.statusCode == 200;
+  }
+
   Future<List<SchoolUserRes>> getSchoolUsers() async {
     try {
       List<SchoolUserRes> schoolUser = [];

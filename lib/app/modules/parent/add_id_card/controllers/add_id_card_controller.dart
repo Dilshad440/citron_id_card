@@ -1,13 +1,26 @@
 import 'dart:io';
 
+import 'package:citron_id_card/app/core/utils/dialog_utils.dart';
+import 'package:citron_id_card/app/modules/parent/add_id_card/model/id_card_field_model.dart';
+import 'package:citron_id_card/app/modules/shared/home/controllers/home_controller.dart';
+import 'package:citron_id_card/app/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/utils/common_utils.dart';
 
 class AddIdCardController extends GetxController {
+  final ApiService service;
+  AddIdCardController({required this.service});
+
+  List<IdCardFieldModel> fields = [];
+
   File? selectedImage;
 
   final builderId = "addIdCard";
+  final fieldUpdate = 'filedUpdate';
+  bool isLoading = false;
+  late String selectedBatch;
+  late String selectedSession;
 
   final formKey = GlobalKey<FormState>();
   final ScrollController scrollController = ScrollController();
@@ -15,7 +28,92 @@ class AddIdCardController extends GetxController {
 
   @override
   void onInit() {
+    selectedBatch = batch.first;
+    selectedSession = session.first;
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      getSelectedFields();
+    });
     super.onInit();
+  }
+
+  void getSelectedFields() async {
+    final schoolUser = Get.find<HomeController>().schoolUser.value;
+    try {
+      isLoading = true;
+      DialogUtils.showLoading();
+      update([fieldUpdate]);
+      final result = await service.getSelectedFields(schoolUser!.schoolId!);
+      for (var v in result) {
+        fields.add(
+          IdCardFieldModel(
+            title: v,
+            hint: "Enter ${v.toLowerCase()}",
+            controller: TextEditingController(),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return "Please Enter ${v.toLowerCase()}";
+              }
+              return null;
+            },
+            fieldKey: GlobalKey(),
+          ),
+        );
+      }
+      isLoading = false;
+      update([fieldUpdate]);
+      DialogUtils.hideLoading();
+    } catch (e) {
+      isLoading = false;
+      update([fieldUpdate]);
+      DialogUtils.hideLoading();
+      AppSnackBar.show(error: e);
+    }
+  }
+
+  Future<bool> onSubmit() async {
+    try {
+      DialogUtils.showLoading();
+      final isValid = formKey.currentState?.validate() ?? false;
+      if (!isValid) return false;
+
+      final homeController = Get.find<HomeController>();
+      final schoolUser = homeController.schoolUser.value;
+
+      if (schoolUser == null) {
+        Get.snackbar('Error', 'School user not found');
+        return false;
+      }
+
+      final Map<String, dynamic> requestStaticData = {
+        'schoolId': schoolUser.schoolId,
+        'session': selectedSession,
+        'batch': selectedBatch,
+      };
+
+      final Map<String, dynamic> requestData = {
+        for (final field in fields) field.title: field.controller.text.trim(),
+      };
+
+      final Map<String, dynamic> finalRequest = {
+        ...requestStaticData,
+        'data': requestData,
+      };
+
+      final result = await service.addIdCard(finalRequest);
+
+      Future.microtask(() {
+        AppSnackBar.show(
+          error: "Id card added successfully",
+          type: SnackBarType.success,
+        );
+      });
+      DialogUtils.hideLoading();
+      return result;
+    } catch (e) {
+      DialogUtils.hideLoading();
+      AppSnackBar.show(error: e, type: SnackBarType.error);
+      return false;
+    }
   }
 
   Future<void> selectImage() async {
@@ -34,51 +132,7 @@ class AddIdCardController extends GetxController {
     update([builderId]);
   }
 
-  String? requiredValidator(String? value, String fieldName) {
-    if (value == null || value.trim().isEmpty) {
-      return "$fieldName is required";
-    }
-    return null;
-  }
+  final session = ["2025-2026", "2026-2027", "2027-2028", "2028-2029"];
 
-  String? emailValidator(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return "Email is required";
-    }
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(value)) {
-      return "Enter a valid email address";
-    }
-    return null;
-  }
-
-  String? mobileValidator(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return "Mobile number is required";
-    }
-    if (!RegExp(r'^[6-9]\d{9}$').hasMatch(value)) {
-      return "Enter a valid 10 digit mobile number";
-    }
-    return null;
-  }
-
-  String? aadhaarValidator(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return "Aadhaar number is required";
-    }
-    if (!RegExp(r'^\d{12}$').hasMatch(value)) {
-      return "Enter a valid 12 digit Aadhaar number";
-    }
-    return null;
-  }
-
-  String? panValidator(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return "PAN number is required";
-    }
-    if (!RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$').hasMatch(value)) {
-      return "Enter a valid PAN number";
-    }
-    return null;
-  }
+  final batch = ["Batch1", "Batch2", "Batch3", "Batch4", "Batch5"];
 }
