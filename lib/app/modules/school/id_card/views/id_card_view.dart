@@ -1,8 +1,8 @@
 import 'dart:io';
-
 import 'package:citron_id_card/app/config/network/api_constants.dart';
 import 'package:citron_id_card/app/core/components/background_gradient.dart';
 import 'package:citron_id_card/app/modules/shared/home/controllers/home_controller.dart';
+import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -53,8 +53,17 @@ class IdCardView extends GetView<IdCardController> {
                       return _StudentIdCard(
                         student: students,
                         index: index,
-                        onEdit: () {},
-                        onDelete: () {},
+                        onEdit: (std) async {
+                          if (std == null) return;
+                          final result = await Get.toNamed(
+                            AppRoutes.addIdCard,
+                            arguments: std,
+                          );
+                          if (result == true) {
+                            controller.getIdCards();
+                          }
+                        },
+                        onDelete: (std) {},
                         onExpand: (val) => controller.expandCard(index, val),
                       );
                     },
@@ -79,8 +88,8 @@ class _StudentIdCard extends GetView<IdCardController> {
   });
 
   final StudentIdModel? student;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
+  final void Function(StudentIdModel? student) onEdit;
+  final void Function(StudentIdModel? student) onDelete;
   final Function(bool val) onExpand;
   final int index;
 
@@ -140,9 +149,9 @@ class _StudentIdCard extends GetView<IdCardController> {
                 icon: const Icon(Icons.more_vert, color: Colors.white),
                 onSelected: (value) {
                   if (value == 'edit') {
-                    onEdit();
+                    onEdit.call(student);
                   } else if (value == 'delete') {
-                    onDelete();
+                    onDelete.call(student);
                   }
                 },
                 itemBuilder: (context) => [

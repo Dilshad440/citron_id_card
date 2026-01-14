@@ -7,6 +7,7 @@ class StudentIdModel {
   DateTime? updatedOn;
   int? updatedBy;
   StudentData? data;
+  List<String>? fields;
   bool isExpanded;
   File? selectedImg;
 
@@ -19,6 +20,7 @@ class StudentIdModel {
     this.data,
     this.isExpanded = false,
     this.selectedImg,
+    this.fields,
   });
 
   factory StudentIdModel.fromJson(Map<String, dynamic> json) => StudentIdModel(
@@ -30,6 +32,7 @@ class StudentIdModel {
         : DateTime.parse(json["updated_on"]),
     updatedBy: json["updatedBy"],
     data: json["data"] == null ? null : StudentData.fromJson(json["data"]),
+    fields: (json['fields'] as List?)?.map((e) => e.toString()).toList(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -39,6 +42,7 @@ class StudentIdModel {
     "updated_on": updatedOn?.toIso8601String(),
     "updatedBy": updatedBy,
     "data": data?.toJson(),
+    if (fields != null) 'fields': fields,
   };
 }
 

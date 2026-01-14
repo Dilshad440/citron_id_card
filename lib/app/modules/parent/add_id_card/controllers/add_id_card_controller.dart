@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:citron_id_card/app/core/utils/dialog_utils.dart';
 import 'package:citron_id_card/app/modules/parent/add_id_card/model/id_card_field_model.dart';
+import 'package:citron_id_card/app/modules/school/id_card/model/student_id_model.dart';
 import 'package:citron_id_card/app/modules/shared/home/controllers/home_controller.dart';
 import 'package:citron_id_card/app/services/api_service.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +16,10 @@ class AddIdCardController extends GetxController {
   AddIdCardController({required this.service});
 
   List<IdCardFieldModel> fields = [];
+  StudentIdModel? student;
 
   File? selectedImage;
+  String? studentPhoto;
 
   final builderId = "addIdCard";
   final fieldUpdate = 'filedUpdate';
@@ -30,11 +33,14 @@ class AddIdCardController extends GetxController {
 
   @override
   void onInit() {
+    student = Get.arguments;
+    studentPhoto = student?.photo;
     selectedBatch = batch.first;
     selectedSession = session.first;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       getSelectedFields();
     });
+
     super.onInit();
   }
 
@@ -44,13 +50,15 @@ class AddIdCardController extends GetxController {
       isLoading = true;
       DialogUtils.showLoading();
       update([fieldUpdate]);
+      final studentData = student?.data?.toJson() ?? {};
       final result = await service.getSelectedFields(schoolUser!.schoolId!);
       for (var v in result) {
+        final text = studentData[v].toString();
         fields.add(
           IdCardFieldModel(
             title: v,
             hint: "Enter ${v.toLowerCase()}",
-            controller: TextEditingController(),
+            controller: TextEditingController(text: text),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return "Please Enter ${v.toLowerCase()}";
@@ -126,6 +134,40 @@ class AddIdCardController extends GetxController {
     }
   }
 
+  Future<bool> onEdit() async {
+    try {
+      DialogUtils.showLoading();
+      final Map<String, dynamic> requestData = {
+        for (final field in fields) field.title: field.controller.text.trim(),
+      };
+
+      final Map<String, dynamic> finalReq = {'Data': requestData};
+      final response = await service.editIdCard(finalReq, student!.id!);
+      if (selectedImage != null) {
+        final photoBase64 = await _fileToBase64(selectedImage!);
+        final uploadPhotoRes = await service.uploadPhoto(
+          base64: photoBase64,
+          stdId: student!.id!,
+        );
+        if (uploadPhotoRes.statusCode != 200) {
+          print("Failed to upload photo");
+        }
+      }
+      Future.microtask(() {
+        AppSnackBar.show(
+          error: "Id card added successfully",
+          type: SnackBarType.success,
+        );
+      });
+      DialogUtils.hideLoading();
+      return response.statusCode == 200;
+    } catch (e) {
+      DialogUtils.hideLoading();
+      AppSnackBar.show(error: e, type: SnackBarType.error);
+      return false;
+    }
+  }
+
   Future<String> _fileToBase64(File file) async {
     final bytes = await file.readAsBytes();
     return base64Encode(bytes);
@@ -142,6 +184,7 @@ class AddIdCardController extends GetxController {
   }
 
   void removePickedImage() {
+    studentPhoto = null;
     selectedImage = null;
     update([builderId]);
   }

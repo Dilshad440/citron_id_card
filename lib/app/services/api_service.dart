@@ -83,6 +83,18 @@ class ApiService {
     }
   }
 
+  Future<Response> editIdCard(Map<String, dynamic> request, int id) async {
+    try {
+      final response = await client.dio.put(
+        ApiConstants.editIdCard + id.toString(),
+        data: {...request},
+      );
+      return response;
+    } on DioException catch (e) {
+      rethrow;
+    }
+  }
+
   Future<Response> uploadPhoto({
     required String base64,
     required int stdId,

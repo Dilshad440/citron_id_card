@@ -8,6 +8,7 @@ import 'package:citron_id_card/app/core/theme/app_colors.dart';
 import 'package:citron_id_card/app/core/theme/app_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../config/network/api_constants.dart';
 import '../controllers/add_id_card_controller.dart';
 import '../model/id_card_field_model.dart';
 
@@ -24,15 +25,19 @@ class AddIdCardView extends GetView<AddIdCardController> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: AppButton(
-            text: "Submit",
+            text: controller.student != null ? "Update" : "Submit",
             onPressed: () async {
-              if(controller.formKey.currentState!.validate()){
-                final result = await controller.onSubmit();
+              if (controller.formKey.currentState!.validate()) {
+                bool result = false;
+                if (controller.student == null) {
+                  result = await controller.onSubmit();
+                } else {
+                  result = await controller.onEdit();
+                }
                 if (result) {
-                  Get.back();
+                  Get.back(result: result);
                 }
               }
-
             },
           ),
         ),
@@ -121,7 +126,6 @@ class AddIdCardView extends GetView<AddIdCardController> {
                           id: controller.builderId,
                           builder: (controller) {
                             return _ImageCard(controller: controller);
-
                           },
                         ),
                       ],
@@ -144,7 +148,10 @@ class _ImageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (controller.selectedImage != null) {
+    final hasNetworkPhoto = controller.studentPhoto != null;
+    final hasLocalPhoto = controller.selectedImage != null;
+
+    if (hasNetworkPhoto || hasLocalPhoto) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: Stack(
@@ -155,32 +162,37 @@ class _ImageCard extends StatelessWidget {
               height: 200,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.primaryColor),
+                border: Border.all(color: Colors.blue),
               ),
-              child: Image.file(controller.selectedImage!, fit: BoxFit.fill),
+              child: hasNetworkPhoto
+                  ? Image.network(
+                      "${ApiConstants.baseUrl}${controller.studentPhoto!}",
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          const Icon(Icons.broken_image),
+                    )
+                  : Image.file(controller.selectedImage!, fit: BoxFit.cover),
             ),
-            IconButton.filled(
-              style: IconButton.styleFrom(backgroundColor: AppColors.red),
-              onPressed: () {
-                controller.removePickedImage();
-              },
-              icon: Icon(Icons.delete, color: AppColors.textOnGradient),
+            IconButton(
+              style: IconButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: controller.removePickedImage,
+              icon: const Icon(Icons.delete, color: Colors.white),
             ),
           ],
         ),
       );
     }
+
+    /// Upload placeholder
     return Container(
       height: 200,
       decoration: BoxDecoration(
-        color: AppColors.generateGradientColors().first.withOpacity(0.9),
+        color: Colors.grey.shade300,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.primaryColor),
+        border: Border.all(color: Colors.blue),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Image.asset(AssetConstant.uploadImage, height: 80),
           SizedBox(height: 15),

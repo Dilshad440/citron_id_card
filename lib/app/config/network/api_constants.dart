@@ -7,4 +7,5 @@ class ApiConstants {
   static const String sectionList = '/api/IDRecords/sections';
   static const String classList = '/api/IDRecords/classnames';
   static const String addIdCard = '/api/idrecords';
+  static const String editIdCard = '/api/IDRecords/';
 }
