@@ -95,6 +95,17 @@ class ApiService {
     }
   }
 
+  Future<Response> deleteCard(int id) async {
+    try {
+      final response = await client.dio.delete(
+        ApiConstants.editIdCard + id.toString(),
+      );
+      return response;
+    } on DioException catch (e) {
+      rethrow;
+    }
+  }
+
   Future<Response> uploadPhoto({
     required String base64,
     required int stdId,

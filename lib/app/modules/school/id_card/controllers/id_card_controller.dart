@@ -39,6 +39,21 @@ class IdCardController extends GetxController {
     update(['idCard']);
   }
 
+  void deleteIdCard(int idCard) async {
+    try {
+      DialogUtils.showLoading();
+      final response = await source.deleteCard(idCard);
+      if(response.statusCode==200){
+        AppSnackBar.show(error: "Id card deleted successfully");
+        getIdCards();
+      }
+      DialogUtils.hideLoading();
+    } catch (e) {
+      DialogUtils.hideLoading();
+      AppSnackBar.show(error: e, type: SnackBarType.error);
+    }
+  }
+
   void pickImage(int stdId, int index) {
     CommonUtils.showImagePickerBottomSheet(
       context: Get.context!,

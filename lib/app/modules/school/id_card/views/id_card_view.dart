@@ -63,7 +63,9 @@ class IdCardView extends GetView<IdCardController> {
                             controller.getIdCards();
                           }
                         },
-                        onDelete: (std) {},
+                        onDelete: (std) async{
+                          controller.deleteIdCard(std!.id!);
+                        },
                         onExpand: (val) => controller.expandCard(index, val),
                       );
                     },
