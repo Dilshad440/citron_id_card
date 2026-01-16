@@ -201,7 +201,7 @@ class AddIdCardController extends GetxController {
         type: SnackBarType.success,
       );
 
-      return true;
+      return false;
     } catch (e) {
       final message = e is Exception
           ? e.toString().replaceFirst('Exception: ', '')

@@ -43,7 +43,7 @@ class IdCardController extends GetxController {
     try {
       DialogUtils.showLoading();
       final response = await source.deleteCard(idCard);
-      if(response.statusCode==200){
+      if (response.statusCode == 200) {
         AppSnackBar.show(error: "Id card deleted successfully");
         getIdCards();
       }
@@ -58,7 +58,6 @@ class IdCardController extends GetxController {
     CommonUtils.showImagePickerBottomSheet(
       context: Get.context!,
       onImageSelected: (file) async {
-        Get.back();
         try {
           isLoading.value = true;
           update(["idCard"]);

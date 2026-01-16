@@ -316,7 +316,6 @@ class _StudentIdCard extends GetView<IdCardController> {
                   ],
                 ),
               ),
-
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(

@@ -28,14 +28,11 @@ class AddIdCardView extends GetView<AddIdCardController> {
             text: controller.student != null ? "Update" : "Submit",
             onPressed: () async {
               if (controller.formKey.currentState!.validate()) {
-                bool result = false;
                 if (controller.student == null) {
-                  result = await controller.onSubmit();
-                } else {
-                  result = await controller.onEdit();
-                }
-                if (result) {
+                  final result = await controller.onSubmit();
                   Get.back(result: result);
+                } else {
+                  await controller.onEdit();
                 }
               }
             },
