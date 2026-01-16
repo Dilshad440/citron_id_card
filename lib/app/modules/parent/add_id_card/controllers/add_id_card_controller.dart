@@ -53,7 +53,7 @@ class AddIdCardController extends GetxController {
       final studentData = student?.data?.toJson() ?? {};
       final result = await service.getSelectedFields(schoolUser!.schoolId!);
       for (var v in result) {
-        final text = studentData[v]?.toString()??"";
+        final text = studentData[v]?.toString() ?? "";
         fields.add(
           IdCardFieldModel(
             title: v,
@@ -82,6 +82,7 @@ class AddIdCardController extends GetxController {
 
   Future<bool> onSubmit() async {
     try {
+      bool isSuccess = false;
       DialogUtils.showLoading();
 
       final homeController = Get.find<HomeController>();
@@ -115,18 +116,31 @@ class AddIdCardController extends GetxController {
         base64: photoBase64,
         stdId: stdId,
       );
+      isSuccess =
+          response.statusCode == 200 && uploadPhotoRes.statusCode == 200;
       if (uploadPhotoRes.statusCode != 200) {
-        print("Failed to upload photo");
+        final res = await service.deleteCard(student!.id!);
+        print("Id Card deleted as got error in uploading photo");
       }
 
-      Future.microtask(() {
-        AppSnackBar.show(
-          error: "Id card added successfully",
-          type: SnackBarType.success,
-        );
-      });
+      if (!isSuccess) {
+        Future.microtask(() {
+          AppSnackBar.show(
+            error: "Failed to add ID Card",
+            type: SnackBarType.error,
+          );
+        });
+      } else {
+        Future.microtask(() {
+          AppSnackBar.show(
+            error: "Id card added successfully",
+            type: SnackBarType.success,
+          );
+        });
+      }
+
       DialogUtils.hideLoading();
-      return response.statusCode == 200;
+      return isSuccess;
     } catch (e) {
       DialogUtils.hideLoading();
       AppSnackBar.show(error: e, type: SnackBarType.error);
@@ -136,6 +150,7 @@ class AddIdCardController extends GetxController {
 
   Future<bool> onEdit() async {
     try {
+      bool isSuccess = false;
       DialogUtils.showLoading();
       final Map<String, dynamic> requestData = {
         for (final field in fields) field.title: field.controller.text.trim(),
@@ -150,17 +165,28 @@ class AddIdCardController extends GetxController {
           stdId: student!.id!,
         );
         if (uploadPhotoRes.statusCode != 200) {
+          final res = await service.deleteCard(student!.id!);
+          AppSnackBar.show(
+            error: "Filed to update the ID Card",
+            type: SnackBarType.error,
+          );
           print("Failed to upload photo");
+          return isSuccess;
         }
+        isSuccess =
+            response.statusCode == 200 && uploadPhotoRes.statusCode == 200;
       }
-      Future.microtask(() {
-        AppSnackBar.show(
-          error: "Id card added successfully",
-          type: SnackBarType.success,
-        );
-      });
+      if (isSuccess) {
+        Future.microtask(() {
+          AppSnackBar.show(
+            error: "Id card added successfully",
+            type: SnackBarType.success,
+          );
+        });
+      }
+
       DialogUtils.hideLoading();
-      return response.statusCode == 200;
+      return isSuccess;
     } catch (e) {
       DialogUtils.hideLoading();
       AppSnackBar.show(error: e, type: SnackBarType.error);

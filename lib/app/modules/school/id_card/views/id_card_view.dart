@@ -44,7 +44,35 @@ class IdCardView extends GetView<IdCardController> {
                       controller.schoolIds == null) {
                     return Center(child: Text("No data found!!!"));
                   }
-                  return ListView.builder(
+                  return
+                  //   ListView(
+                  //   children:
+                  //       controller.schoolIds?.asMap().entries.map((entry) {
+                  //         final index = entry.key;
+                  //
+                  //         return _StudentIdCard(
+                  //           student: entry.value,
+                  //           index: index,
+                  //           onEdit: (std) async {
+                  //             if (std == null) return;
+                  //             final result = await Get.toNamed(
+                  //               AppRoutes.addIdCard,
+                  //               arguments: std,
+                  //             );
+                  //             if (result == true) {
+                  //               controller.getIdCards();
+                  //             }
+                  //           },
+                  //           onDelete: (std) async {
+                  //             controller.deleteIdCard(std!.id!);
+                  //           },
+                  //           onExpand: (val) =>
+                  //               controller.expandCard(index, val),
+                  //         );
+                  //       }).toList() ??
+                  //       [],
+                  // );
+                  ListView.builder(
                     shrinkWrap: true,
                     padding: const EdgeInsets.all(16),
                     itemCount: controller.schoolIds?.length,
@@ -63,7 +91,7 @@ class IdCardView extends GetView<IdCardController> {
                             controller.getIdCards();
                           }
                         },
-                        onDelete: (std) async{
+                        onDelete: (std) async {
                           controller.deleteIdCard(std!.id!);
                         },
                         onExpand: (val) => controller.expandCard(index, val),
@@ -98,6 +126,8 @@ class _StudentIdCard extends GetView<IdCardController> {
   @override
   Widget build(BuildContext context) {
     final schoolUser = Get.find<HomeController>().schoolUser.value;
+    final studentObj = student?.data?.toJson() ?? {};
+
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
@@ -251,23 +281,14 @@ class _StudentIdCard extends GetView<IdCardController> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _infoRow(
-                              "Admission No",
-                              student?.data?.admNo ?? "",
+                          children: studentObj.entries.take(2).map((e) {
+                            return _infoRow(
+                              label: e.key,
+                              value: e.value,
                               bottomPadding: 0,
-                            ),
-                            _infoRow(
-                              "Name",
-                              student?.data?.studentName ?? "",
-                              bottomPadding: 0,
-                            ),
-                            _infoRow(
-                              "Class",
-                              student?.data?.studentClass ?? "",
-                              bottomPadding: 0,
-                            ),
-                          ],
+                              width: Get.size.width * 0.2,
+                            );
+                          }).toList(),
                         ),
                       ),
                     ],
@@ -284,13 +305,13 @@ class _StudentIdCard extends GetView<IdCardController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _infoRow('Name', student?.data?.studentName ?? ""),
-                    _infoRow('Class', student?.data?.studentClass ?? ""),
-                    _infoRow('Section', student?.data?.section ?? ""),
-                    _infoRow('D.O.B', "NA"),
-                    _infoRow('Mobile', "NA"),
-                    _infoRow('Conveyance', "NA"),
-                    _infoRow('Address', "NA"),
+                    ...studentObj.entries.map((e) {
+                      return _infoRow(
+                        label: e.key,
+                        value: e.value,
+                        bottomPadding: 0,
+                      );
+                    }),
                     const SizedBox(height: 12),
                   ],
                 ),
@@ -300,13 +321,7 @@ class _StudentIdCard extends GetView<IdCardController> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: AppColors.primaryColor,
-                  // gradient: LinearGradient(
-                  //   colors: AppColors.generateGradientColors(),
-                  //   end: Alignment.topLeft,
-                  //   begin: Alignment.topRight,
-                  // ),
                   borderRadius: const BorderRadius.vertical(
-                    // top: Radius.circular(18),
                     bottom: Radius.circular(18),
                   ),
                 ),
@@ -361,14 +376,19 @@ class _StudentIdCard extends GetView<IdCardController> {
     );
   }
 
-  Widget _infoRow(String label, String value, {double bottomPadding = 6.0}) {
+  Widget _infoRow({
+    required String label,
+    required String value,
+    double bottomPadding = 6.0,
+    double? width,
+  }) {
     return Padding(
       padding: EdgeInsets.only(bottom: bottomPadding),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 100,
+            width: width ?? Get.size.width * 0.35,
             child: AppTextStyle.body.small.textColor.semiBold.text(label),
           ),
           SizedBox(
