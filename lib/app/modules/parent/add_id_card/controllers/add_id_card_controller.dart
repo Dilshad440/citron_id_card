@@ -81,16 +81,16 @@ class AddIdCardController extends GetxController {
   }
 
   Future<bool> onSubmit() async {
-    try {
-      bool isSuccess = false;
-      DialogUtils.showLoading();
+    DialogUtils.showLoading();
 
+    int? createdCardId;
+
+    try {
       final homeController = Get.find<HomeController>();
       final schoolUser = homeController.schoolUser.value;
 
       if (schoolUser == null) {
-        Get.snackbar('Error', 'School user not found');
-        return false;
+        throw Exception('School user not found');
       }
 
       final Map<String, dynamic> requestStaticData = {
@@ -108,89 +108,108 @@ class AddIdCardController extends GetxController {
         'data': requestData,
       };
 
+      /// 1️⃣ Create ID card
       final response = await service.addIdCard(finalRequest);
 
-      final stdId = response.data['id'];
-      final photoBase64 = await _fileToBase64(selectedImage!);
-      final uploadPhotoRes = await service.uploadPhoto(
-        base64: photoBase64,
-        stdId: stdId,
+      if (response.statusCode != 200 || response.data == null) {
+        throw Exception('Failed to create ID card');
+      }
+
+      createdCardId = response.data['id'];
+
+      /// 2️⃣ Upload photo (if exists)
+      if (selectedImage != null) {
+        final photoBase64 = await _fileToBase64(selectedImage!);
+
+        final uploadPhotoRes = await service.uploadPhoto(
+          base64: photoBase64,
+          stdId: createdCardId!,
+        );
+
+        if (uploadPhotoRes.statusCode != 200) {
+          throw Exception('Failed to upload photo');
+        }
+      }
+
+      /// ✅ All APIs succeeded
+      AppSnackBar.show(
+        error: "ID card added successfully",
+        type: SnackBarType.success,
       );
-      isSuccess =
-          response.statusCode == 200 && uploadPhotoRes.statusCode == 200;
-      if (uploadPhotoRes.statusCode != 200) {
-        final res = await service.deleteCard(student!.id!);
-        print("Id Card deleted as got error in uploading photo");
-      }
 
-      if (!isSuccess) {
-        Future.microtask(() {
-          AppSnackBar.show(
-            error: "Failed to add ID Card",
-            type: SnackBarType.error,
-          );
-        });
-      } else {
-        Future.microtask(() {
-          AppSnackBar.show(
-            error: "Id card added successfully",
-            type: SnackBarType.success,
-          );
-        });
-      }
-
-      DialogUtils.hideLoading();
-      return isSuccess;
+      return true;
     } catch (e) {
-      DialogUtils.hideLoading();
-      AppSnackBar.show(error: e, type: SnackBarType.error);
+      /// 🔴 Rollback if card was created
+      if (createdCardId != null) {
+        try {
+          await service.deleteCard(createdCardId);
+          debugPrint("ID Card rolled back due to failure");
+        } catch (deleteError) {
+          debugPrint("Failed to rollback ID Card: $deleteError");
+        }
+      }
+      final message = e is Exception
+          ? e.toString().replaceFirst('Exception: ', '')
+          : e;
+      AppSnackBar.show(error: message, type: SnackBarType.error);
+
       return false;
+    } finally {
+      DialogUtils.hideLoading();
     }
   }
 
   Future<bool> onEdit() async {
+    DialogUtils.showLoading();
     try {
-      bool isSuccess = false;
-      DialogUtils.showLoading();
+      if (student?.id == null) {
+        throw 'Invalid student ID';
+      }
+
       final Map<String, dynamic> requestData = {
         for (final field in fields) field.title: field.controller.text.trim(),
       };
 
-      final Map<String, dynamic> finalReq = {'Data': requestData};
+      final Map<String, dynamic> finalReq = {
+        'data': requestData, // keep key consistent with backend
+      };
+
+      /// 1️⃣ Update ID card data
       final response = await service.editIdCard(finalReq, student!.id!);
+
+      if (response.statusCode != 200) {
+        throw 'Failed to update ID card';
+      }
+
+      /// 2️⃣ Upload photo if selected
       if (selectedImage != null) {
         final photoBase64 = await _fileToBase64(selectedImage!);
+
         final uploadPhotoRes = await service.uploadPhoto(
           base64: photoBase64,
           stdId: student!.id!,
         );
+
         if (uploadPhotoRes.statusCode != 200) {
-          final res = await service.deleteCard(student!.id!);
-          AppSnackBar.show(
-            error: "Filed to update the ID Card",
-            type: SnackBarType.error,
-          );
-          print("Failed to upload photo");
-          return isSuccess;
+          throw 'Failed to upload photo';
         }
-        isSuccess =
-            response.statusCode == 200 && uploadPhotoRes.statusCode == 200;
-      }
-      if (isSuccess) {
-        Future.microtask(() {
-          AppSnackBar.show(
-            error: "Id card added successfully",
-            type: SnackBarType.success,
-          );
-        });
       }
 
-      DialogUtils.hideLoading();
-      return isSuccess;
+      /// ✅ All APIs succeeded
+      AppSnackBar.show(
+        error: "ID card updated successfully",
+        type: SnackBarType.success,
+      );
+
+      return true;
     } catch (e) {
-      DialogUtils.hideLoading();
-      AppSnackBar.show(error: e, type: SnackBarType.error);
+      final message = e is Exception
+          ? e.toString().replaceFirst('Exception: ', '')
+          : e;
+      AppSnackBar.show(error: message, type: SnackBarType.error);
       return false;
+    } finally {
+      DialogUtils.hideLoading();
     }
   }
 
