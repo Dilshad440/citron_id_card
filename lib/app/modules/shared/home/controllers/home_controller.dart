@@ -36,39 +36,93 @@ class HomeController extends GetxController {
     super.onInit();
   }
 
-  void getSchoolUserRes() async {
+  Future<void> getSchoolUserRes() async {
+    isLoading.value = true;
+
     try {
-      isLoading.value = true;
       final response = await service.getSchoolUsers();
+
+      if (response.isEmpty) {
+        AppSnackBar.show(
+          error: "No school user found",
+          type: SnackBarType.error,
+        );
+        return;
+      }
+
       schoolUser.value = response.first;
+
+      final schoolId = schoolUser.value?.schoolId;
+      if (schoolId == null) {
+        AppSnackBar.show(
+          error: "Invalid school data",
+          type: SnackBarType.error,
+        );
+        return;
+      }
+
+      final selectedFiledRes =
+      await service.getSelectedFields(schoolId);
+
+      if (selectedFiledRes.isEmpty) {
+        AppSnackBar.show(
+          error: "No fields configured for this school",
+          type: SnackBarType.error,
+        );
+        return;
+      }
+
+      /// Filter only required fields
+      final List<String> selectedFields = selectedFiledRes.where((e) {
+        final fieldName = e.toLowerCase();
+        return fieldName == "adm. no" ||
+            fieldName == "class" ||
+            fieldName == "section";
+      }).toList();
+
+      // if (selectedSession == null) {
+      //   AppSnackBar.show(
+      //     error: "Session not selected",
+      //     type: SnackBarType.error,
+      //   );
+      //   return;
+      // }
+
       await getClassAndSection(selectedSession!);
-      final selectedFields = List<String>.from(
-        jsonDecode(schoolUser.value?.selectedFields ?? ""),
-      );
-      selectedFields.remove("Student Name");
-      for (var v in selectedFields) {
-        final hintText = getFieldType(v) == FieldType.textField
-            ? "Enter ${v.toLowerCase()}"
-            : "Select ${v.toLowerCase()}";
+
+      fieldModel.clear(); // avoid duplicate fields
+
+      for (final v in selectedFields) {
+        final isTextField = getFieldType(v) == FieldType.textField;
+        final hintText =
+        isTextField ? "Enter ${v.toLowerCase()}" : "Select ${v.toLowerCase()}";
+
         fieldModel.add(
           FieldModel(
             title: v,
             hint: hintText,
             controller: TextEditingController(),
             validator: (value) =>
-                value == null || value.isEmpty ? hintText : null,
-            keyboardType: TextInputType.text,
+            value == null || value.isEmpty ? hintText : null,
+            keyboardType:
+            isTextField ? TextInputType.text : TextInputType.none,
             type: getFieldType(v),
           ),
         );
       }
+    } catch (e, stack) {
+      debugPrint("getSchoolUserRes error: $e");
+      debugPrintStack(stackTrace: stack);
 
+      AppSnackBar.show(
+        error: "Something went wrong. Please try again.",
+        type: SnackBarType.error,
+      );
+    } finally {
       isLoading.value = false;
-    } catch (e) {
-      isLoading.value = false;
-      AppSnackBar.show(error: e, type: SnackBarType.error);
     }
   }
+
 
   FieldType getFieldType(String v) {
     switch (v.toLowerCase()) {
@@ -81,7 +135,7 @@ class HomeController extends GetxController {
     }
   }
 
-  void getUserFromLocal() async {
+  Future<void> getUserFromLocal() async {
     final user = await SharedPrefs.instance.getTypedObject<LoginResponse>(
       AppConstants.user,
       (value) => LoginResponse.fromJson(value),

@@ -21,33 +21,6 @@ class FilterView extends StatelessWidget {
   Widget build(BuildContext context) {
     final homeController = Get.find<HomeController>();
     return Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
-      floatingActionButton: (homeController.schoolUser.value?.canAdd ?? false)
-          ? SizedBox(
-              height: 45,
-              child: FloatingActionButton.extended(
-                backgroundColor: AppColors.textOnGradient,
-                tooltip: "Add New Student",
-                extendedIconLabelSpacing: 5,
-                isExtended: true,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                icon: Icon(
-                  Icons.add,
-                  color: AppColors.generateGradientColors().last,
-                  size: 25,
-                ),
-                label: Text(
-                  "Add Student",
-                  style: AppTextStyle.body.medium.textColor,
-                ),
-                onPressed: () {
-                  Get.toNamed(AppRoutes.addIdCard);
-                },
-              ),
-            )
-          : SizedBox(),
       body: BackgroundGradient(
         child: Obx(
           () => OverlayIdCardLoader(
@@ -60,6 +33,34 @@ class FilterView extends StatelessWidget {
                   Row(
                     children: [
                       Text("Filter", style: AppTextStyle.display.medium),
+                      Spacer(),
+                      (homeController.schoolUser.value?.canAdd ?? false)
+                          ? SizedBox(
+                              height: 35,
+                              child: FloatingActionButton.extended(
+                                backgroundColor: AppColors.textOnGradient,
+                                tooltip: "Add New Student",
+                                extendedIconLabelSpacing: 5,
+                                isExtended: true,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                icon: Icon(
+                                  Icons.add,
+                                  color:
+                                      AppColors.generateGradientColors().last,
+                                  size: 25,
+                                ),
+                                label: Text(
+                                  "Add Student",
+                                  style: AppTextStyle.body.medium.textColor,
+                                ),
+                                onPressed: () {
+                                  Get.toNamed(AppRoutes.addIdCard);
+                                },
+                              ),
+                            )
+                          : SizedBox(),
                     ],
                   ),
                   SizedBox(height: 15),

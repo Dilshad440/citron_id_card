@@ -265,7 +265,7 @@ class _StudentIdCard extends GetView<IdCardController> {
                   ),
                   const SizedBox(height: 4),
                   AppTextStyle.body.medium.textColor.bold.text(
-                    'Class: ${student?.data?.studentClass}',
+                    'Class: ${student?.data?.cls}',
                   ),
                 ] else ...[
                   Row(
@@ -281,15 +281,21 @@ class _StudentIdCard extends GetView<IdCardController> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: studentObj.entries.take(2).map((e) {
-                            return _infoRow(
-                              label: e.key,
-                              value: e.value,
-                              bottomPadding: 0,
-                              width: Get.size.width * 0.2,
-                            );
-                          }).toList(),
+                          children: studentObj.entries
+                              .where((e) =>
+                          e.value != null &&
+                              e.value.toString().trim().isNotEmpty &&
+                              e.value.toString().toLowerCase() != 'null')
+                              .take(2)
+                              .map((e) => _infoRow(
+                            label: e.key,
+                            value: e.value,
+                            bottomPadding: 0,
+                            width: Get.size.width * 0.2,
+                          ))
+                              .toList(),
                         ),
+
                       ),
                     ],
                   ),
@@ -305,13 +311,19 @@ class _StudentIdCard extends GetView<IdCardController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    ...studentObj.entries.map((e) {
+                    ...studentObj.entries
+                        .where((e) =>
+                    e.value != null &&
+                        e.value.toString().trim().isNotEmpty &&
+                        e.value.toString().toLowerCase() != 'null')
+                        .map((e) {
                       return _infoRow(
                         label: e.key,
-                        value: e.value,
+                        value: e.value.toString(),
                         bottomPadding: 0,
                       );
                     }),
+
                     const SizedBox(height: 12),
                   ],
                 ),

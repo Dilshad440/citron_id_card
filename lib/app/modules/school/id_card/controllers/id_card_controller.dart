@@ -20,7 +20,7 @@ class IdCardController extends GetxController {
 
   @override
   void onInit() {
-    data = Get.arguments;
+    data = Get.arguments ?? {};
     getIdCards();
     super.onInit();
   }

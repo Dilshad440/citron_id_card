@@ -4,8 +4,12 @@ import 'package:citron_id_card/app/core/components/app_textfield.dart';
 import 'package:citron_id_card/app/core/components/background_gradient.dart';
 import 'package:citron_id_card/app/core/components/two_line_element.dart';
 import 'package:citron_id_card/app/core/constants/asset_constant.dart';
+import 'package:citron_id_card/app/core/constants/global_constants.dart';
 import 'package:citron_id_card/app/core/theme/app_colors.dart';
 import 'package:citron_id_card/app/core/theme/app_text_style.dart';
+import 'package:citron_id_card/app/modules/school/id_card/controllers/id_card_controller.dart';
+import 'package:citron_id_card/app/routes/app_routes.dart';
+import 'package:citron_id_card/app/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../config/network/api_constants.dart';
@@ -27,12 +31,18 @@ class AddIdCardView extends GetView<AddIdCardController> {
           child: AppButton(
             text: controller.student != null ? "Update" : "Submit",
             onPressed: () async {
-              if (controller.formKey.currentState!.validate()) {
-                if (controller.student == null) {
-                  final result = await controller.onSubmit();
-                  Get.back(result: result);
+              if (!controller.formKey.currentState!.validate()) return;
+
+              final success = controller.student == null
+                  ? await controller.onSubmit()
+                  : await controller.onEdit();
+
+              if (success) {
+                if (Get.key.currentState?.canPop() == true) {
+                  Navigator.of(Get.context!, rootNavigator: true).pop(true);
+
                 } else {
-                  await controller.onEdit();
+                  Get.offNamed(AppRoutes.idCard);
                 }
               }
             },

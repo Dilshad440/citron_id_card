@@ -170,21 +170,15 @@ class AddIdCardController extends GetxController {
         for (final field in fields) field.title: field.controller.text.trim(),
       };
 
-      final Map<String, dynamic> finalReq = {
-        'data': requestData, // keep key consistent with backend
-      };
-
-      /// 1️⃣ Update ID card data
-      final response = await service.editIdCard(finalReq, student!.id!);
+      final response =
+      await service.editIdCard({'data': requestData}, student!.id!);
 
       if (response.statusCode != 200) {
         throw 'Failed to update ID card';
       }
 
-      /// 2️⃣ Upload photo if selected
       if (selectedImage != null) {
         final photoBase64 = await _fileToBase64(selectedImage!);
-
         final uploadPhotoRes = await service.uploadPhoto(
           base64: photoBase64,
           stdId: student!.id!,
@@ -195,23 +189,23 @@ class AddIdCardController extends GetxController {
         }
       }
 
-      /// ✅ All APIs succeeded
       AppSnackBar.show(
         error: "ID card updated successfully",
         type: SnackBarType.success,
       );
 
-      return false;
+      return true; // ✅ FIX
     } catch (e) {
-      final message = e is Exception
-          ? e.toString().replaceFirst('Exception: ', '')
-          : e;
-      AppSnackBar.show(error: message, type: SnackBarType.error);
+      AppSnackBar.show(
+        error: e.toString().replaceFirst('Exception: ', ''),
+        type: SnackBarType.error,
+      );
       return false;
     } finally {
       DialogUtils.hideLoading();
     }
   }
+
 
   Future<String> _fileToBase64(File file) async {
     final bytes = await file.readAsBytes();

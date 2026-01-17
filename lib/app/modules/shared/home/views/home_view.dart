@@ -137,10 +137,16 @@ class SchoolInfoCard extends StatelessWidget {
                               color: AppColors.textOnGradient,
                             ),
                             const SizedBox(width: 6),
-                            Text(
-                              schoolUser?.email ?? "",
-                              style:
-                                  AppTextStyle.title.medium.regular.textColor,
+                            Flexible(
+                              child: Text(
+                                schoolUser?.email ?? "",
+                                style: AppTextStyle
+                                    .title
+                                    .medium
+                                    .regular
+                                    .textColor
+                                    .ellipsis,
+                              ),
                             ),
                           ],
                         ),
