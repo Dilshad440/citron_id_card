@@ -40,7 +40,6 @@ class AddIdCardView extends GetView<AddIdCardController> {
               if (success) {
                 if (Get.key.currentState?.canPop() == true) {
                   Navigator.of(Get.context!, rootNavigator: true).pop(true);
-
                 } else {
                   Get.offNamed(AppRoutes.idCard);
                 }
@@ -166,7 +165,7 @@ class _ImageCard extends StatelessWidget {
           children: [
             Container(
               width: double.infinity,
-              height: 200,
+              height: 230,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.blue),
@@ -174,11 +173,10 @@ class _ImageCard extends StatelessWidget {
               child: hasNetworkPhoto
                   ? Image.network(
                       "${ApiConstants.baseUrl}${controller.studentPhoto!}",
-                      fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) =>
                           const Icon(Icons.broken_image),
                     )
-                  : Image.file(controller.selectedImage!, fit: BoxFit.cover),
+                  : Image.file(controller.selectedImage!),
             ),
             IconButton(
               style: IconButton.styleFrom(backgroundColor: Colors.red),
@@ -192,7 +190,7 @@ class _ImageCard extends StatelessWidget {
 
     /// Upload placeholder
     return Container(
-      height: 200,
+      height: 230,
       decoration: BoxDecoration(
         color: Colors.grey.shade300,
         borderRadius: BorderRadius.circular(10),
