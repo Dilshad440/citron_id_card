@@ -4,9 +4,8 @@ APK_DIR := build/app/outputs/flutter-apk
 APK_NAME := $(APP_NAME)-$(DATE_TIME).apk
 
 apk:
+	flutter clean
+	flutter pub get
 	flutter build apk --release
 	mv $(APK_DIR)/app-release.apk $(APK_DIR)/$(APK_NAME)
 	@echo "APK generated: $(APK_DIR)/$(APK_NAME)"
-
-
-
