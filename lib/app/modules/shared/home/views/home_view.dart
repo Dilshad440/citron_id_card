@@ -27,9 +27,39 @@ class HomeView extends GetView<HomeController> {
         return Scaffold(
           body: BackgroundGradient(
             child: Center(
-              child: Text(
-                "No data found !!",
-                style: AppTextStyle.title.medium.regular,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "No data found !!",
+                    style: AppTextStyle.title.medium.regular,
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      controller.getSchoolUserRes();
+                    },
+                    icon: const Icon(
+                      Icons.refresh,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    label: const Text(
+                      "Refresh",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.blue, // Background color
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

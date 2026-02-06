@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
       title: 'Citron IdCard',
       getPages: AppPages.pages,
       debugShowCheckedModeBanner: false,
-      initialRoute: user?.token != null ? AppRoutes.home : AppRoutes.login,
+      initialRoute: AppRoutes.getInitialRoute(user),
       initialBinding: LoginBinding(loggedIn: user?.token != null),
       theme: AppTheme.getAppTheme(),
     );
