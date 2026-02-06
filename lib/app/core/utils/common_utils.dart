@@ -238,16 +238,23 @@ class CommonUtils {
   static Future<XFile?> cropImage(String path) async {
     final cropped = await ImageCropper().cropImage(
       sourcePath: path,
-      compressQuality: 50,
+      compressQuality: 65,
+      compressFormat: ImageCompressFormat.png,
+      aspectRatio: const CropAspectRatio(ratioX: 3.25, ratioY: 4),
       uiSettings: [
         AndroidUiSettings(
           toolbarTitle: "Crop Image",
-          toolbarColor: Colors.black,
-          toolbarWidgetColor: Colors.white,
+          toolbarColor: AppColors.generateGradientColors().last,
+          toolbarWidgetColor: AppColors.generateGradientColors().first,
           initAspectRatio: CropAspectRatioPreset.original,
-          lockAspectRatio: false,
+          activeControlsWidgetColor: AppColors.red,
+          backgroundColor: AppColors.generateGradientColors().first.withOpacity(
+            0.5,
+          ),
+          cropFrameColor: AppColors.generateGradientColors().last,
+          lockAspectRatio: true,
         ),
-        IOSUiSettings(title: "Crop Image"),
+        IOSUiSettings(title: "Crop Image", aspectRatioLockEnabled: true),
       ],
     );
 
