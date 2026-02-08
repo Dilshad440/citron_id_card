@@ -166,6 +166,7 @@ class CommonUtils {
                           );
                           if (xFile == null) return;
                           onImageSelected.call(xFile);
+                          Get.back();
                         },
                       ),
                     ),
@@ -209,10 +210,7 @@ class CommonUtils {
   }) async {
     if (!await checkPermission(source)) return null;
 
-    final image = await ImagePicker().pickImage(
-      source: source,
-      imageQuality: 85,
-    );
+    final image = await ImagePicker().pickImage(source: source);
 
     if (image == null) return null;
 
@@ -238,6 +236,8 @@ class CommonUtils {
   static Future<XFile?> cropImage(String path) async {
     final cropped = await ImageCropper().cropImage(
       sourcePath: path,
+      maxWidth: 390,
+      maxHeight: 480,
       compressQuality: 65,
       compressFormat: ImageCompressFormat.png,
       aspectRatio: const CropAspectRatio(ratioX: 3.25, ratioY: 4),
