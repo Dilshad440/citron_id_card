@@ -1,18 +1,12 @@
 import 'dart:io';
-
-import 'package:citron_id_card/app/core/components/overlay_loader.dart';
 import 'package:citron_id_card/app/core/constants/asset_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:image_background_remover/image_background_remover.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:path/path.dart' as p;
-
 import '../theme/app_colors.dart';
 
 class CommonUtils {
