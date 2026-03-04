@@ -1,4 +1,4 @@
-package com.example.citron_id_card
+package io.citron.citronidapp
 
 import io.flutter.embedding.android.FlutterActivity
 

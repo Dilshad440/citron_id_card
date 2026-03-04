@@ -201,7 +201,7 @@ class CommonUtils {
   static Future<File?> pickImage({
     ImageSource source = ImageSource.camera,
   }) async {
-    if (!await checkPermission(source)) return null;
+    // if (!await checkPermission(source)) return null;
 
     final image = await ImagePicker().pickImage(source: source);
 
