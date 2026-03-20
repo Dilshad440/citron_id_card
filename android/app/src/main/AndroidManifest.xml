@@ -12,7 +12,7 @@
         android:maxSdkVersion="32"/>
 
     <application
-        android:label="Citron Id App"
+        android:label="Citron Id Data Collector"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
