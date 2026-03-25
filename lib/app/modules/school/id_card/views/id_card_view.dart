@@ -44,35 +44,7 @@ class IdCardView extends GetView<IdCardController> {
                       controller.schoolIds == null) {
                     return Center(child: Text("No data found!!!"));
                   }
-                  return
-                  //   ListView(
-                  //   children:
-                  //       controller.schoolIds?.asMap().entries.map((entry) {
-                  //         final index = entry.key;
-                  //
-                  //         return _StudentIdCard(
-                  //           student: entry.value,
-                  //           index: index,
-                  //           onEdit: (std) async {
-                  //             if (std == null) return;
-                  //             final result = await Get.toNamed(
-                  //               AppRoutes.addIdCard,
-                  //               arguments: std,
-                  //             );
-                  //             if (result == true) {
-                  //               controller.getIdCards();
-                  //             }
-                  //           },
-                  //           onDelete: (std) async {
-                  //             controller.deleteIdCard(std!.id!);
-                  //           },
-                  //           onExpand: (val) =>
-                  //               controller.expandCard(index, val),
-                  //         );
-                  //       }).toList() ??
-                  //       [],
-                  // );
-                  ListView.builder(
+                  return ListView.builder(
                     shrinkWrap: true,
                     padding: const EdgeInsets.all(16),
                     itemCount: controller.schoolIds?.length,
@@ -218,55 +190,9 @@ class _StudentIdCard extends GetView<IdCardController> {
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                /// PHOTO
                 if (student?.isExpanded ?? false) ...[
-                  Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      GetBuilder<IdCardController>(
-                        id: "photo",
-                        builder: (controller) {
-                          return UserAvatar(
-                            radius: 45,
-                            iconSize: 60,
-                            imageUrl: student?.photo,
-                            file: student?.selectedImg,
-                          );
-                        },
-                      ),
-
-                      // Edit Icon
-                      Positioned(
-                        bottom: 2,
-                        right: 2,
-                        child: InkWell(
-                          onTap: () {
-                            controller.pickImage(student!.id!, index);
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryColor,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.edit,
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  AppTextStyle.body.large.textColor.bold.text(
-                    'Admission: ${student?.data?.admNo}',
-                  ),
-                  const SizedBox(height: 4),
-                  AppTextStyle.body.medium.textColor.bold.text(
-                    'Class: ${student?.data?.cls}',
-                  ),
+                  /// Expanded View
+                  _ExpandedView(index: index, student: student),
                 ] else ...[
                   Row(
                     children: [
@@ -277,25 +203,30 @@ class _StudentIdCard extends GetView<IdCardController> {
                       ),
 
                       SizedBox(width: 20),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: studentObj.entries
-                              .where((e) =>
-                          e.value != null &&
-                              e.value.toString().trim().isNotEmpty &&
-                              e.value.toString().toLowerCase() != 'null')
-                              .take(2)
-                              .map((e) => _infoRow(
-                            label: e.key,
-                            value: e.value,
-                            bottomPadding: 0,
-                            width: Get.size.width * 0.2,
-                          ))
-                              .toList(),
-                        ),
 
+                      Expanded(
+                        child: Builder(
+                          builder: (context) {
+                            final entries = _getDisplayEntries(studentObj);
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: entries.map((e) {
+                                final label =
+                                    e.key.toLowerCase() == 'student name'
+                                    ? 'Name'
+                                    : e.key;
+
+                                return _infoRow(
+                                  label: label,
+                                  value: e.value.toString(),
+                                  bottomPadding: 0,
+                                  width: Get.size.width * 0.2,
+                                );
+                              }).toList(),
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -312,17 +243,19 @@ class _StudentIdCard extends GetView<IdCardController> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     ...studentObj.entries
-                        .where((e) =>
-                    e.value != null &&
-                        e.value.toString().trim().isNotEmpty &&
-                        e.value.toString().toLowerCase() != 'null')
+                        .where(
+                          (e) =>
+                              e.value != null &&
+                              e.value.toString().trim().isNotEmpty &&
+                              e.value.toString().toLowerCase() != 'null',
+                        )
                         .map((e) {
-                      return _infoRow(
-                        label: e.key,
-                        value: e.value.toString(),
-                        bottomPadding: 0,
-                      );
-                    }),
+                          return _infoRow(
+                            label: e.key,
+                            value: e.value.toString(),
+                            bottomPadding: 0,
+                          );
+                        }),
 
                     const SizedBox(height: 12),
                   ],
@@ -387,6 +320,27 @@ class _StudentIdCard extends GetView<IdCardController> {
     );
   }
 
+  List<MapEntry<String, dynamic>> _getDisplayEntries(
+    Map<String, dynamic> studentObj,
+  ) {
+    final validEntries = studentObj.entries.where((e) {
+      final value = e.value?.toString().trim();
+      return value != null && value.isNotEmpty && value.toLowerCase() != 'null';
+    }).toList();
+
+    // Find Student Name
+    final nameEntry = validEntries.firstWhere(
+      (e) => e.key.toLowerCase() == 'student name',
+      orElse: () => const MapEntry('', ''),
+    );
+
+    // Build final list
+    return [
+      if (nameEntry.key.isNotEmpty) nameEntry,
+      ...validEntries.where((e) => e.key != nameEntry.key).take(2),
+    ];
+  }
+
   Widget _infoRow({
     required String label,
     required String value,
@@ -412,6 +366,57 @@ class _StudentIdCard extends GetView<IdCardController> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ExpandedView extends GetView<IdCardController> {
+  const _ExpandedView({this.student, required this.index});
+
+  final StudentIdModel? student;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            UserAvatar(
+              radius: 45,
+              iconSize: 60,
+              imageUrl: student?.photo,
+              file: student?.selectedImg,
+            ),
+            Positioned(
+              bottom: 2,
+              right: 2,
+              child: InkWell(
+                onTap: () {
+                  controller.pickImage(student!.id!, index);
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.edit, size: 16, color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        AppTextStyle.body.large.textColor.bold.text(
+          'Admission: ${student?.data?.admNo}',
+        ),
+        const SizedBox(height: 4),
+        AppTextStyle.body.medium.textColor.bold.text(
+          'Class: ${student?.data?.cls}',
+        ),
+      ],
     );
   }
 }

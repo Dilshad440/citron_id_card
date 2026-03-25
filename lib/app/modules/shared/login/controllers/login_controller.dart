@@ -14,8 +14,8 @@ class LoginController extends GetxController {
   LoginController({required this.apiService});
 
   final formKey = GlobalKey<FormState>();
-  final usernameController = TextEditingController(text: "1234567899");
-  final passwordController = TextEditingController(text: "abc@123");
+  final usernameController = TextEditingController();
+  final passwordController = TextEditingController();
 
   final userTypes = ['Admin', 'Teacher', 'Student', 'Parent'];
 
