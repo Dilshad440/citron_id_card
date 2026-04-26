@@ -23,8 +23,9 @@ class LoginBinding extends Bindings {
     );
 
     // Login Controller
-    Get.lazyPut<LoginController>(
-      () => LoginController(apiService: Get.find<ApiService>()),
+    Get.put(
+      LoginController(apiService: Get.find()),
+      permanent: true,
     );
 
     // Home Controller (only if logged in)

@@ -19,6 +19,8 @@ void main() async {
         (value) => LoginResponse.fromJson(value),
       )
       .then((value) {
+        print("Token::::${value?.token}");
+
         runApp(MyApp(user: value));
       });
 }
@@ -30,6 +32,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("Token::::${user?.token}");
     return GetMaterialApp(
       title: 'Citron IdCard',
       getPages: AppPages.pages,

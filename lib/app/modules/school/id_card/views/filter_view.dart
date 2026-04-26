@@ -1,4 +1,5 @@
 import 'package:citron_id_card/app/core/components/app_buttons.dart';
+import 'package:citron_id_card/app/core/components/app_date_picker.dart';
 import 'package:citron_id_card/app/core/components/app_dropdown.dart';
 import 'package:citron_id_card/app/core/components/app_textfield.dart';
 import 'package:citron_id_card/app/core/components/background_gradient.dart';
@@ -7,6 +8,7 @@ import 'package:citron_id_card/app/core/components/two_line_element.dart';
 import 'package:citron_id_card/app/core/theme/app_colors.dart';
 import 'package:citron_id_card/app/core/theme/app_text_style.dart';
 import 'package:citron_id_card/app/modules/school/id_card/model/final%20_field_model.dart';
+import 'package:citron_id_card/app/modules/school/id_card/model/get_sessions.dart';
 import 'package:citron_id_card/app/modules/shared/home/views/home_view.dart';
 import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
@@ -91,9 +93,9 @@ class FilterView extends StatelessWidget {
                           child: GetBuilder<HomeController>(
                             id: "class",
                             builder: (controller) {
-                              return AppDropdown(
+                              return AppDropdown<String>(
                                 hintText: "Select your session",
-                                items: homeController.session,
+                                items: homeController.sessions.map((e) => e.session??"").toList(),
                                 value: homeController.selectedSession,
                                 validator: (value) {
                                   if (value == null) {
@@ -169,12 +171,12 @@ class _GetFieldElements extends StatelessWidget {
       final value = isClass || isSection ? "All" : fieldModel.changedValue;
       return TwoLineElement(
         title: fieldModel.title,
-        isRequired: true,
+        isRequired: fieldModel.isRequired,
         child: AppDropdown<String>(
           hintText: fieldModel.hint,
           value: value,
           items: items,
-          // validator: fieldModel.validator,
+          validator: fieldModel.validator,
           onChanged: (value) =>
               onChanged.call(value, fieldModel.title.toLowerCase()),
         ),
@@ -182,11 +184,55 @@ class _GetFieldElements extends StatelessWidget {
     } else if (fieldModel.type == FieldType.textField) {
       return TwoLineElement(
         title: fieldModel.title,
-        isRequired: false,
+        isRequired: fieldModel.isRequired,
         child: AppTextField(
+          keyboardType: TextInputType.text,
           controller: fieldModel.controller,
           hintText: fieldModel.hint,
-          // validator: fieldModel.validator,
+          validator: fieldModel.validator,
+        ),
+      );
+    } else if (fieldModel.type == FieldType.numeric) {
+      return TwoLineElement(
+        title: fieldModel.title,
+        isRequired: fieldModel.isRequired,
+        child: AppTextField(
+          keyboardType: TextInputType.numberWithOptions(
+            decimal: false,
+            signed: false,
+          ),
+          controller: fieldModel.controller,
+          hintText: fieldModel.hint,
+          validator: fieldModel.validator,
+        ),
+      );
+    } else if (fieldModel.type == FieldType.datePicker &&
+        fieldModel.enforcementType == false) {
+      return TwoLineElement(
+        title: fieldModel.title,
+        isRequired: fieldModel.isRequired,
+        child: AppTextField(
+          keyboardType: TextInputType.numberWithOptions(
+            decimal: false,
+            signed: false,
+          ),
+          controller: fieldModel.controller,
+          hintText: fieldModel.hint,
+          validator: fieldModel.validator,
+        ),
+      );
+    } else if (fieldModel.type == FieldType.datePicker &&
+        fieldModel.enforcementType == true) {
+      return TwoLineElement(
+        title: fieldModel.title,
+        isRequired: fieldModel.isRequired,
+        child: AppDatePickerField(
+          hintText: fieldModel.hint,
+          controller: fieldModel.controller,
+          onDateSelected: (date) {
+            fieldModel.changedValue = date;
+          },
+          validator: fieldModel.validator,
         ),
       );
     }

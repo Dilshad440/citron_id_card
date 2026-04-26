@@ -31,6 +31,7 @@ class LoginController extends GetxController {
 
     try {
       isLoading.value = true;
+      update();
       final response = await apiService.login(
         userName: usernameController.text,
         password: passwordController.text,
@@ -45,11 +46,12 @@ class LoginController extends GetxController {
         type: SnackBarType.success,
       );
       isLoading.value = false;
+      update();
 
       Get.offAllNamed(AppRoutes.home);
     } catch (e) {
       isLoading.value = false;
-
+      update();
       AppSnackBar.show(error: e, type: SnackBarType.error);
     }
   }

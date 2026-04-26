@@ -1,10 +1,16 @@
 import 'dart:convert';
 
 import 'package:citron_id_card/app/config/local/shared_prefs.dart';
+import 'package:citron_id_card/app/core/components/app_buttons.dart';
 import 'package:citron_id_card/app/core/constants/app_constants.dart';
+import 'package:citron_id_card/app/core/utils/common_utils.dart';
 import 'package:citron_id_card/app/core/utils/dialog_utils.dart';
 import 'package:citron_id_card/app/modules/school/id_card/model/final%20_field_model.dart';
+import 'package:citron_id_card/app/modules/school/id_card/model/get_sessions.dart';
+import 'package:citron_id_card/app/modules/school/id_card/model/selected_fields_model.dart';
+import 'package:citron_id_card/app/modules/shared/login/controllers/login_controller.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../services/api_service.dart';
@@ -26,10 +32,10 @@ class HomeController extends GetxController {
   String? selectedSession;
   List<String> classList = ["All"];
   List<String> sectionList = ["All"];
+  RxList<Sessions> sessions = <Sessions>[].obs;
 
   @override
   void onInit() {
-    selectedSession = session.first;
     selectedBatch = batch.first;
     getUserFromLocal();
     getSchoolUserRes();
@@ -43,9 +49,23 @@ class HomeController extends GetxController {
       final response = await service.getSchoolUsers();
 
       if (response.isEmpty) {
-        AppSnackBar.show(
-          error: "No school user found",
-          type: SnackBarType.error,
+        await Get.dialog(
+          AlertDialog(
+            title: const Text("No School Found"),
+            content: const Text(
+              "No school is associated with your account. Please contact support or logout.",
+            ),
+            actions: [
+              AppButton(
+                text: "Logout",
+                onPressed: () {
+                  Get.back();
+                  logout();
+                },
+              ),
+            ],
+          ),
+          barrierDismissible: false,
         );
         return;
       }
@@ -61,10 +81,9 @@ class HomeController extends GetxController {
         return;
       }
 
-      final selectedFiledRes =
-      await service.getSelectedFields(schoolId);
-
-      if (selectedFiledRes.isEmpty) {
+      final selectedFiledRes = await service.getSelectedFields(schoolId);
+      final fields = selectedFiledRes.selectedFields ?? [];
+      if (fields.isEmpty) {
         AppSnackBar.show(
           error: "No fields configured for this school",
           type: SnackBarType.error,
@@ -72,13 +91,13 @@ class HomeController extends GetxController {
         return;
       }
 
-      /// Filter only required fields
-      final List<String> selectedFields = selectedFiledRes.where((e) {
-        final fieldName = e.toLowerCase();
-        return fieldName == "adm. no" ||
-            fieldName == "class" ||
-            fieldName == "section";
-      }).toList();
+      // /// Filter only required fields
+      // final List<SelectedFields> selectedFields = fields.where((e) {
+      //   final fieldName = e.fieldName?.toLowerCase()??"";
+      //   return fieldName == "adm. no" ||
+      //       fieldName == "class" ||
+      //       fieldName == "section";
+      // }).toList();
 
       // if (selectedSession == null) {
       //   AppSnackBar.show(
@@ -87,26 +106,55 @@ class HomeController extends GetxController {
       //   );
       //   return;
       // }
-
+      final sessionsRes = await service.getSessions();
+      sessions.value = sessionsRes.sessions ?? [];
+      selectedSession = sessionsRes.defaultSession ?? "";
       await getClassAndSection(selectedSession!);
 
       fieldModel.clear(); // avoid duplicate fields
 
-      for (final v in selectedFields) {
-        final isTextField = getFieldType(v) == FieldType.textField;
-        final hintText =
-        isTextField ? "Enter ${v.toLowerCase()}" : "Select ${v.toLowerCase()}";
+      for (final v in fields) {
+        final isTextField =
+            getFieldType(v.fieldType ?? "") == FieldType.textField;
+        final hintText = isTextField
+            ? "Enter ${v.fieldName?.toLowerCase()}"
+            : "Select ${v.fieldName?.toLowerCase()}";
 
         fieldModel.add(
           FieldModel(
-            title: v,
+            title: v.fieldName ?? "",
             hint: hintText,
+            enforcementType: v.enforceType ?? false,
+            isRequired: v.isRequired ?? false,
             controller: TextEditingController(),
-            validator: (value) =>
-            value == null || value.isEmpty ? hintText : null,
-            keyboardType:
-            isTextField ? TextInputType.text : TextInputType.none,
-            type: getFieldType(v),
+            validator: (value) {
+              final isRequired = v.isRequired ?? false;
+
+              final fieldName = (v.fieldName ?? "").toLowerCase();
+
+              if (isRequired && (value == null || value.trim().isEmpty)) {
+                return hintText;
+              }
+
+              /// Aadhaar validation
+              if (fieldName == "aadhar no") {
+                final val = value?.trim() ?? "";
+
+                if (val.isEmpty) return null; // already handled above
+
+                if (val.length != 12) {
+                  return "Aadhaar number must be 12 digits";
+                }
+
+                if (!RegExp(r'^[0-9]+$').hasMatch(val)) {
+                  return "Aadhaar must contain only digits";
+                }
+              }
+
+              return null;
+            },
+            keyboardType: isTextField ? TextInputType.text : TextInputType.none,
+            type: getFieldType(v.fieldType ?? ""),
           ),
         );
       }
@@ -123,13 +171,16 @@ class HomeController extends GetxController {
     }
   }
 
-
   FieldType getFieldType(String v) {
     switch (v.toLowerCase()) {
-      case "adm. no" || "student name":
+      case "String":
         return FieldType.textField;
-      case "class" || "section" || "session" || "batch":
+      case "list":
         return FieldType.dropdown;
+      case "date":
+        return FieldType.datePicker;
+      case "numeric":
+        return FieldType.numeric;
       default:
         return FieldType.textField;
     }
@@ -168,7 +219,6 @@ class HomeController extends GetxController {
     Get.toNamed(AppRoutes.idCard, arguments: req);
   }
 
-  final session = ["2025-2026", "2026-2027", "2027-2028", "2028-2029"];
 
   final batch = ["Batch1", "Batch2", "Batch3", "Batch4", "Batch5"];
 

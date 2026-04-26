@@ -52,7 +52,7 @@ class AddIdCardController extends GetxController {
       update([fieldUpdate]);
       final studentData = student?.data?.toJson() ?? {};
       final result = await service.getSelectedFields(schoolUser!.schoolId!);
-      for (var v in result) {
+      for (var v in result.selectedFields??[]) {
         final text = studentData[v]?.toString() ?? "";
         fields.add(
           IdCardFieldModel(

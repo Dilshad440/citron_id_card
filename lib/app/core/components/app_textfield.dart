@@ -15,17 +15,23 @@ class AppTextField extends StatelessWidget {
     this.suffix,
     this.maxLines = 1,
     this.isObsecure = false,
+    this.keyboardType = TextInputType.text,
+    this.onTap,
+    this.readOnly = false,
   });
 
   final Function(String val)? onChanged;
   final TextEditingController? controller;
   final String? Function(String? val)? validator;
+  final void Function()? onTap;
+  final bool readOnly;
   final String? labelText;
   final String? hintText;
   final Widget? prefix;
   final Widget? suffix;
   final int maxLines;
   final bool isObsecure;
+  final TextInputType keyboardType;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +42,9 @@ class AppTextField extends StatelessWidget {
       validator: validator,
       maxLines: maxLines,
       autofocus: false,
+      keyboardType: keyboardType,
+      onTap: onTap,
+      readOnly: readOnly,
       cursorColor: AppColors.primaryColor,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       style: AppTextStyle.body.medium.textColor.medium,

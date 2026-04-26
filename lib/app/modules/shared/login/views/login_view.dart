@@ -2,11 +2,9 @@ import 'package:citron_id_card/app/core/components/app_buttons.dart';
 import 'package:citron_id_card/app/core/components/overlay_loader.dart';
 import 'package:citron_id_card/app/core/components/two_line_element.dart';
 import 'package:citron_id_card/app/core/constants/asset_constant.dart';
-import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
-import 'package:overlay_loader_with_app_icon/overlay_loader_with_app_icon.dart';
+
 import '../../../../core/components/app_textfield.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_style.dart';
@@ -18,52 +16,49 @@ class LoginView extends GetView<LoginController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false, // 🔥 Important
-      body: Obx(
-        () => OverlayIdCardLoader(
-          isLoading: controller.isLoading.value,
-          child: (isLoading) {
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+      resizeToAvoidBottomInset: true,
+      body: Stack(
+        children: [
 
-                return AnimatedPadding(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOut,
-                  padding: EdgeInsets.only(bottom: bottomInset),
-                  child: _buildStack(constraints),
-                );
-              },
-            );
-          },
-        ),
+          /// ✅ Main UI (NO Obx here)
+          _buildStack(context),
+
+          /// ✅ Loader Overlay (separate)
+
+
+          GetBuilder<LoginController>(builder: (controller) {
+            return OverlayIdCardLoader(child: (isLoading) => SizedBox(),
+                isLoading: controller.isLoading.value);
+          },)
+        ],
       ),
     );
   }
 
-  Widget _buildStack(BoxConstraints constraints) {
-    final maxHeight = constraints.maxHeight;
-    final double topHeight = maxHeight * 0.24;
-    final double bottomHeight = maxHeight * 0.22;
+  Widget _buildStack(BuildContext context) {
+    final size = MediaQuery
+        .of(context)
+        .size;
+    final double topHeight = size.height * 0.24;
+    final double bottomHeight = size.height * 0.22;
 
     return Stack(
       children: [
-        /// 🌿 TOP GRADIENT
         _topCard(topHeight),
-
-        /// 🌿 BOTTOM GRADIENT
         _bottomCard(bottomHeight),
 
-        /// 🧾 CENTER LOGIN CARD
         Align(
           alignment: Alignment.center,
           child: SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: EdgeInsets.only(
-              left: 20,
-              right: 20,
-              top: 24,
-              bottom: MediaQuery.of(Get.context!).viewInsets.bottom,
+            padding: EdgeInsets.fromLTRB(
+              20,
+              24,
+              20,
+              MediaQuery
+                  .of(context)
+                  .viewInsets
+                  .bottom + 20,
             ),
             child: _loginCard(),
           ),
@@ -72,62 +67,13 @@ class LoginView extends GetView<LoginController> {
     );
   }
 
-  Positioned _bottomCard(double topHeight) {
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        height: topHeight,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: AppColors.generateGradientColors(),
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(48),
-            topRight: Radius.circular(48),
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.borderColor, width: 1.5),
-              ),
-              child: CircleAvatar(
-                radius: 45,
-                backgroundImage: AssetImage(AssetConstant.logo),
-              ),
-            ),
-            SizedBox(height: 10),
-            Text(
-              "Powered By Citron Software",
-              style: AppTextStyle.title.medium.regular.textOnGradient,
-            ),
-            Text(
-              "© ${DateTime.now().year} Citron Software. All rights reserved.",
-              style: AppTextStyle.title.small.lightWeight.italic.copyWith(
-                color: AppColors.borderColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Positioned _topCard(double topHeight) {
+  Positioned _topCard(double height) {
     return Positioned(
       top: 0,
       left: 0,
       right: 0,
       child: Container(
-        height: topHeight,
+        height: height,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: AppColors.generateGradientColors(),
@@ -162,6 +108,56 @@ class LoginView extends GetView<LoginController> {
     );
   }
 
+  Positioned _bottomCard(double height) {
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: AppColors.generateGradientColors(),
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(48),
+            topRight: Radius.circular(48),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.borderColor, width: 1.5),
+              ),
+              child: CircleAvatar(
+                radius: 45,
+                backgroundImage: AssetImage(AssetConstant.logo),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              "Powered By Citron Software",
+              style: AppTextStyle.title.medium.regular.textOnGradient,
+            ),
+            Text(
+              "© ${DateTime
+                  .now()
+                  .year} Citron Software. All rights reserved.",
+              style: AppTextStyle.title.small.lightWeight.italic.copyWith(
+                color: AppColors.borderColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _loginCard() {
     return Container(
       width: double.infinity,
@@ -182,7 +178,7 @@ class LoginView extends GetView<LoginController> {
         ],
       ),
       child: Form(
-        key: controller.formKey,
+        key: controller.formKey, // ✅ SAFE now (only one Form exists)
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -190,8 +186,6 @@ class LoginView extends GetView<LoginController> {
             const SizedBox(height: 6),
             AppTextStyle.body.medium.textColor.text("Login to your account"),
             const SizedBox(height: 20),
-
-            const SizedBox(height: 10),
 
             TwoLineElement(
               title: "Username",
@@ -205,36 +199,35 @@ class LoginView extends GetView<LoginController> {
             const SizedBox(height: 10),
 
             Obx(
-              () => TwoLineElement(
-                title: "Password",
-                child: AppTextField(
-                  controller: controller.passwordController,
-                  isObsecure: controller.isPasswordVisible.value,
-                  hintText: "Enter password",
-                  suffix: IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: controller.togglePasswordVisibility,
-                    icon: Icon(
-                      controller.isPasswordVisible.value
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      size: 20,
+                  () =>
+                  TwoLineElement(
+                    title: "Password",
+                    child: AppTextField(
+                      controller: controller.passwordController,
+                      isObsecure: controller.isPasswordVisible.value,
+                      hintText: "Enter password",
+                      suffix: IconButton(
+                        onPressed: controller.togglePasswordVisibility,
+                        icon: Icon(
+                          controller.isPasswordVisible.value
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                      ),
+                      validator: (val) =>
+                      val!.isEmpty
+                          ? "Password required"
+                          : null,
                     ),
                   ),
-                  validator: (val) => val!.isEmpty ? "Password required" : null,
-                ),
-              ),
             ),
 
             const SizedBox(height: 28),
 
             AppButton(
               text: "Login",
-              onPressed: () {
-                controller.onLogin();
-              },
-              icon: Icon(Icons.arrow_forward),
+              onPressed: controller.onLogin,
+              icon: const Icon(Icons.arrow_forward),
             ),
           ],
         ),

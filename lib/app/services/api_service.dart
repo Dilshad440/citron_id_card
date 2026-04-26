@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:citron_id_card/app/config/network/api_constants.dart';
+import 'package:citron_id_card/app/modules/school/id_card/model/get_sessions.dart';
 import 'package:citron_id_card/app/modules/school/id_card/model/student_id_model.dart';
 import 'package:dio/dio.dart';
 import '../config/network/dio_client.dart';
+import '../modules/school/id_card/model/selected_fields_model.dart';
 import '../modules/shared/home/model/school_user_res.dart';
 import '../modules/shared/login/model/login_response.dart';
 
@@ -32,13 +34,11 @@ class ApiService {
     }
   }
 
-  Future<List<String>> getSelectedFields(int schoolId) async {
+  Future<SelectedFieldsModel> getSelectedFields(int schoolId) async {
     try {
-      final response = await client.dio.get('/api/idfields/$schoolId/selected');
+      final response = await client.dio.get('/api/IDFields/$schoolId/selected');
 
-      final List<dynamic> data = response.data['selectedFieldNames'];
-
-      return data.map((e) => e.toString()).toList();
+      return SelectedFieldsModel.fromJson(response.data);
     } catch (e) {
       rethrow;
     }
@@ -50,6 +50,11 @@ class ApiService {
       data: request,
     );
     return response;
+  }
+
+  Future<GetSessions>getSessions()async{
+    final response= await client.dio.get(ApiConstants.sessions);
+    return GetSessions.fromJson(response.data);
   }
 
   Future<List<SchoolUserRes>> getSchoolUsers() async {
