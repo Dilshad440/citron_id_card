@@ -72,14 +72,14 @@ class AddIdCardController extends GetxController {
       //   );
       // }
 
-      for (final v in result.selectedFields??[]) {
+      for (final v in result.selectedFields ?? []) {
         final isTextField =
             getFieldType(v.fieldType ?? "") == FieldType.textField;
         final hintText = isTextField
             ? "Enter ${v.fieldName?.toLowerCase()}"
             : "Select ${v.fieldName?.toLowerCase()}";
         final studentValue = v.fieldName;
-          final text = studentData[studentValue]?.toString() ?? "";
+        final text = studentData[studentValue]?.toString() ?? "";
         fields.add(
           FieldModel(
             title: v.fieldName ?? "",
@@ -129,7 +129,6 @@ class AddIdCardController extends GetxController {
     }
   }
 
-
   FieldType getFieldType(String v) {
     switch (v.toLowerCase()) {
       case "String":
@@ -145,7 +144,6 @@ class AddIdCardController extends GetxController {
     }
   }
 
-
   Future<bool> onSubmit() async {
     DialogUtils.showLoading();
 
@@ -159,17 +157,18 @@ class AddIdCardController extends GetxController {
         throw Exception('School user not found');
       }
 
-
       final Map<String, dynamic> requestData = {
         'schoolId': schoolUser.schoolId,
         'session': selectedSession,
         'batch': selectedBatch,
         "data": {
           for (final field in fields)
-            field.title: _formatValue(field.title, field.controller.text.trim()),
-        }
+            field.title: _formatValue(
+              field.title,
+              field.controller.text.trim(),
+            ),
+        },
       };
-
 
       /// 1️⃣ Create ID card
       final response = await service.addIdCard(requestData);
@@ -246,10 +245,16 @@ class AddIdCardController extends GetxController {
       }
 
       final Map<String, dynamic> requestData = {
-        for (final field in fields) field.title: field.controller.text.trim(),
+        "data": {
+          for (final field in fields)
+            field.title: _formatValue(
+              field.title,
+              field.controller.text.trim(),
+            ),
+        },
       };
-      final response =
-      await service.editIdCard({'data': requestData}, student!.id!);
+
+      final response = await service.editIdCard(requestData, student!.id!);
 
       if (response.statusCode != 200) {
         throw 'Failed to update ID card';
@@ -283,7 +288,6 @@ class AddIdCardController extends GetxController {
       DialogUtils.hideLoading();
     }
   }
-
 
   Future<String> _fileToBase64(File file) async {
     final bytes = await file.readAsBytes();
