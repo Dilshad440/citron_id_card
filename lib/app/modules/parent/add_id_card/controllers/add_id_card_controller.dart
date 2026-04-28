@@ -8,6 +8,7 @@ import 'package:citron_id_card/app/modules/shared/home/controllers/home_controll
 import 'package:citron_id_card/app/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/utils/common_utils.dart';
 import '../../../school/id_card/model/final _field_model.dart';
 
@@ -77,14 +78,15 @@ class AddIdCardController extends GetxController {
         final hintText = isTextField
             ? "Enter ${v.fieldName?.toLowerCase()}"
             : "Select ${v.fieldName?.toLowerCase()}";
-
+        final studentValue = v.fieldName;
+          final text = studentData[studentValue]?.toString() ?? "";
         fields.add(
           FieldModel(
             title: v.fieldName ?? "",
             hint: hintText,
             enforcementType: v.enforceType ?? false,
             isRequired: v.isRequired ?? false,
-            controller: TextEditingController(),
+            controller: TextEditingController(text: text),
             validator: (value) {
               final isRequired = v.isRequired ?? false;
 
@@ -157,23 +159,20 @@ class AddIdCardController extends GetxController {
         throw Exception('School user not found');
       }
 
-      final Map<String, dynamic> requestStaticData = {
+
+      final Map<String, dynamic> requestData = {
         'schoolId': schoolUser.schoolId,
         'session': selectedSession,
         'batch': selectedBatch,
+        "data": {
+          for (final field in fields)
+            field.title: _formatValue(field.title, field.controller.text.trim()),
+        }
       };
 
-      final Map<String, dynamic> requestData = {
-        for (final field in fields) field.title: field.controller.text.trim(),
-      };
-
-      final Map<String, dynamic> finalRequest = {
-        ...requestStaticData,
-        'data': requestData,
-      };
 
       /// 1️⃣ Create ID card
-      final response = await service.addIdCard(finalRequest);
+      final response = await service.addIdCard(requestData);
 
       if (response.statusCode != 200 || response.data == null) {
         throw Exception('Failed to create ID card');
@@ -223,6 +222,22 @@ class AddIdCardController extends GetxController {
     }
   }
 
+  String _formatValue(String title, String value) {
+    final key = title.trim().toLowerCase();
+
+    if (key == "dob" || key.contains("date")) {
+      try {
+        final parsed = DateFormat("dd-MM-yyyy").parseStrict(value);
+        return DateFormat("yyyy-MM-dd").format(parsed);
+      } catch (e) {
+        print("Date parse failed for $title: $value");
+        return value;
+      }
+    }
+
+    return value;
+  }
+
   Future<bool> onEdit() async {
     DialogUtils.showLoading();
     try {
@@ -233,7 +248,6 @@ class AddIdCardController extends GetxController {
       final Map<String, dynamic> requestData = {
         for (final field in fields) field.title: field.controller.text.trim(),
       };
-
       final response =
       await service.editIdCard({'data': requestData}, student!.id!);
 

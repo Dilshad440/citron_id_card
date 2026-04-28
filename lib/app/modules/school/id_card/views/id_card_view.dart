@@ -5,6 +5,7 @@ import 'package:citron_id_card/app/modules/shared/home/controllers/home_controll
 import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_style.dart';
 import '../controllers/id_card_controller.dart';
@@ -219,7 +220,7 @@ class _StudentIdCard extends GetView<IdCardController> {
 
                                 return _infoRow(
                                   label: label,
-                                  value: e.value.toString(),
+                                  value:e.key.toLowerCase()=="dob"?formatDateForUI(e.value.toString()): e.value.toString(),
                                   bottomPadding: 0,
                                   width: Get.size.width * 0.2,
                                 );
@@ -318,6 +319,15 @@ class _StudentIdCard extends GetView<IdCardController> {
         ],
       ),
     );
+  }
+
+  String formatDateForUI(String apiDate) {
+    try {
+      final parsedDate = DateFormat("yyyy-MM-dd").parseStrict(apiDate);
+      return DateFormat("dd-MM-yyyy").format(parsedDate);
+    } catch (e) {
+      return apiDate;
+    }
   }
 
   List<MapEntry<String, dynamic>> _getDisplayEntries(
