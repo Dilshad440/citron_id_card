@@ -14,6 +14,7 @@ import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/components/GetFiledElements.dart';
 import '../../../shared/home/controllers/home_controller.dart';
 
 class FilterView extends StatelessWidget {
@@ -118,7 +119,8 @@ class FilterView extends StatelessWidget {
                             child: GetBuilder<HomeController>(
                               id: "class",
                               builder: (controller) {
-                                return _GetFieldElements(
+                                return GetFieldElements(
+                                  isFromAddEdit: false,
                                   fieldModel: element,
                                   onChanged: (value, fieldName) {
                                     element.changedValue = value;
@@ -149,93 +151,4 @@ class FilterView extends StatelessWidget {
   }
 }
 
-class _GetFieldElements extends StatelessWidget {
-  const _GetFieldElements({
-    super.key,
-    required this.fieldModel,
-    required this.onChanged,
-  });
 
-  final FieldModel fieldModel;
-  final void Function(dynamic value, String fieldName) onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    if (fieldModel.type == FieldType.dropdown) {
-      final bool isClass = fieldModel.title.toLowerCase() == "class";
-      final bool isSection = fieldModel.title.toLowerCase() == "section";
-      final items = isClass
-          ? Get.find<HomeController>().classList
-          : Get.find<HomeController>().sectionList;
-
-      final value = isClass || isSection ? "All" : fieldModel.changedValue;
-      return TwoLineElement(
-        title: fieldModel.title,
-        isRequired: fieldModel.isRequired,
-        child: AppDropdown<String>(
-          hintText: fieldModel.hint,
-          value: value,
-          items: items,
-          validator: fieldModel.validator,
-          onChanged: (value) =>
-              onChanged.call(value, fieldModel.title.toLowerCase()),
-        ),
-      );
-    } else if (fieldModel.type == FieldType.textField) {
-      return TwoLineElement(
-        title: fieldModel.title,
-        isRequired: fieldModel.isRequired,
-        child: AppTextField(
-          keyboardType: TextInputType.text,
-          controller: fieldModel.controller,
-          hintText: fieldModel.hint,
-          validator: fieldModel.validator,
-        ),
-      );
-    } else if (fieldModel.type == FieldType.numeric) {
-      return TwoLineElement(
-        title: fieldModel.title,
-        isRequired: fieldModel.isRequired,
-        child: AppTextField(
-          keyboardType: TextInputType.numberWithOptions(
-            decimal: false,
-            signed: false,
-          ),
-          controller: fieldModel.controller,
-          hintText: fieldModel.hint,
-          validator: fieldModel.validator,
-        ),
-      );
-    } else if (fieldModel.type == FieldType.datePicker &&
-        fieldModel.enforcementType == false) {
-      return TwoLineElement(
-        title: fieldModel.title,
-        isRequired: fieldModel.isRequired,
-        child: AppTextField(
-          keyboardType: TextInputType.numberWithOptions(
-            decimal: false,
-            signed: false,
-          ),
-          controller: fieldModel.controller,
-          hintText: fieldModel.hint,
-          validator: fieldModel.validator,
-        ),
-      );
-    } else if (fieldModel.type == FieldType.datePicker &&
-        fieldModel.enforcementType == true) {
-      return TwoLineElement(
-        title: fieldModel.title,
-        isRequired: fieldModel.isRequired,
-        child: AppDatePickerField(
-          hintText: fieldModel.hint,
-          controller: fieldModel.controller,
-          onDateSelected: (date) {
-            fieldModel.changedValue = date;
-          },
-          validator: fieldModel.validator,
-        ),
-      );
-    }
-    return const Placeholder();
-  }
-}

@@ -9,13 +9,14 @@ import 'package:citron_id_card/app/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/utils/common_utils.dart';
+import '../../../school/id_card/model/final _field_model.dart';
 
 class AddIdCardController extends GetxController {
   final ApiService service;
 
   AddIdCardController({required this.service});
 
-  List<IdCardFieldModel> fields = [];
+  List<FieldModel> fields = [];
   StudentIdModel? student;
 
   File? selectedImage;
@@ -52,20 +53,66 @@ class AddIdCardController extends GetxController {
       update([fieldUpdate]);
       final studentData = student?.data?.toJson() ?? {};
       final result = await service.getSelectedFields(schoolUser!.schoolId!);
-      for (var v in result.selectedFields??[]) {
-        final text = studentData[v]?.toString() ?? "";
+      // for (var v in result.selectedFields??[]) {
+      //   final text = studentData[v]?.toString() ?? "";
+      //   fields.add(
+      //     IdCardFieldModel(
+      //       title: v,
+      //       hint: "Enter ${v.toLowerCase()}",
+      //       controller: TextEditingController(text: text),
+      //       validator: (value) {
+      //         if (value == null || value.isEmpty) {
+      //           return "Please Enter ${v.toLowerCase()}";
+      //         }
+      //         return null;
+      //       },
+      //       fieldKey: GlobalKey(),
+      //     ),
+      //   );
+      // }
+
+      for (final v in result.selectedFields??[]) {
+        final isTextField =
+            getFieldType(v.fieldType ?? "") == FieldType.textField;
+        final hintText = isTextField
+            ? "Enter ${v.fieldName?.toLowerCase()}"
+            : "Select ${v.fieldName?.toLowerCase()}";
+
         fields.add(
-          IdCardFieldModel(
-            title: v,
-            hint: "Enter ${v.toLowerCase()}",
-            controller: TextEditingController(text: text),
+          FieldModel(
+            title: v.fieldName ?? "",
+            hint: hintText,
+            enforcementType: v.enforceType ?? false,
+            isRequired: v.isRequired ?? false,
+            controller: TextEditingController(),
             validator: (value) {
-              if (value == null || value.isEmpty) {
-                return "Please Enter ${v.toLowerCase()}";
+              final isRequired = v.isRequired ?? false;
+
+              final fieldName = (v.fieldName ?? "").toLowerCase();
+
+              if (isRequired && (value == null || value.trim().isEmpty)) {
+                return hintText;
               }
+
+              /// Aadhaar validation
+              if (fieldName == "aadhar no") {
+                final val = value?.trim() ?? "";
+
+                if (val.isEmpty) return null; // already handled above
+
+                if (val.length != 12) {
+                  return "Aadhaar number must be 12 digits";
+                }
+
+                if (!RegExp(r'^[0-9]+$').hasMatch(val)) {
+                  return "Aadhaar must contain only digits";
+                }
+              }
+
               return null;
             },
-            fieldKey: GlobalKey(),
+            keyboardType: isTextField ? TextInputType.text : TextInputType.none,
+            type: getFieldType(v.fieldType ?? ""),
           ),
         );
       }
@@ -79,6 +126,23 @@ class AddIdCardController extends GetxController {
       AppSnackBar.show(error: e);
     }
   }
+
+
+  FieldType getFieldType(String v) {
+    switch (v.toLowerCase()) {
+      case "String":
+        return FieldType.textField;
+      case "list":
+        return FieldType.dropdown;
+      case "date":
+        return FieldType.datePicker;
+      case "numeric":
+        return FieldType.numeric;
+      default:
+        return FieldType.textField;
+    }
+  }
+
 
   Future<bool> onSubmit() async {
     DialogUtils.showLoading();

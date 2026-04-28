@@ -1,3 +1,4 @@
+import 'package:citron_id_card/app/core/components/GetFiledElements.dart';
 import 'package:citron_id_card/app/core/components/app_buttons.dart';
 import 'package:citron_id_card/app/core/components/app_dropdown.dart';
 import 'package:citron_id_card/app/core/components/app_textfield.dart';
@@ -113,17 +114,25 @@ class AddIdCardView extends GetView<AddIdCardController> {
                         ),
                         SizedBox(height: 4),
                         ...controller.fields.map(
-                          (e) => Padding(
+                          (element) => Padding(
                             padding: const EdgeInsets.symmetric(vertical: 6.0),
-                            child: TwoLineElement(
-                              title: e.title,
-                              child: AppTextField(
-                                hintText: e.hint,
-                                validator: e.validator,
-                                controller: e.controller,
-                                key: e.fieldKey,
-                              ),
+                            child: GetFieldElements(
+                              isFromAddEdit: true,
+                              fieldModel: element,
+                              onChanged: (value, fieldName) {
+                                element.changedValue = value;
+                                element.controller.text = value!;
+                              },
                             ),
+                            // TwoLineElement(
+                            //   title: e.title,
+                            //   child: AppTextField(
+                            //     hintText: e.hint,
+                            //     validator: e.validator,
+                            //     controller: e.controller,
+                            //     key: e.fieldKey,
+                            //   ),
+                            // ),
                           ),
                         ),
 

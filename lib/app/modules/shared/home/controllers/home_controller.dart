@@ -83,6 +83,10 @@ class HomeController extends GetxController {
 
       final selectedFiledRes = await service.getSelectedFields(schoolId);
       final fields = selectedFiledRes.selectedFields ?? [];
+      fields.removeWhere((e) {
+        final name = e.fieldName?.trim().toLowerCase();
+        return name != "class" && name != "section";
+      });
       if (fields.isEmpty) {
         AppSnackBar.show(
           error: "No fields configured for this school",
@@ -218,7 +222,6 @@ class HomeController extends GetxController {
 
     Get.toNamed(AppRoutes.idCard, arguments: req);
   }
-
 
   final batch = ["Batch1", "Batch2", "Batch3", "Batch4", "Batch5"];
 
