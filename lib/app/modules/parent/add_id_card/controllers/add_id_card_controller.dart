@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:citron_id_card/app/core/utils/dialog_utils.dart';
-import 'package:citron_id_card/app/modules/parent/add_id_card/model/id_card_field_model.dart';
 import 'package:citron_id_card/app/modules/school/id_card/model/student_id_model.dart';
 import 'package:citron_id_card/app/modules/shared/home/controllers/home_controller.dart';
 import 'package:citron_id_card/app/services/api_service.dart';
@@ -11,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/utils/common_utils.dart';
 import '../../../school/id_card/model/final _field_model.dart';
+import '../../../school/id_card/model/get_sessions.dart';
 
 class AddIdCardController extends GetxController {
   final ApiService service;
@@ -27,23 +27,31 @@ class AddIdCardController extends GetxController {
   final fieldUpdate = 'filedUpdate';
   bool isLoading = false;
   late String selectedBatch;
-  late String selectedSession;
+  String? selectedSession;
 
   final formKey = GlobalKey<FormState>();
   final ScrollController scrollController = ScrollController();
   final TextEditingController admissionController = TextEditingController();
+  Rxn<GetSessions> sessions = Rxn<GetSessions>();
 
   @override
   void onInit() {
     student = Get.arguments;
     studentPhoto = student?.photo;
     selectedBatch = batch.first;
-    selectedSession = session.first;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      getSession();
       getSelectedFields();
     });
 
     super.onInit();
+  }
+
+
+  void getSession()async{
+    final sessionsRes = await service.getSessions();
+    sessions.value = sessionsRes;
+    selectedSession = sessionsRes.defaultSession ?? "";
   }
 
   void getSelectedFields() async {
@@ -310,7 +318,5 @@ class AddIdCardController extends GetxController {
     update([builderId]);
   }
 
-  final session = ["2025-2026", "2026-2027", "2027-2028", "2028-2029"];
-
-  final batch = ["Batch1", "Batch2", "Batch3", "Batch4", "Batch5"];
+  final batch = ["Batch1", "Batch2", "Batch3"];
 }

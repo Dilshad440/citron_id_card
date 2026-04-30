@@ -87,13 +87,13 @@ class HomeController extends GetxController {
         final name = e.fieldName?.trim().toLowerCase();
         return name != "class" && name != "section";
       });
-      if (fields.isEmpty) {
-        AppSnackBar.show(
-          error: "No fields configured for this school",
-          type: SnackBarType.error,
-        );
-        return;
-      }
+      // if (fields.isEmpty) {
+      //   AppSnackBar.show(
+      //     error: "No fields configured for this school",
+      //     type: SnackBarType.error,
+      //   );
+      //   return;
+      // }
 
       // /// Filter only required fields
       // final List<SelectedFields> selectedFields = fields.where((e) {
@@ -110,9 +110,13 @@ class HomeController extends GetxController {
       //   );
       //   return;
       // }
+    try{
       final sessionsRes = await service.getSessions();
       sessions.value = sessionsRes.sessions ?? [];
       selectedSession = sessionsRes.defaultSession ?? "";
+    }catch(e){
+      print("Error in session Api:::${e}");
+    }
       await getClassAndSection(selectedSession!);
 
       fieldModel.clear(); // avoid duplicate fields
@@ -223,7 +227,7 @@ class HomeController extends GetxController {
     Get.toNamed(AppRoutes.idCard, arguments: req);
   }
 
-  final batch = ["Batch1", "Batch2", "Batch3", "Batch4", "Batch5"];
+  final batch = ["Batch1", "Batch2", "Batch3"];
 
   Future<void> getClassAndSection(String session) async {
     try {

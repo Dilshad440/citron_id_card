@@ -99,7 +99,11 @@ class AddIdCardView extends GetView<AddIdCardController> {
                           title: "Select session",
                           child: AppDropdown<String>(
                             hintText: "Select your session",
-                            items: controller.session,
+                            items:
+                                controller.sessions.value?.sessions
+                                    ?.map((e) => e.session ?? "")
+                                    .toList() ??
+                                [],
                             value: controller.selectedSession,
                             validator: (value) {
                               if (value == null) {
