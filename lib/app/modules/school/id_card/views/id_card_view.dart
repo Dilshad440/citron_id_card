@@ -101,222 +101,231 @@ class _StudentIdCard extends GetView<IdCardController> {
     final schoolUser = Get.find<HomeController>().schoolUser.value;
     final studentObj = student?.data?.toJson() ?? {};
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.borderColor),
-        color: AppColors.generateGradientColors().first,
-        // gradient: LinearGradient(
-        //   colors: AppColors.generateGradientColors(),
-        //   begin: Alignment.topLeft,
-        //   end: Alignment.bottomRight,
-        // ),
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 25,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          /// 🔹 HEADER
-          Stack(
-            alignment: Alignment.topRight,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
-                  // gradient: LinearGradient(
-                  //   colors: AppColors.generateGradientColors(),
-                  //   end: Alignment.topRight,
-                  //   begin: Alignment.topLeft,
-                  // ),
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(18),
+    return GestureDetector(
+      onTap: () => onExpand.call(student?.isExpanded??false),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.borderColor),
+          color: AppColors.generateGradientColors().first,
+          // gradient: LinearGradient(
+          //   colors: AppColors.generateGradientColors(),
+          //   begin: Alignment.topLeft,
+          //   end: Alignment.bottomRight,
+          // ),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.12),
+              blurRadius: 25,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            /// 🔹 HEADER
+            Stack(
+              alignment: Alignment.topRight,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor,
+                    // gradient: LinearGradient(
+                    //   colors: AppColors.generateGradientColors(),
+                    //   end: Alignment.topRight,
+                    //   begin: Alignment.topLeft,
+                    // ),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(18),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        Get.find<HomeController>().schoolUser.value?.schoolName ??
+                            "",
+                        style: AppTextStyle.title.medium.textColor.bold,
+                      ),
+                    ],
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      Get.find<HomeController>().schoolUser.value?.schoolName ??
-                          "",
-                      style: AppTextStyle.title.medium.textColor.bold,
-                    ),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, color: Colors.white),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      onEdit.call(student);
+                    } else if (value == 'delete') {
+                      onDelete.call(student);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    if (schoolUser?.canEdit ?? false) ...[
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Text(
+                          'Edit',
+                          style: AppTextStyle.title.medium.primaryColor,
+                        ),
+                      ),
+                    ],
+                    if (schoolUser?.canDelete ?? false) ...[
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Text(
+                          'Delete',
+                          style: AppTextStyle.title.medium.red,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
-              ),
-              PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert, color: Colors.white),
-                onSelected: (value) {
-                  if (value == 'edit') {
-                    onEdit.call(student);
-                  } else if (value == 'delete') {
-                    onDelete.call(student);
-                  }
-                },
-                itemBuilder: (context) => [
-                  if (schoolUser?.canEdit ?? false) ...[
-                    PopupMenuItem(
-                      value: 'edit',
-                      child: Text(
-                        'Edit',
-                        style: AppTextStyle.title.medium.primaryColor,
-                      ),
-                    ),
-                  ],
-                  if (schoolUser?.canDelete ?? false) ...[
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Text(
-                        'Delete',
-                        style: AppTextStyle.title.medium.red,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ],
-          ),
-
-          /// 🔹 STUDENT DETAILS
-          ExpansionTile(
-            showTrailingIcon: false,
-            onExpansionChanged: onExpand,
-            initiallyExpanded: student?.isExpanded ?? false,
-            title: Column(
+              ],
+            ),
+            Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 if (student?.isExpanded ?? false) ...[
                   /// Expanded View
                   _ExpandedView(index: index, student: student),
-                ] else ...[
-                  Row(
-                    children: [
-                      UserAvatar(
-                        file: student?.selectedImg,
-                        imageUrl: student?.photo,
-                        radius: 35,
-                      ),
-
-                      SizedBox(width: 20),
-
-                      Expanded(
-                        child: Builder(
-                          builder: (context) {
-                            final entries = _getDisplayEntries(studentObj);
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: entries.map((e) {
-                                final label =
-                                    e.key.toLowerCase() == 'student name'
-                                    ? 'Name'
-                                    : e.key;
-
-                                return _infoRow(
-                                  label: label,
-                                  value:e.key.toLowerCase()=="dob"?formatDateForUI(e.value.toString()): e.value.toString(),
-                                  bottomPadding: 0,
-                                  width: Get.size.width * 0.2,
-                                );
-                              }).toList(),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ...studentObj.entries
-                        .where(
-                          (e) =>
-                              e.value != null &&
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ...studentObj.entries
+                            .where(
+                              (e) =>
+                          e.value != null &&
                               e.value.toString().trim().isNotEmpty &&
                               e.value.toString().toLowerCase() != 'null',
                         )
-                        .map((e) {
+                            .map((e) {
                           return _infoRow(
                             label: e.key,
-                            value: e.value.toString(),
+                            value:e.key.toLowerCase()=="dob"?formatDateForUI(e.value.toString()): e.value.toString(),
                             bottomPadding: 0,
                           );
                         }),
 
-                    const SizedBox(height: 12),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
-                  borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(18),
+                        const SizedBox(height: 12),
+                      ],
+                    ),
                   ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: GetBuilder<HomeController>(
-                        builder: (controller) {
-                          final schoolUser = controller.schoolUser.value;
-                          return Column(
-                            children: [
-                              Text(
-                                [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor,
+                      borderRadius: const BorderRadius.vertical(
+                        bottom: Radius.circular(18),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: GetBuilder<HomeController>(
+                            builder: (controller) {
+                              final schoolUser = controller.schoolUser.value;
+                              return Column(
+                                children: [
+                                  Text(
+                                    [
                                       schoolUser?.address1,
                                       schoolUser?.address2,
                                       schoolUser?.address3,
                                     ]
-                                    .where(
-                                      (e) => e != null && e.trim().isNotEmpty,
+                                        .where(
+                                          (e) => e != null && e.trim().isNotEmpty,
                                     )
-                                    .join(', '),
-                                textAlign: TextAlign.center,
-                                style: AppTextStyle.title.small.textColor,
-                              ),
-                              Text(
-                                "Mob: ${schoolUser?.contactNo?.trim().isNotEmpty == true ? schoolUser!.contactNo : 'NA'}",
-                                style: AppTextStyle.body.small.semiBold.italic
-                                    .copyWith(fontSize: 13),
-                              ),
-                              Text(
-                                "Website: ${schoolUser?.website?.trim().isNotEmpty == true ? schoolUser!.website : 'NA'}",
+                                        .join(', '),
+                                    textAlign: TextAlign.center,
+                                    style: AppTextStyle.title.small.textColor,
+                                  ),
+                                  Text(
+                                    "Mob: ${schoolUser?.contactNo?.trim().isNotEmpty == true ? schoolUser!.contactNo : 'NA'}",
+                                    style: AppTextStyle.body.small.semiBold.italic
+                                        .copyWith(fontSize: 13),
+                                  ),
+                                  Text(
+                                    "Website: ${schoolUser?.website?.trim().isNotEmpty == true ? schoolUser!.website : 'NA'}",
 
-                                style: AppTextStyle.body.small.semiBold.italic
-                                    .copyWith(
+                                    style: AppTextStyle.body.small.semiBold.italic
+                                        .copyWith(
                                       color: AppColors.textOnGradient,
                                       fontSize: 12,
                                     ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+                  ),
+                ] else ...[
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Row(
+                      children: [
+                        UserAvatar(
+                          file: student?.selectedImg,
+                          imageUrl: student?.photo,
+                          radius: 35,
+                        ),
+
+                        SizedBox(width: 20),
+
+                        Expanded(
+                          child: Builder(
+                            builder: (context) {
+                              final entries = _getDisplayEntries(studentObj);
+                              return Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: entries.map((e) {
+                                  final label =
+                                  e.key.toLowerCase() == 'student name'
+                                      ? 'Name'
+                                      : e.key;
+
+                                  return _infoRow(
+                                    label: label,
+                                    value:e.key.toLowerCase()=="dob"?formatDateForUI(e.value.toString()): e.value.toString(),
+                                    bottomPadding: 0,
+                                    width: Get.size.width * 0.2,
+                                  );
+                                }).toList(),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            )
+            /// 🔹 STUDENT DETAILS
+            // ExpansionTile(
+            //   showTrailingIcon: false,
+            //   internalAddSemanticForOnTap: true,
+            //   onExpansionChanged: onExpand,
+            //   controlAffinity: ListTileControlAffinity.platform,
+            //   initiallyExpanded: student?.isExpanded ?? false,
+            //   title: ,
+            //   children: [
+            //
+            //   ],
+            // ),
+          ],
+        ),
       ),
     );
   }
@@ -390,6 +399,7 @@ class _ExpandedView extends GetView<IdCardController> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        SizedBox(height: 10),
         Stack(
           alignment: Alignment.bottomRight,
           children: [

@@ -35,7 +35,7 @@ class IdCardController extends GetxController {
   }
 
   void expandCard(int index, bool expand) {
-    schoolIds?[index].isExpanded = expand;
+    schoolIds?[index].isExpanded = !(schoolIds?[index].isExpanded??false);
     update(['idCard']);
   }
 

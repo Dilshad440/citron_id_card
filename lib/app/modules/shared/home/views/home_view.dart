@@ -1,3 +1,4 @@
+import 'package:citron_id_card/app/config/network/api_constants.dart';
 import 'package:citron_id_card/app/core/components/background_gradient.dart';
 import 'package:citron_id_card/app/core/theme/app_colors.dart';
 import 'package:citron_id_card/app/core/theme/app_text_style.dart';
@@ -89,117 +90,120 @@ class SchoolInfoCard extends StatelessWidget {
           child: BackgroundGradient(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: Colors.grey.shade200,
-                    backgroundImage: schoolUser?.logo != null
-                        ? NetworkImage(schoolUser!.logo!)
-                        : null,
-                    child: schoolUser?.logo == null
-                        ? const Icon(Icons.school, size: 30, color: Colors.grey)
-                        : null,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Colors.grey.shade200,
+                        backgroundImage: schoolUser?.logo != null
+                            ? NetworkImage("${ApiConstants.baseUrl}${schoolUser!.logo!}")
+                            : null,
+                        child: schoolUser?.logo == null
+                            ? const Icon(
+                                Icons.school,
+                                size: 30,
+                                color: Colors.grey,
+                              )
+                            : null,
+                      ),
+                      SizedBox(width: 15),
+                      Text(
+                        schoolUser?.schoolName ?? "",
+                        style: AppTextStyle.display.large.bold.textColor,
+                      ),
+                      const SizedBox(width: 16),
+
+                      // School Info
+                    ],
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(height: 10),
 
-                  // School Info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // School Name
-                        Text(
-                          schoolUser?.schoolName ?? "",
-                          style: AppTextStyle.title.medium.bold.textColor,
-                        ),
-                        const SizedBox(height: 6),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            size: 20,
+                            color: AppColors.textOnGradient,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              schoolUser?.address1 ?? "",
+                              style: AppTextStyle
+                                  .title
+                                  .medium
+                                  .regular
+                                  .semiBold
+                                  .textColor.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
 
-                        // Address
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              size: 20,
-                              color: AppColors.textOnGradient,
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                schoolUser?.address1 ?? "",
-                                style: AppTextStyle
-                                    .title
-                                    .medium
-                                    .regular
-                                    .semiBold
-                                    .textColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
+                      // Contact
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.phone,
+                            size: 20,
+                            color: AppColors.textOnGradient,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            schoolUser?.contactNo ?? "",
+                            style: AppTextStyle.title.medium.regular.textColor,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
 
-                        // Contact
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.phone,
-                              size: 20,
-                              color: AppColors.textOnGradient,
+                      // Email
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.email,
+                            size: 20,
+                            color: AppColors.textOnGradient,
+                          ),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              schoolUser?.email ?? "",
+                              style: AppTextStyle
+                                  .title
+                                  .medium
+                                  .regular
+                                  .textColor
+                                  .ellipsis.ellipsis,
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              schoolUser?.contactNo ?? "",
-                              style:
-                                  AppTextStyle.title.medium.regular.textColor,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
 
-                        // Email
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.email,
-                              size: 20,
-                              color: AppColors.textOnGradient,
-                            ),
-                            const SizedBox(width: 6),
-                            Flexible(
-                              child: Text(
-                                schoolUser?.email ?? "",
-                                style: AppTextStyle
-                                    .title
-                                    .medium
-                                    .regular
-                                    .textColor
-                                    .ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-
-                        // Website
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.link,
-                              size: 20,
-                              color: AppColors.textOnGradient,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              schoolUser?.website ?? "",
-                              style:
-                                  AppTextStyle.title.medium.regular.textColor,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                      // Website
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.link,
+                            size: 20,
+                            color: AppColors.textOnGradient,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            schoolUser?.website ?? "",
+                            style: AppTextStyle.title.medium.regular.textColor,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),
