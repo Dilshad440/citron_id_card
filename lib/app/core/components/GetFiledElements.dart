@@ -99,6 +99,7 @@ class GetFieldElements extends StatelessWidget {
         title: fieldModel.title,
         isRequired: fieldModel.isRequired,
         child: AppDatePickerField(
+          currentDate: DateTime.tryParse(fieldModel.controller.text),
           hintText: fieldModel.hint,
           controller: fieldModel.controller,
           onDateSelected: (date) {

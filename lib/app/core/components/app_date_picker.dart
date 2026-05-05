@@ -6,6 +6,7 @@ class AppDatePickerField extends StatefulWidget {
   final String hintText;
   final TextEditingController controller;
   final String? Function(String?)? validator;
+  final DateTime? currentDate;
 
   /// ✅ Callback for selected DateTime
   final Function(DateTime date)? onDateSelected;
@@ -16,6 +17,7 @@ class AppDatePickerField extends StatefulWidget {
     required this.controller,
     this.validator,
     this.onDateSelected,
+    this.currentDate,
   });
 
   @override
@@ -24,11 +26,18 @@ class AppDatePickerField extends StatefulWidget {
 
 class _AppDatePickerFieldState extends State<AppDatePickerField> {
   Future<void> _pickDate(BuildContext context) async {
+    final DateTime now = DateTime.now();
+
+    final DateTime initial =
+        (widget.currentDate != null && widget.currentDate!.isAfter(now))
+        ? now
+        : (widget.currentDate ?? now);
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: initial,
       firstDate: DateTime(1900),
-      lastDate: DateTime(2100),
+      lastDate: now,
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(

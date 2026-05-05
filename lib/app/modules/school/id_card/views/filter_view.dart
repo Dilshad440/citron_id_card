@@ -96,7 +96,9 @@ class FilterView extends StatelessWidget {
                             builder: (controller) {
                               return AppDropdown<String>(
                                 hintText: "Select your session",
-                                items: homeController.sessions.map((e) => e.session??"").toList(),
+                                items: homeController.sessions
+                                    .map((e) => e.session ?? "")
+                                    .toList(),
                                 value: homeController.selectedSession,
                                 validator: (value) {
                                   if (value == null) {
@@ -104,9 +106,21 @@ class FilterView extends StatelessWidget {
                                   }
                                   return null;
                                 },
-                                onChanged: (value) {
+                                onChanged: (value) async {
                                   homeController.selectedSession = value;
-                                  homeController.getClassAndSection(value!);
+                                  final hasClassAndSection =
+                                      homeController.fieldModel.any(
+                                        (f) => f.title.toLowerCase() == "class",
+                                      ) &&
+                                      homeController.fieldModel.any(
+                                        (f) =>
+                                            f.title.toLowerCase() == "section",
+                                      );
+                                  if (hasClassAndSection) {
+                                    await homeController.getClassAndSection(
+                                      value!,
+                                    );
+                                  }
                                 },
                               );
                             },
@@ -150,5 +164,3 @@ class FilterView extends StatelessWidget {
     );
   }
 }
-
-

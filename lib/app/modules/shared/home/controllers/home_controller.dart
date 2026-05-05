@@ -110,14 +110,19 @@ class HomeController extends GetxController {
       //   );
       //   return;
       // }
-    try{
-      final sessionsRes = await service.getSessions();
-      sessions.value = sessionsRes.sessions ?? [];
-      selectedSession = sessionsRes.defaultSession ?? "";
-    }catch(e){
-      print("Error in session Api:::${e}");
-    }
-      await getClassAndSection(selectedSession!);
+      try {
+        final sessionsRes = await service.getSessions();
+        sessions.value = sessionsRes.sessions ?? [];
+        selectedSession = sessionsRes.defaultSession ?? "";
+      } catch (e) {
+        print("Error in session Api:::${e}");
+      }
+      final hasClassAndSection =
+          fields.any((f) => f.fieldName?.toLowerCase() == "class") &&
+          fields.any((f) => f.fieldName?.toLowerCase() == "section");
+      if (hasClassAndSection) {
+        await getClassAndSection(selectedSession!);
+      }
 
       fieldModel.clear(); // avoid duplicate fields
 
