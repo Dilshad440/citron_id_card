@@ -134,9 +134,9 @@ flutter_native_splash:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "asset/images/Citron ID.png"
+  image_path: "asset/images/jd-enterprises.jpeg"
   # Remove the old launcher icon before generating new ones
   remove_alpha_ios: true
   # Adaptive icon configuration for Android
   adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "asset/images/Citron ID.png"
+  adaptive_icon_foreground: "asset/images/jd-enterprises.jpeg"

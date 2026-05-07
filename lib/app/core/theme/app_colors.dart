@@ -4,7 +4,7 @@ class AppColors {
   AppColors._();
 
   /// 🌈 Brand color (only input)
-  static const Color primaryColor = Colors.blue;
+  static const Color primaryColor = Colors.red;
   static const Color red = Colors.red;
 
   /* ───────────────── GRADIENT ───────────────── */
@@ -14,7 +14,7 @@ class AppColors {
 
     return [
       hsl.withLightness(0.88).toColor(), // light
-      primaryColor, // base
+      primaryColor.withOpacity(0.6), // base
       hsl.withLightness(0.32).toColor(), // dark
     ];
   }
