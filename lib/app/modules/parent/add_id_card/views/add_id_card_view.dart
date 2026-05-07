@@ -38,13 +38,13 @@ class AddIdCardView extends GetView<AddIdCardController> {
                   ? await controller.onSubmit()
                   : await controller.onEdit();
 
-              if (success) {
-                if (Get.key.currentState?.canPop() == true) {
-                  Navigator.of(Get.context!, rootNavigator: true).pop(true);
-                } else {
-                  Get.offNamed(AppRoutes.idCard);
-                }
-              }
+              // if (success) {
+              //   if (Get.key.currentState?.canPop() == true) {
+              //     Navigator.of(Get.context!, rootNavigator: true).pop(true);
+              //   } else {
+              //     Get.offNamed(AppRoutes.idCard);
+              //   }
+              // }
             },
           ),
         ),

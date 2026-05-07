@@ -97,7 +97,7 @@ class LoginView extends GetView<LoginController> {
             const SizedBox(height: 20),
             Image.asset(AssetConstant.idCard, height: 80),
             const SizedBox(height: 12),
-            AppTextStyle.display.large.textColor.bold.text("ID Card Generator"),
+            AppTextStyle.display.large.textColor.bold.text("JD Enterprises"),
             const SizedBox(height: 6),
             AppTextStyle.body.medium.textColor.regular.text(
               "Create & Manage ID Cards",
@@ -130,28 +130,35 @@ class LoginView extends GetView<LoginController> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.borderColor, width: 1.5),
-              ),
-              child: CircleAvatar(
-                radius: 45,
-                backgroundImage: AssetImage(AssetConstant.logo),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              "Powered By Citron Software",
-              style: AppTextStyle.title.medium.regular.textOnGradient,
-            ),
-            Text(
-              "© ${DateTime
-                  .now()
-                  .year} Citron Software. All rights reserved.",
-              style: AppTextStyle.title.small.lightWeight.italic.copyWith(
-                color: AppColors.borderColor,
-              ),
-            ),
+                height: 110,
+                width: 220,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12)
+                ),
+                child: Image.asset(AssetConstant.JDInterprises))
+            // Container(
+            //   decoration: BoxDecoration(
+            //     // shape: BoxShape.circle,
+            //     border: Border.all(color: AppColors.borderColor, width: 1.5),
+            //   ),
+            //   child: CircleAvatar(
+            //     radius: 45,
+            //     backgroundImage: AssetImage(AssetConstant.JDInterprises),
+            //   ),
+            // ),
+            // const SizedBox(height: 10),
+            // Text(
+            //   "Powered By Citron Software",
+            //   style: AppTextStyle.title.medium.regular.textOnGradient,
+            // ),
+            // Text(
+            //   "© ${DateTime
+            //       .now()
+            //       .year} Citron Software. All rights reserved.",
+            //   style: AppTextStyle.title.small.lightWeight.italic.copyWith(
+            //     color: AppColors.borderColor,
+            //   ),
+            // ),
           ],
         ),
       ),

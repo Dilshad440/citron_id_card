@@ -1,4 +1,4 @@
-# Citron ID Card Generator
+# Citron JD Enterprises
 
 A Flutter application for creating and managing ID cards with a modern, gradient-based UI design. Built using GetX for state management and following a clean architecture pattern.
 

@@ -4,4 +4,5 @@ class AssetConstant {
   static String hill = "asset/images/hill.jpeg";
   static String logo = "asset/images/logo.png";
   static String splash = "asset/images/splash.png";
+  static String JDInterprises = "asset/images/jd-enterprises.jpeg";
 }

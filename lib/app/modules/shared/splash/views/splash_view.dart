@@ -35,7 +35,7 @@ class SplashView extends GetView<SplashController> {
               const SizedBox(height: 24),
               // App Name
               AppTextStyle.display.large.textColor.bold.text(
-                "ID Card Generator",
+                "JD Enterprises",
               ),
               const SizedBox(height: 8),
               // Tagline
