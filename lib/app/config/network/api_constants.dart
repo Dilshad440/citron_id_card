@@ -1,5 +1,9 @@
 class ApiConstants {
-  static const String baseUrl = 'https://iddev.citronsoftwares.com';
+
+  /// Testing
+  static const String baseUrl = 'https://testidapp.citronsoftwares.com';
+  /// Production
+  // static const String baseUrl = 'https://iddev.citronsoftwares.com';
   static const String login = '/api/auth/login';
   static const String getSchoolUser = '/api/idrecords/getschoolforuser';
   static const String schoolIdList = '/api/IDRecords/filter';
