@@ -32,7 +32,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "io.citron.citrondatacollector"
+        applicationId = "com.citron.jdenterprises"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
         versionCode = flutter.versionCode
