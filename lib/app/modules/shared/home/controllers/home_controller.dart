@@ -9,9 +9,11 @@ import 'package:citron_id_card/app/modules/school/id_card/model/final%20_field_m
 import 'package:citron_id_card/app/modules/school/id_card/model/get_sessions.dart';
 import 'package:citron_id_card/app/modules/school/id_card/model/selected_fields_model.dart';
 import 'package:citron_id_card/app/modules/shared/login/controllers/login_controller.dart';
+import 'package:citron_id_card/app/services/local/sqf_lite_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../config/network/dio_client.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../services/api_service.dart';
 import '../../login/model/login_response.dart';
@@ -33,6 +35,7 @@ class HomeController extends GetxController {
   List<String> classList = ["All"];
   List<String> sectionList = ["All"];
   RxList<Sessions> sessions = <Sessions>[].obs;
+  Map<String, List<dynamic>> dropdownList = {};
 
   @override
   void onInit() {
@@ -82,79 +85,77 @@ class HomeController extends GetxController {
       }
 
       final selectedFiledRes = await service.getSelectedFields(schoolId);
+
       final fields = selectedFiledRes.selectedFields ?? [];
-      fields.removeWhere((e) {
-        final name = e.fieldName?.trim().toLowerCase();
+
+      fields.removeWhere((field) {
+        final name = field.fieldName?.trim().toLowerCase();
         return name != "class" && name != "section";
       });
-      // if (fields.isEmpty) {
-      //   AppSnackBar.show(
-      //     error: "No fields configured for this school",
-      //     type: SnackBarType.error,
-      //   );
-      //   return;
-      // }
 
-      // /// Filter only required fields
-      // final List<SelectedFields> selectedFields = fields.where((e) {
-      //   final fieldName = e.fieldName?.toLowerCase()??"";
-      //   return fieldName == "adm. no" ||
-      //       fieldName == "class" ||
-      //       fieldName == "section";
-      // }).toList();
-
-      // if (selectedSession == null) {
-      //   AppSnackBar.show(
-      //     error: "Session not selected",
-      //     type: SnackBarType.error,
-      //   );
-      //   return;
-      // }
       try {
         final sessionsRes = await service.getSessions();
+
         sessions.value = sessionsRes.sessions ?? [];
         selectedSession = sessionsRes.defaultSession ?? "";
       } catch (e) {
-        print("Error in session Api:::${e}");
-      }
-      final hasClassAndSection =
-          fields.any((f) => f.fieldName?.toLowerCase() == "class") &&
-          fields.any((f) => f.fieldName?.toLowerCase() == "section");
-      if (hasClassAndSection) {
-        await getClassAndSection(selectedSession!);
+        debugPrint("Error fetching sessions: $e");
       }
 
-      fieldModel.clear(); // avoid duplicate fields
+      fieldModel.clear();
+      dropdownList.clear();
 
-      for (final v in fields) {
-        final isTextField =
-            getFieldType(v.fieldType ?? "") == FieldType.textField;
+      for (final field in fields) {
+        final fieldName = field.fieldName ?? "";
+        final fieldNameLower = fieldName.toLowerCase();
+        final isClassOrSection =
+            fieldNameLower == "class" || fieldNameLower == "section";
+        final fieldType = getFieldType(field.fieldType ?? "");
+
+        if (fieldType == FieldType.list) {
+          final dropdownValue = await service.getListValuesByFieldName(
+            fieldName: fieldName,
+            schoolId: schoolId,
+          );
+
+          final values = List<String>.from(
+            dropdownValue['values'] ?? [],
+            growable: true,
+          );
+
+          if (isClassOrSection) {
+            values.insert(0, "All");
+          }
+
+          dropdownList[fieldName] = values;
+        }
+
+        final isTextField = fieldType == FieldType.textField;
+
         final hintText = isTextField
-            ? "Enter ${v.fieldName?.toLowerCase()}"
-            : "Select ${v.fieldName?.toLowerCase()}";
+            ? "Enter $fieldNameLower"
+            : "Select $fieldNameLower";
 
         fieldModel.add(
           FieldModel(
-            title: v.fieldName ?? "",
+            title: fieldName,
             hint: hintText,
-            enforcementType: v.enforceType ?? false,
-            isRequired: v.isRequired ?? false,
+            changedValue: isClassOrSection ? "All" : null,
+            enforcementType: field.enforceType ?? false,
+            dropdownList: dropdownList,
+            isRequired: field.isRequired ?? false,
             controller: TextEditingController(),
+            keyboardType: isTextField ? TextInputType.text : TextInputType.none,
+            type: fieldType,
             validator: (value) {
-              final isRequired = v.isRequired ?? false;
+              final isRequired = field.isRequired ?? false;
+              final val = value?.trim() ?? "";
 
-              final fieldName = (v.fieldName ?? "").toLowerCase();
-
-              if (isRequired && (value == null || value.trim().isEmpty)) {
+              if (isRequired && val.isEmpty) {
                 return hintText;
               }
 
-              /// Aadhaar validation
-              if (fieldName == "aadhar no") {
-                final val = value?.trim() ?? "";
-
-                if (val.isEmpty) return null; // already handled above
-
+              if (fieldNameLower == "aadhar no" && val.isNotEmpty) {
                 if (val.length != 12) {
                   return "Aadhaar number must be 12 digits";
                 }
@@ -166,8 +167,6 @@ class HomeController extends GetxController {
 
               return null;
             },
-            keyboardType: isTextField ? TextInputType.text : TextInputType.none,
-            type: getFieldType(v.fieldType ?? ""),
           ),
         );
       }
@@ -189,7 +188,7 @@ class HomeController extends GetxController {
       case "String":
         return FieldType.textField;
       case "list":
-        return FieldType.dropdown;
+        return FieldType.list;
       case "date":
         return FieldType.datePicker;
       case "numeric":
@@ -264,3 +263,28 @@ class HomeController extends GetxController {
     Get.offAllNamed(AppRoutes.login);
   }
 }
+
+//
+// const String workTaskName = "offlineUploadTask";
+//
+// class BackgroundService {
+//
+//   Future<void> startBackgroundSync() async {
+//
+//     await Workmanager().registerPeriodicTask(
+//       "offlineUploadUnique",
+//       workTaskName,
+//       frequency: const Duration(
+//         minutes: 1,
+//       ),
+//
+//       existingWorkPolicy:
+//       ExistingPeriodicWorkPolicy.keep,
+//
+//       constraints: Constraints(
+//         networkType: NetworkType.connected,
+//       ),
+//     );
+//   }
+
+// }

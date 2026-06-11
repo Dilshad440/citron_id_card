@@ -14,6 +14,7 @@ import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../main.dart';
 import '../../../../core/components/GetFiledElements.dart';
 import '../../../shared/home/controllers/home_controller.dart';
 
@@ -33,6 +34,12 @@ class FilterView extends StatelessWidget {
                 children: [
                   SchoolInfoCard(),
                   SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      addIdCard();
+                    },
+                    child: Text("Add"),
+                  ),
                   Row(
                     children: [
                       Text("Filter", style: AppTextStyle.display.medium),

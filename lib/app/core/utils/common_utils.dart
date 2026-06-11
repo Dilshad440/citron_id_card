@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:citron_id_card/app/core/constants/asset_constant.dart';
 import 'package:flutter/material.dart';
@@ -262,5 +263,10 @@ class CommonUtils {
     } catch (e) {
       return apiDate;
     }
+  }
+
+  static Future<String> fileToBase64(File file) async {
+    final bytes = await file.readAsBytes();
+    return base64Encode(bytes);
   }
 }

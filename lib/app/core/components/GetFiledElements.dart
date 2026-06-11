@@ -21,32 +21,33 @@ class GetFieldElements extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (fieldModel.type == FieldType.dropdown && isFromAddEdit) {
-      return TwoLineElement(
-        title: fieldModel.title,
-        isRequired: fieldModel.isRequired,
-        child: AppTextField(
-          keyboardType: TextInputType.text,
-          controller: fieldModel.controller,
-          hintText: "Enter ${fieldModel.title}",
-          validator: fieldModel.validator,
-        ),
+    // if (fieldModel.type == FieldType.dropdown && isFromAddEdit) {
+    //   return TwoLineElement(
+    //     title: fieldModel.title,
+    //     isRequired: fieldModel.isRequired,
+    //     child: AppTextField(
+    //       keyboardType: TextInputType.text,
+    //       controller: fieldModel.controller,
+    //       hintText: "Enter ${fieldModel.title}",
+    //       validator: fieldModel.validator,
+    //     ),
+    //   );
+    // }
+    if (fieldModel.type == FieldType.list) {
+      // final bool isClass = fieldModel.title.toLowerCase() == "class";
+      // final bool isSection = fieldModel.title.toLowerCase() == "section";
+      final items = List<String>.from(
+        fieldModel.dropdownList[fieldModel.title]!,
+        growable: true,
       );
-    }
-    if (fieldModel.type == FieldType.dropdown) {
-      final bool isClass = fieldModel.title.toLowerCase() == "class";
-      final bool isSection = fieldModel.title.toLowerCase() == "section";
-      final items = isClass
-          ? Get.find<HomeController>().classList
-          : Get.find<HomeController>().sectionList;
 
-      final value = isClass || isSection ? "All" : fieldModel.changedValue;
+      // final value = isClass || isSection ? "All" : fieldModel.changedValue;
       return TwoLineElement(
         title: fieldModel.title,
         isRequired: fieldModel.isRequired,
         child: AppDropdown<String>(
           hintText: fieldModel.hint,
-          value: value,
+          value: fieldModel.changedValue,
           items: items,
           validator: fieldModel.validator,
           onChanged: (value) =>
@@ -78,7 +79,8 @@ class GetFieldElements extends StatelessWidget {
           validator: fieldModel.validator,
         ),
       );
-    } else if (fieldModel.type == FieldType.datePicker &&
+    }
+    /*else if (fieldModel.type == FieldType.datePicker &&
         fieldModel.enforcementType == false) {
       return TwoLineElement(
         title: fieldModel.title,
@@ -93,7 +95,8 @@ class GetFieldElements extends StatelessWidget {
           validator: fieldModel.validator,
         ),
       );
-    } else if (fieldModel.type == FieldType.datePicker &&
+    } */
+    else if (fieldModel.type == FieldType.datePicker &&
         fieldModel.enforcementType == true) {
       return TwoLineElement(
         title: fieldModel.title,

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../parent/add_id_card/model/id_card_field_model.dart';
 
 enum FieldType {
-  dropdown,
+  list,
   numeric,
   textField,
   datePicker,
@@ -18,7 +18,7 @@ class FieldModel {
   final bool isRequired;
   final bool enforcementType;
   dynamic changedValue;
-  final List<String>? items;
+  // final List<String>? items;
 
   final FieldType type;
 
@@ -27,6 +27,7 @@ class FieldModel {
   final FieldValidator validator;
   final TextInputType keyboardType;
   final GlobalKey? fieldKey;
+  Map<String, List<dynamic>> dropdownList = {};
 
   FieldModel({
     required this.title,
@@ -36,25 +37,27 @@ class FieldModel {
     required this.keyboardType,
     required this.type,
     this.changedValue,
-    this.items,
+    // this.items,
     required this.enforcementType,
     required this.isRequired,
     this.fieldKey,
+    required this.dropdownList,
   });
 
-  static List<FieldModel> getStaticFields(HomeController c) {
-    return [
-      FieldModel(
-        title: "Batch",
-        hint: "Select batch",
-        items: c.batch,
-        controller: TextEditingController(),
-        validator: (value) => value == null ? "Select batch" : null,
-        keyboardType: TextInputType.text,
-        type: FieldType.dropdown,
-        enforcementType: false,
-        isRequired: false,
-      ),
-    ];
-  }
+  // static List<FieldModel> getStaticFields(HomeController c) {
+  //   return [
+  //     FieldModel(
+  //       title: "Batch",
+  //       hint: "Select batch",
+  //       items: c.batch,
+  //       controller: TextEditingController(),
+  //       validator: (value) => value == null ? "Select batch" : null,
+  //       keyboardType: TextInputType.text,
+  //       type: FieldType.dropdown,
+  //       enforcementType: false,
+  //       isRequired: false,
+  //       dropdownList: {}
+  //     ),
+  //   ];
+  // }
 }

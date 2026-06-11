@@ -2,12 +2,17 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:citron_id_card/app/core/utils/dialog_utils.dart';
+import 'package:citron_id_card/app/modules/school/id_card/model/offline_cards_model.dart';
+import 'package:citron_id_card/app/modules/school/id_card/model/selected_fields_model.dart';
 import 'package:citron_id_card/app/modules/school/id_card/model/student_id_model.dart';
 import 'package:citron_id_card/app/modules/shared/home/controllers/home_controller.dart';
 import 'package:citron_id_card/app/services/api_service.dart';
+import 'package:citron_id_card/app/services/local/sqf_lite_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../../../core/utils/common_utils.dart';
 import '../../../school/id_card/model/final _field_model.dart';
 import '../../../school/id_card/model/get_sessions.dart';
@@ -28,6 +33,7 @@ class AddIdCardController extends GetxController {
   bool isLoading = false;
   late String selectedBatch;
   String? selectedSession;
+  Map<String, List<dynamic>> dropdownList = {};
 
   final formKey = GlobalKey<FormState>();
   final ScrollController scrollController = ScrollController();
@@ -39,77 +45,81 @@ class AddIdCardController extends GetxController {
     student = Get.arguments;
     studentPhoto = student?.photo;
     selectedBatch = batch.first;
+    getSession();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      getSession();
       getSelectedFields();
     });
-
     super.onInit();
   }
 
-
-  void getSession()async{
+  void getSession() async {
     final sessionsRes = await service.getSessions();
     sessions.value = sessionsRes;
     selectedSession = sessionsRes.defaultSession ?? "";
   }
 
-  void getSelectedFields() async {
+  Future<void> getSelectedFields() async {
     final schoolUser = Get.find<HomeController>().schoolUser.value;
+
+    if (schoolUser?.schoolId == null) return;
+
     try {
       isLoading = true;
       DialogUtils.showLoading();
       update([fieldUpdate]);
-      final studentData = student?.data?.toJson() ?? {};
-      final result = await service.getSelectedFields(schoolUser!.schoolId!);
-      // for (var v in result.selectedFields??[]) {
-      //   final text = studentData[v]?.toString() ?? "";
-      //   fields.add(
-      //     IdCardFieldModel(
-      //       title: v,
-      //       hint: "Enter ${v.toLowerCase()}",
-      //       controller: TextEditingController(text: text),
-      //       validator: (value) {
-      //         if (value == null || value.isEmpty) {
-      //           return "Please Enter ${v.toLowerCase()}";
-      //         }
-      //         return null;
-      //       },
-      //       fieldKey: GlobalKey(),
-      //     ),
-      //   );
-      // }
 
-      for (final v in result.selectedFields ?? []) {
-        final isTextField =
-            getFieldType(v.fieldType ?? "") == FieldType.textField;
+      final studentData = student?.data?.toJson() ?? {};
+      final schoolId = schoolUser!.schoolId!;
+
+      final result = await service.getSelectedFields(schoolId);
+
+      fields.clear();
+      dropdownList.clear();
+
+      for (final field in result.selectedFields ?? []) {
+        final fieldName = field.fieldName ?? "";
+        final fieldNameLower = fieldName.toLowerCase();
+
+        final fieldType = getFieldType(field.fieldType ?? "");
+
+        if (fieldType == FieldType.list) {
+          final dropdownValue = await service.getListValuesByFieldName(
+            fieldName: fieldName,
+            schoolId: schoolId,
+          );
+
+          dropdownList[fieldName] = List<dynamic>.from(
+            dropdownValue['values'] ?? [],
+          );
+        }
+
+        final isTextField = fieldType == FieldType.textField;
+
         final hintText = isTextField
-            ? "Enter ${v.fieldName?.toLowerCase()}"
-            : "Select ${v.fieldName?.toLowerCase()}";
-        final studentValue = v.fieldName;
-        final text = studentData[studentValue]?.toString() ?? "";
+            ? "Enter $fieldNameLower"
+            : "Select $fieldNameLower";
+
+        final text = studentData[fieldName]?.toString() ?? "";
+
         fields.add(
           FieldModel(
-            title: v.fieldName ?? "",
+            title: fieldName,
             hint: hintText,
-            enforcementType: v.enforceType ?? false,
-            isRequired: v.isRequired ?? false,
+            enforcementType: field.enforceType ?? false,
+            dropdownList: dropdownList,
+            isRequired: field.isRequired ?? false,
+            changedValue:(fieldType == FieldType.list && student!=null)? text:null,
             controller: TextEditingController(text: text),
+            keyboardType: isTextField ? TextInputType.text : TextInputType.none,
+            type: fieldType,
             validator: (value) {
-              final isRequired = v.isRequired ?? false;
+              final val = value?.trim() ?? "";
 
-              final fieldName = (v.fieldName ?? "").toLowerCase();
-
-              if (isRequired && (value == null || value.trim().isEmpty)) {
+              if ((field.isRequired ?? false) && val.isEmpty) {
                 return hintText;
               }
 
-              /// Aadhaar validation
-              if (fieldName == "aadhar no") {
-                final val = value?.trim() ?? "";
-
-                if (val.isEmpty) return null; // already handled above
-
+              if (fieldNameLower == "aadhar no" && val.isNotEmpty) {
                 if (val.length != 12) {
                   return "Aadhaar number must be 12 digits";
                 }
@@ -121,19 +131,15 @@ class AddIdCardController extends GetxController {
 
               return null;
             },
-            keyboardType: isTextField ? TextInputType.text : TextInputType.none,
-            type: getFieldType(v.fieldType ?? ""),
           ),
         );
       }
-      isLoading = false;
-      update([fieldUpdate]);
-      DialogUtils.hideLoading();
     } catch (e) {
+      AppSnackBar.show(error: e);
+    } finally {
       isLoading = false;
       update([fieldUpdate]);
       DialogUtils.hideLoading();
-      AppSnackBar.show(error: e);
     }
   }
 
@@ -142,7 +148,7 @@ class AddIdCardController extends GetxController {
       case "String":
         return FieldType.textField;
       case "list":
-        return FieldType.dropdown;
+        return FieldType.list;
       case "date":
         return FieldType.datePicker;
       case "numeric":
@@ -152,11 +158,71 @@ class AddIdCardController extends GetxController {
     }
   }
 
-  Future<bool> onSubmit() async {
+  // Future<bool> onSubmit(Map<String, dynamic> records, File? img) async {
+  //   // DialogUtils.showLoading();
+  //
+  //   int? createdCardId;
+  //
+  //   try {
+  //     final homeController = Get.find<HomeController>();
+  //     final schoolUser = homeController.schoolUser.value;
+  //
+  //     if (schoolUser == null) {
+  //       throw Exception('School user not found');
+  //     }
+  //
+  //     /// 1️⃣ Create ID card
+  //     final response = await service.addIdCard(records);
+  //
+  //     if (response.statusCode != 200 || response.data == null) {
+  //       throw Exception('Failed to create ID card');
+  //     }
+  //
+  //     createdCardId = response.data['id'];
+  //
+  //     /// 2️⃣ Upload photo (if exists)
+  //     if (img != null) {
+  //       final photoBase64 = await CommonUtils.fileToBase64(img);
+  //
+  //       final uploadPhotoRes = await service.uploadPhoto(
+  //         base64: photoBase64,
+  //         stdId: createdCardId!,
+  //       );
+  //
+  //       if (uploadPhotoRes.statusCode != 200) {
+  //         throw Exception('Failed to upload photo');
+  //       }
+  //     }
+  //
+  //     /// ✅ All APIs succeeded
+  //     AppSnackBar.show(
+  //       error: "ID card added successfully",
+  //       type: SnackBarType.success,
+  //     );
+  //     return true;
+  //   } catch (e) {
+  //     /// 🔴 Rollback if card was created
+  //     if (createdCardId != null) {
+  //       try {
+  //         await service.deleteCard(createdCardId);
+  //         debugPrint("ID Card rolled back due to failure");
+  //       } catch (deleteError) {
+  //         debugPrint("Failed to rollback ID Card: $deleteError");
+  //       }
+  //     }
+  //     final message = e is Exception
+  //         ? e.toString().replaceFirst('Exception: ', '')
+  //         : e;
+  //     AppSnackBar.show(error: message, type: SnackBarType.error);
+  //
+  //     return false;
+  //   } finally {
+  //     DialogUtils.hideLoading();
+  //   }
+  // }
+
+  Future<bool> offlineSubmit() async {
     DialogUtils.showLoading();
-
-    int? createdCardId;
-
     try {
       final homeController = Get.find<HomeController>();
       final schoolUser = homeController.schoolUser.value;
@@ -166,7 +232,6 @@ class AddIdCardController extends GetxController {
       }
 
       final Map<String, dynamic> requestData = {
-        'schoolId': schoolUser.schoolId,
         'session': selectedSession,
         'batch': selectedBatch,
         "data": {
@@ -178,54 +243,68 @@ class AddIdCardController extends GetxController {
         },
       };
 
-      /// 1️⃣ Create ID card
-      final response = await service.addIdCard(requestData);
+      File? savedFileToAppDir = await copyFileToAppDir();
 
-      if (response.statusCode != 200 || response.data == null) {
-        throw Exception('Failed to create ID card');
-      }
-
-      createdCardId = response.data['id'];
-
-      /// 2️⃣ Upload photo (if exists)
-      if (selectedImage != null) {
-        final photoBase64 = await _fileToBase64(selectedImage!);
-
-        final uploadPhotoRes = await service.uploadPhoto(
-          base64: photoBase64,
-          stdId: createdCardId!,
-        );
-
-        if (uploadPhotoRes.statusCode != 200) {
-          throw Exception('Failed to upload photo');
-        }
-      }
-
-      /// ✅ All APIs succeeded
-      AppSnackBar.show(
-        error: "ID card added successfully",
-        type: SnackBarType.success,
+      final requestBody = OfflineCardsModel(
+        records: requestData,
+        schoolId: schoolUser.schoolId,
+        selectedImage: savedFileToAppDir,
       );
 
-      return true;
-    } catch (e) {
-      /// 🔴 Rollback if card was created
-      if (createdCardId != null) {
-        try {
-          await service.deleteCard(createdCardId);
-          debugPrint("ID Card rolled back due to failure");
-        } catch (deleteError) {
-          debugPrint("Failed to rollback ID Card: $deleteError");
-        }
+      final result = await SqfLiteService().insertIntoDb(requestBody);
+
+      if (result == 1) {
+        /// ✅ All APIs succeeded
+        AppSnackBar.show(
+          error: "ID card saved successfully",
+          type: SnackBarType.success,
+        );
+        return true;
       }
+      return false;
+    } catch (e) {
       final message = e is Exception
           ? e.toString().replaceFirst('Exception: ', '')
           : e;
       AppSnackBar.show(error: message, type: SnackBarType.error);
-
       return false;
     } finally {
       DialogUtils.hideLoading();
+    }
+  }
+
+  Future<File?> copyFileToAppDir() async {
+    try {
+      if (selectedImage == null) return null;
+
+      final sourceFile = File(selectedImage!.path);
+
+      // Check source exists
+      if (!await sourceFile.exists()) {
+        print("Source image not found");
+        return null;
+      }
+
+      final appDir = await getApplicationDocumentsDirectory();
+
+      final imageDir = Directory('${appDir.path}/images');
+
+      if (!await imageDir.exists()) {
+        await imageDir.create(recursive: true);
+      }
+
+      // Unique file name
+      final fileName =
+          '${DateTime.now().millisecondsSinceEpoch}_${basename(selectedImage!.path)}';
+
+      final destinationPath = '${imageDir.path}/$fileName';
+
+      final savedFile = await sourceFile.copy(destinationPath);
+
+      return savedFile;
+    } catch (e) {
+      print("Copy Error: $e");
+      return null;
     }
   }
 
@@ -261,15 +340,17 @@ class AddIdCardController extends GetxController {
             ),
         },
       };
-
-      final response = await service.editIdCard(requestData, student!.id!);
+      final response = await service.editIdCard(
+        requestData,
+        student!.id!,
+      );
 
       if (response.statusCode != 200) {
         throw 'Failed to update ID card';
       }
 
       if (selectedImage != null) {
-        final photoBase64 = await _fileToBase64(selectedImage!);
+        final photoBase64 = await CommonUtils.fileToBase64(selectedImage!);
         final uploadPhotoRes = await service.uploadPhoto(
           base64: photoBase64,
           stdId: student!.id!,
@@ -295,11 +376,6 @@ class AddIdCardController extends GetxController {
     } finally {
       DialogUtils.hideLoading();
     }
-  }
-
-  Future<String> _fileToBase64(File file) async {
-    final bytes = await file.readAsBytes();
-    return base64Encode(bytes);
   }
 
   Future<void> selectImage() async {

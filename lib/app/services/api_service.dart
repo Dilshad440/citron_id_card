@@ -46,14 +46,14 @@ class ApiService {
 
   Future<Response<dynamic>> addIdCard(Map<String, dynamic> request) async {
     final response = await client.dio.post(
-      ApiConstants.addIdCard,
+      ApiConstants.addBulkIdCard,
       data: request,
     );
     return response;
   }
 
-  Future<GetSessions>getSessions()async{
-    final response= await client.dio.get(ApiConstants.sessions);
+  Future<GetSessions> getSessions() async {
+    final response = await client.dio.get(ApiConstants.sessions);
     return GetSessions.fromJson(response.data);
   }
 
@@ -121,6 +121,23 @@ class ApiService {
         data: {"IdRecordId": stdId, "Base64Photo": base64},
       );
       return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> getListValuesByFieldName({
+    required int schoolId,
+    required String fieldName,
+  }) async {
+    try {
+      final response = await client.dio.get(
+        ApiConstants.listValuesByFieldName(
+          schoolId: schoolId,
+          fieldName: fieldName,
+        ),
+      );
+      return response.data;
     } catch (e) {
       rethrow;
     }

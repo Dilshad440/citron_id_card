@@ -33,18 +33,17 @@ class AddIdCardView extends GetView<AddIdCardController> {
             text: controller.student != null ? "Update" : "Submit",
             onPressed: () async {
               if (!controller.formKey.currentState!.validate()) return;
-
-              final success = controller.student == null
-                  ? await controller.onSubmit()
+              final canPopForEdit = controller.student == null
+                  ? await controller.offlineSubmit()
                   : await controller.onEdit();
 
-              // if (success) {
-              //   if (Get.key.currentState?.canPop() == true) {
-              //     Navigator.of(Get.context!, rootNavigator: true).pop(true);
-              //   } else {
-              //     Get.offNamed(AppRoutes.idCard);
-              //   }
-              // }
+              if (canPopForEdit) {
+                if (Get.key.currentState?.canPop() == true) {
+                  Navigator.of(Get.context!, rootNavigator: true).pop(true);
+                } else {
+                  Get.offNamed(AppRoutes.idCard);
+                }
+              }
             },
           ),
         ),
