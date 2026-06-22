@@ -1,21 +1,16 @@
 import 'package:citron_id_card/app/core/components/GetFiledElements.dart';
 import 'package:citron_id_card/app/core/components/app_buttons.dart';
 import 'package:citron_id_card/app/core/components/app_dropdown.dart';
-import 'package:citron_id_card/app/core/components/app_textfield.dart';
 import 'package:citron_id_card/app/core/components/background_gradient.dart';
 import 'package:citron_id_card/app/core/components/two_line_element.dart';
 import 'package:citron_id_card/app/core/constants/asset_constant.dart';
-import 'package:citron_id_card/app/core/constants/global_constants.dart';
 import 'package:citron_id_card/app/core/theme/app_colors.dart';
 import 'package:citron_id_card/app/core/theme/app_text_style.dart';
-import 'package:citron_id_card/app/modules/school/id_card/controllers/id_card_controller.dart';
 import 'package:citron_id_card/app/routes/app_routes.dart';
-import 'package:citron_id_card/app/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../config/network/api_constants.dart';
 import '../controllers/add_id_card_controller.dart';
-import '../model/id_card_field_model.dart';
 
 class AddIdCardView extends GetView<AddIdCardController> {
   const AddIdCardView({super.key});
@@ -33,11 +28,12 @@ class AddIdCardView extends GetView<AddIdCardController> {
             text: controller.student != null ? "Update" : "Submit",
             onPressed: () async {
               if (!controller.formKey.currentState!.validate()) return;
-              final canPopForEdit = controller.student == null
-                  ? await controller.offlineSubmit()
-                  : await controller.onEdit();
+              final isEdit = controller.student != null;
+              final success = isEdit
+                  ? await controller.onEdit()
+                  : await controller.offlineSubmit();
 
-              if (canPopForEdit) {
+              if (success && isEdit) {
                 if (Get.key.currentState?.canPop() == true) {
                   Navigator.of(Get.context!, rootNavigator: true).pop(true);
                 } else {
@@ -66,12 +62,14 @@ class AddIdCardView extends GetView<AddIdCardController> {
               ],
             ),
             Expanded(
-              child: Form(
-                key: controller.formKey,
-                child: GetBuilder<AddIdCardController>(
-                  id: controller.fieldUpdate,
-                  builder: (controller) {
-                    return ListView(
+              child: KeyedSubtree(
+                key: ValueKey('add-id-card-form-${controller.formResetVersion}'),
+                child: Form(
+                  key: controller.formKey,
+                  child: GetBuilder<AddIdCardController>(
+                    id: controller.fieldUpdate,
+                    builder: (controller) {
+                      return ListView(
                       controller: controller.scrollController,
                       shrinkWrap: true,
                       padding: EdgeInsets.all(16),
@@ -79,6 +77,9 @@ class AddIdCardView extends GetView<AddIdCardController> {
                         TwoLineElement(
                           title: "Select batch",
                           child: AppDropdown<String>(
+                            key: ValueKey(
+                              'batch-${controller.formResetVersion}',
+                            ),
                             hintText: "Select your batch",
                             items: controller.batch,
                             value: controller.selectedBatch,
@@ -97,6 +98,9 @@ class AddIdCardView extends GetView<AddIdCardController> {
                         TwoLineElement(
                           title: "Select session",
                           child: AppDropdown<String>(
+                            key: ValueKey(
+                              'session-${controller.formResetVersion}',
+                            ),
                             hintText: "Select your session",
                             items:
                                 controller.sessions.value?.sessions
@@ -118,6 +122,9 @@ class AddIdCardView extends GetView<AddIdCardController> {
                         SizedBox(height: 4),
                         ...controller.fields.map(
                           (element) => Padding(
+                            key: ValueKey(
+                              '${element.title}-${controller.formResetVersion}',
+                            ),
                             padding: const EdgeInsets.symmetric(vertical: 6.0),
                             child: GetFieldElements(
                               isFromAddEdit: true,
@@ -147,8 +154,9 @@ class AddIdCardView extends GetView<AddIdCardController> {
                           },
                         ),
                       ],
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -160,7 +168,7 @@ class AddIdCardView extends GetView<AddIdCardController> {
 }
 
 class _ImageCard extends StatelessWidget {
-  const _ImageCard({super.key, required this.controller});
+  const _ImageCard({required this.controller});
 
   final AddIdCardController controller;
 

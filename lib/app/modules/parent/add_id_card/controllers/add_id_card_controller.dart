@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:citron_id_card/app/core/utils/dialog_utils.dart';
 import 'package:citron_id_card/app/modules/school/id_card/model/offline_cards_model.dart';
-import 'package:citron_id_card/app/modules/school/id_card/model/selected_fields_model.dart';
 import 'package:citron_id_card/app/modules/school/id_card/model/student_id_model.dart';
 import 'package:citron_id_card/app/modules/shared/home/controllers/home_controller.dart';
 import 'package:citron_id_card/app/services/api_service.dart';
@@ -31,7 +29,7 @@ class AddIdCardController extends GetxController {
   final builderId = "addIdCard";
   final fieldUpdate = 'filedUpdate';
   bool isLoading = false;
-  late String selectedBatch;
+  late String? selectedBatch;
   String? selectedSession;
   Map<String, List<dynamic>> dropdownList = {};
 
@@ -39,6 +37,7 @@ class AddIdCardController extends GetxController {
   final ScrollController scrollController = ScrollController();
   final TextEditingController admissionController = TextEditingController();
   Rxn<GetSessions> sessions = Rxn<GetSessions>();
+  int formResetVersion = 0;
 
   @override
   void onInit() {
@@ -251,17 +250,14 @@ class AddIdCardController extends GetxController {
         selectedImage: savedFileToAppDir,
       );
 
-      final result = await SqfLiteService().insertIntoDb(requestBody);
+      await SqfLiteService().insertIntoDb(requestBody);
 
-      if (result == 1) {
-        /// ✅ All APIs succeeded
-        AppSnackBar.show(
-          error: "ID card saved successfully",
-          type: SnackBarType.success,
-        );
-        return true;
-      }
-      return false;
+      AppSnackBar.show(
+        error: "ID card saved successfully",
+        type: SnackBarType.success,
+      );
+      clearForm();
+      return true;
     } catch (e) {
       final message = e is Exception
           ? e.toString().replaceFirst('Exception: ', '')
@@ -271,6 +267,28 @@ class AddIdCardController extends GetxController {
     } finally {
       DialogUtils.hideLoading();
     }
+  }
+
+
+  void clearForm() {
+    formKey.currentState?.reset();
+
+    for (FieldModel field in fields) {
+      field.controller.clear();
+      field.changedValue = null;
+    }
+
+    admissionController.clear();
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    selectedImage = null;
+    studentPhoto = null;
+
+    selectedBatch = batch.isNotEmpty ? batch.first : null;
+    selectedSession = sessions.value?.defaultSession;
+    formResetVersion++;
+
+    update([fieldUpdate, builderId]);
   }
 
   Future<File?> copyFileToAppDir() async {

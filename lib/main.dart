@@ -98,8 +98,10 @@ Future<void> addIdCard() async {
     final dbService = SqfLiteService();
     final apiService = ApiService(client: DioClient());
 
+    final schoolId = await SharedPrefs.instance.getInt(AppConstants.schoolId);
+    if(schoolId==null) return;
     /// Fetch pending records
-    final records = await dbService.getFromDb();
+    final records = await dbService.getFromDb(schoolId: schoolId);
 
     if (records.isEmpty) {
       print("No Pending Records");
@@ -117,11 +119,8 @@ Future<void> addIdCard() async {
     final List<int> offlineIds =
     records.where((e) => e.id != null).map((e) => e.id!).toList();
 
-    int? schoolId;
 
     final List<Map<String, dynamic>> recordsList = records.map((record) {
-      schoolId = record.schoolId;
-
       return {
         "OfflineId": record.id,
         ...record.records,
@@ -173,6 +172,7 @@ Future<void> addIdCard() async {
 
     if (imageRequest.isEmpty) {
       print("No images to upload.");
+      await dbService.deleteMultipleFromDb(ids: offlineIds);
       return;
     }
 

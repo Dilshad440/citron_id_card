@@ -40,21 +40,20 @@ mixin class SqfLiteService {
     );
   }
 
-  Future<List<OfflineCardsModel>> getFromDb() async {
-    List<OfflineCardsModel> storedCards = [];
-
+  Future<List<OfflineCardsModel>> getFromDb({
+    required int schoolId,
+  }) async {
     final db = await _initializeDb();
+
     final data = await db.query(
       AppConstants.tableName,
-      where: 'isSynced = ?',
-      whereArgs: [0],
+      where: 'isSynced = ? AND schoolId = ?',
+      whereArgs: [0, schoolId],
     );
 
-    for (var v in data) {
-      storedCards.add(OfflineCardsModel.fromJson(v));
-    }
-
-    return storedCards;
+    return data
+        .map((e) => OfflineCardsModel.fromJson(e))
+        .toList();
   }
 
   //
