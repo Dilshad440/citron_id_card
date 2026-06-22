@@ -5,6 +5,7 @@ import 'package:citron_id_card/app/core/theme/app_text_style.dart';
 import 'package:citron_id_card/app/modules/school/id_card/views/filter_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../../main.dart';
 import '../../../parent/add_id_card/views/enter_admission_number_view.dart';
 import '../../../school/id_card/views/id_card_view.dart';
 import '../controllers/home_controller.dart';
@@ -99,7 +100,9 @@ class SchoolInfoCard extends StatelessWidget {
                         radius: 40,
                         backgroundColor: Colors.grey.shade200,
                         backgroundImage: schoolUser?.logo != null
-                            ? NetworkImage("${ApiConstants.baseUrl}${schoolUser!.logo!}")
+                            ? NetworkImage(
+                                "${ApiConstants.baseUrl}${schoolUser!.logo!}",
+                              )
                             : null,
                         child: schoolUser?.logo == null
                             ? const Icon(
@@ -140,7 +143,8 @@ class SchoolInfoCard extends StatelessWidget {
                                   .medium
                                   .regular
                                   .semiBold
-                                  .textColor.ellipsis,
+                                  .textColor
+                                  .ellipsis,
                             ),
                           ),
                         ],
@@ -181,7 +185,8 @@ class SchoolInfoCard extends StatelessWidget {
                                   .medium
                                   .regular
                                   .textColor
-                                  .ellipsis.ellipsis,
+                                  .ellipsis
+                                  .ellipsis,
                             ),
                           ),
                         ],

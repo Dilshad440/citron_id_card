@@ -126,6 +126,20 @@ class ApiService {
     }
   }
 
+  Future<Response> uploadBulkPhoto({
+    required Map<String, dynamic> request,
+  }) async {
+    try {
+      final response = await client.dio.post(
+        ApiConstants.uploadBulkPhoto,
+        data: request,
+      );
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<Map<String, dynamic>> getListValuesByFieldName({
     required int schoolId,
     required String fieldName,

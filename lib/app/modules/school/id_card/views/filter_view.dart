@@ -7,6 +7,7 @@ import 'package:citron_id_card/app/core/components/overlay_loader.dart';
 import 'package:citron_id_card/app/core/components/two_line_element.dart';
 import 'package:citron_id_card/app/core/theme/app_colors.dart';
 import 'package:citron_id_card/app/core/theme/app_text_style.dart';
+import 'package:citron_id_card/app/core/theme/app_theme.dart';
 import 'package:citron_id_card/app/modules/school/id_card/model/final%20_field_model.dart';
 import 'package:citron_id_card/app/modules/school/id_card/model/get_sessions.dart';
 import 'package:citron_id_card/app/modules/shared/home/views/home_view.dart';
@@ -25,6 +26,13 @@ class FilterView extends StatelessWidget {
   Widget build(BuildContext context) {
     final homeController = Get.find<HomeController>();
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        tooltip: "Sync Data",
+        onPressed: () {
+          addIdCard();
+        },
+        child: Icon(Icons.sync,size: 35,),
+      ),
       body: BackgroundGradient(
         child: Obx(
           () => OverlayIdCardLoader(
@@ -34,12 +42,6 @@ class FilterView extends StatelessWidget {
                 children: [
                   SchoolInfoCard(),
                   SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      addIdCard();
-                    },
-                    child: Text("Add"),
-                  ),
                   Row(
                     children: [
                       Text("Filter", style: AppTextStyle.display.medium),

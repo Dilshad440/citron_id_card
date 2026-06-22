@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:citron_id_card/app/config/app_config.dart';
@@ -12,6 +13,7 @@ import 'package:citron_id_card/app/config/network/dio_client.dart';
 import 'package:citron_id_card/app/core/constants/app_constants.dart';
 import 'package:citron_id_card/app/core/theme/app_theme.dart';
 import 'package:citron_id_card/app/core/utils/common_utils.dart';
+import 'package:citron_id_card/app/modules/school/id_card/model/records_uploaded_res.dart';
 import 'package:citron_id_card/app/modules/shared/login/bindings/login_binding.dart';
 import 'package:citron_id_card/app/modules/shared/login/model/login_response.dart';
 import 'package:citron_id_card/app/routes/app_pages.dart';
@@ -24,6 +26,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+
+import 'app/modules/school/id_card/model/offline_cards_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -92,47 +96,106 @@ void onStart(ServiceInstance service) async {
 Future<void> addIdCard() async {
   try {
     final dbService = SqfLiteService();
+    final apiService = ApiService(client: DioClient());
 
-    /// ========================
-    /// FETCH UNSYNCED RECORDS
-    /// ========================
-
+    /// Fetch pending records
     final records = await dbService.getFromDb();
 
-    print("Pending Records Count: ${records.length}");
-    int? schoolId;
-    final List<Map<String, dynamic>> recordsList = records.map((e) {
-      schoolId = e.schoolId ?? 0;
-      return e.records;
-    }).toList();
-    print("Json Data:::${jsonEncode(recordsList)}");
-    print("SchoolID:::$schoolId");
-    final requestData = {"schoolId": schoolId, "records": recordsList};
-
-    if (records.isEmpty || recordsList.isEmpty) {
+    if (records.isEmpty) {
       print("No Pending Records");
-
       return;
     }
 
-    final apiService = ApiService(client: DioClient());
+    print("Pending Records Count: ${records.length}");
 
-    try {
-      print("Uploading Record");
+    /// Local DB ID -> OfflineCardsModel
+    final Map<int, OfflineCardsModel> recordsMap = {
+      for (final record in records)
+        if (record.id != null) record.id!: record,
+    };
 
-      /// ========================
-      /// ADD CARD API
-      /// ========================
+    final List<int> offlineIds =
+    records.where((e) => e.id != null).map((e) => e.id!).toList();
 
-      final response = await apiService.addIdCard(requestData);
-      if (response.statusCode == 200) {
-        ///
-      }
-    } catch (e) {
-      print("Error $e");
+    int? schoolId;
+
+    final List<Map<String, dynamic>> recordsList = records.map((record) {
+      schoolId = record.schoolId;
+
+      return {
+        "OfflineId": record.id,
+        ...record.records,
+      };
+    }).toList();
+
+    final requestData = {
+      "schoolId": schoolId,
+      "records": recordsList,
+    };
+
+    print("Request: ${jsonEncode(requestData)}");
+
+    /// Upload records
+    final response = await apiService.addIdCard(requestData);
+
+    if (response.statusCode != 200) {
+      print("Record Upload Failed");
+      return;
     }
-  } catch (e) {
-    print("Error${e}");
+
+    final uploadResponse = RecordsUploadRes.fromJson(response.data);
+
+    /// Prepare photo upload request
+    final List<Map<String, dynamic>> imageRequest = [];
+
+    for (final created in uploadResponse.createdIds ?? []) {
+      final localRecord = recordsMap[created.offlineId];
+
+      if (localRecord == null) {
+        print("Local record not found for OfflineId ${created.offlineId}");
+        continue;
+      }
+
+      final image = localRecord.selectedImage;
+
+      if (image == null) {
+        print("No image found for OfflineId ${created.offlineId}");
+        continue;
+      }
+
+      imageRequest.add({
+        "idRecordId": created.id,
+        "base64Photo": await CommonUtils.fileToBase64(image),
+      });
+    }
+
+    print("Photo Upload Request: ${jsonEncode(imageRequest)}");
+
+    if (imageRequest.isEmpty) {
+      print("No images to upload.");
+      return;
+    }
+
+    /// Upload photos
+    final imageResponse = await apiService.uploadBulkPhoto(
+      request: {
+        "schoolId": schoolId,
+        "photos": imageRequest,
+      },
+    );
+
+    if (imageResponse.statusCode == 200) {
+      print("Image Upload Success");
+
+      await dbService.deleteMultipleFromDb(ids: offlineIds);
+
+      print("Offline records deleted successfully.");
+    } else {
+      print("Image Upload Failed");
+    }
+  } catch (e, stackTrace) {
+    print("addIdCard Error: $e");
+    print(stackTrace);
   }
 }
 

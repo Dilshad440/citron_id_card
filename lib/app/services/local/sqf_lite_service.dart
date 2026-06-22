@@ -69,15 +69,19 @@ mixin class SqfLiteService {
     );
   }
 
-  // Future<int> deleteInDb({required String id}) async {
-  //   final db = await _initializeDb();
-  //   return await db.delete(
-  //     AppConstant.tableName,
-  //     where: 'varEmpCode = ?',
-  //     whereArgs: [id],
-  //   );
-  // }
+  Future<int> deleteMultipleFromDb({
+    required List<int> ids,
+  }) async {
+    if (ids.isEmpty) return 0;
 
+    final db = await _initializeDb();
+
+    return await db.delete(
+      AppConstants.tableName,
+      where: 'id IN (${List.filled(ids.length, '?').join(',')})',
+      whereArgs: ids,
+    );
+  }
   String createColumns(Map<dynamic, dynamic> map) {
     String column = ' ';
     map.forEach((key, value) {
