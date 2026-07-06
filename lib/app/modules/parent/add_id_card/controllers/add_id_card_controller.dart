@@ -107,7 +107,9 @@ class AddIdCardController extends GetxController {
             enforcementType: field.enforceType ?? false,
             dropdownList: dropdownList,
             isRequired: field.isRequired ?? false,
-            changedValue:(fieldType == FieldType.list && student!=null)? text:null,
+            changedValue: (fieldType == FieldType.list && student != null)
+                ? text
+                : null,
             controller: TextEditingController(text: text),
             keyboardType: isTextField ? TextInputType.text : TextInputType.none,
             type: fieldType,
@@ -157,68 +159,98 @@ class AddIdCardController extends GetxController {
     }
   }
 
-  // Future<bool> onSubmit(Map<String, dynamic> records, File? img) async {
-  //   // DialogUtils.showLoading();
-  //
-  //   int? createdCardId;
-  //
-  //   try {
-  //     final homeController = Get.find<HomeController>();
-  //     final schoolUser = homeController.schoolUser.value;
-  //
-  //     if (schoolUser == null) {
-  //       throw Exception('School user not found');
-  //     }
-  //
-  //     /// 1️⃣ Create ID card
-  //     final response = await service.addIdCard(records);
-  //
-  //     if (response.statusCode != 200 || response.data == null) {
-  //       throw Exception('Failed to create ID card');
-  //     }
-  //
-  //     createdCardId = response.data['id'];
-  //
-  //     /// 2️⃣ Upload photo (if exists)
-  //     if (img != null) {
-  //       final photoBase64 = await CommonUtils.fileToBase64(img);
-  //
-  //       final uploadPhotoRes = await service.uploadPhoto(
-  //         base64: photoBase64,
-  //         stdId: createdCardId!,
-  //       );
-  //
-  //       if (uploadPhotoRes.statusCode != 200) {
-  //         throw Exception('Failed to upload photo');
-  //       }
-  //     }
-  //
-  //     /// ✅ All APIs succeeded
-  //     AppSnackBar.show(
-  //       error: "ID card added successfully",
-  //       type: SnackBarType.success,
-  //     );
-  //     return true;
-  //   } catch (e) {
-  //     /// 🔴 Rollback if card was created
-  //     if (createdCardId != null) {
-  //       try {
-  //         await service.deleteCard(createdCardId);
-  //         debugPrint("ID Card rolled back due to failure");
-  //       } catch (deleteError) {
-  //         debugPrint("Failed to rollback ID Card: $deleteError");
-  //       }
-  //     }
-  //     final message = e is Exception
-  //         ? e.toString().replaceFirst('Exception: ', '')
-  //         : e;
-  //     AppSnackBar.show(error: message, type: SnackBarType.error);
-  //
-  //     return false;
-  //   } finally {
-  //     DialogUtils.hideLoading();
-  //   }
-  // }
+  Future<bool> onSubmit() async {
+    DialogUtils.showLoading();
+
+    int? createdCardId;
+
+    try {
+      final homeController = Get.find<HomeController>();
+      final schoolUser = homeController.schoolUser.value;
+
+      if (schoolUser == null) {
+        throw Exception('School user not found');
+      }
+
+      final Map<String, dynamic> requestData = {
+        'schoolId': schoolUser.schoolId,
+        'session': selectedSession,
+        'batch': selectedBatch,
+        "data": {
+          for (final field in fields)
+            field.title: _formatValue(
+              field.title,
+              field.controller.text.trim(),
+            ),
+        },
+      };
+
+      /// 1️⃣ Create ID card
+      final response = await service.addIdCard(requestData);
+
+      if (response.statusCode != 200 || response.data == null) {
+        throw Exception('Failed to create ID card');
+      }
+
+      createdCardId = response.data['id'];
+
+      /// 2️⃣ Upload photo (if exists)
+      if (selectedImage != null) {
+        final photoBase64 = await CommonUtils.fileToBase64(selectedImage!);
+
+        final uploadPhotoRes = await service.uploadPhoto(
+          base64: photoBase64,
+          stdId: createdCardId!,
+        );
+
+        if (uploadPhotoRes.statusCode != 200) {
+          throw Exception('Failed to upload photo');
+        }
+      }
+
+      /// ✅ All APIs succeeded
+      AppSnackBar.show(
+        error: "ID card added successfully",
+        type: SnackBarType.success,
+      );
+
+      return true;
+    } catch (e) {
+      /// 🔴 Rollback if card was created
+      if (createdCardId != null) {
+        try {
+          await service.deleteCard(createdCardId);
+          debugPrint("ID Card rolled back due to failure");
+        } catch (deleteError) {
+          debugPrint("Failed to rollback ID Card: $deleteError");
+        }
+      }
+      final message = e is Exception
+          ? e.toString().replaceFirst('Exception: ', '')
+          : e;
+      AppSnackBar.show(error: message, type: SnackBarType.error);
+
+      return false;
+    } finally {
+      DialogUtils.hideLoading();
+    }
+  }
+
+  String _formatValue(String title, String value) {
+    final key = title.trim().toLowerCase();
+
+    if (key == "dob" || key.contains("date")) {
+      try {
+        final parsed = DateFormat("dd-MM-yyyy").parseStrict(value);
+        return DateFormat("yyyy-MM-dd").format(parsed);
+      } catch (e) {
+        print("Date parse failed for $title: $value");
+        return value;
+      }
+    }
+
+    return value;
+  }
 
   Future<bool> offlineSubmit() async {
     DialogUtils.showLoading();
@@ -268,7 +300,6 @@ class AddIdCardController extends GetxController {
       DialogUtils.hideLoading();
     }
   }
-
 
   void clearForm() {
     formKey.currentState?.reset();
@@ -326,22 +357,6 @@ class AddIdCardController extends GetxController {
     }
   }
 
-  String _formatValue(String title, String value) {
-    final key = title.trim().toLowerCase();
-
-    if (key == "dob" || key.contains("date")) {
-      try {
-        final parsed = DateFormat("dd-MM-yyyy").parseStrict(value);
-        return DateFormat("yyyy-MM-dd").format(parsed);
-      } catch (e) {
-        print("Date parse failed for $title: $value");
-        return value;
-      }
-    }
-
-    return value;
-  }
-
   Future<bool> onEdit() async {
     DialogUtils.showLoading();
     try {
@@ -358,10 +373,7 @@ class AddIdCardController extends GetxController {
             ),
         },
       };
-      final response = await service.editIdCard(
-        requestData,
-        student!.id!,
-      );
+      final response = await service.editIdCard(requestData, student!.id!);
 
       if (response.statusCode != 200) {
         throw 'Failed to update ID card';

@@ -31,7 +31,7 @@ class FilterView extends StatelessWidget {
         onPressed: () {
           addIdCard();
         },
-        child: Icon(Icons.sync,size: 35,),
+        child: Icon(Icons.sync, size: 35),
       ),
       body: BackgroundGradient(
         child: Obx(
@@ -160,7 +160,8 @@ class FilterView extends StatelessWidget {
                   SizedBox(height: 20),
                   AppButton(
                     text: "Filter",
-                    onPressed: () {
+                    onPressed: () async {
+                      await addIdCard();
                       homeController.getFilterResponse();
                     },
                   ),

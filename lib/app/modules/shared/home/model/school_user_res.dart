@@ -20,6 +20,7 @@ class SchoolUserRes {
   bool? canEdit;
   String? selectedFields;
   String? customer;
+  bool? allowOfflineMode;
   String? user;
 
   SchoolUserRes({
@@ -44,6 +45,7 @@ class SchoolUserRes {
     this.canEdit,
     this.selectedFields,
     this.customer,
+    this.allowOfflineMode,
     this.user,
   });
 
@@ -69,6 +71,7 @@ class SchoolUserRes {
     canEdit = json['canEdit'];
     selectedFields = json['selectedFields'];
     customer = json['customer'];
+    allowOfflineMode = json['allowOfflineMode'];
     user = json['user'];
   }
 
@@ -96,6 +99,8 @@ class SchoolUserRes {
     data['selectedFields'] = this.selectedFields;
     data['customer'] = this.customer;
     data['user'] = this.user;
+    data['allowOfflineMode'] = allowOfflineMode;
+
     return data;
   }
 }

@@ -6,6 +6,7 @@ import 'package:citron_id_card/app/core/components/two_line_element.dart';
 import 'package:citron_id_card/app/core/constants/asset_constant.dart';
 import 'package:citron_id_card/app/core/theme/app_colors.dart';
 import 'package:citron_id_card/app/core/theme/app_text_style.dart';
+import 'package:citron_id_card/app/modules/shared/home/controllers/home_controller.dart';
 import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -29,11 +30,22 @@ class AddIdCardView extends GetView<AddIdCardController> {
             onPressed: () async {
               if (!controller.formKey.currentState!.validate()) return;
               final isEdit = controller.student != null;
-              final success = isEdit
-                  ? await controller.onEdit()
-                  : await controller.offlineSubmit();
+              final isAllowedOfflineMode =
+                  Get.find<HomeController>()
+                      .schoolUser
+                      .value
+                      ?.allowOfflineMode ??
+                  false;
+              bool isSuccess = false;
+              if (isEdit) {
+                isSuccess = await controller.onEdit();
+              } else if (isAllowedOfflineMode) {
+                isSuccess = await controller.offlineSubmit();
+              } else {
+                isSuccess = await controller.onSubmit();
+              }
 
-              if (success && isEdit) {
+              if (isSuccess && isEdit) {
                 if (Get.key.currentState?.canPop() == true) {
                   Navigator.of(Get.context!, rootNavigator: true).pop(true);
                 } else {
@@ -63,97 +75,101 @@ class AddIdCardView extends GetView<AddIdCardController> {
             ),
             Expanded(
               child: KeyedSubtree(
-                key: ValueKey('add-id-card-form-${controller.formResetVersion}'),
+                key: ValueKey(
+                  'add-id-card-form-${controller.formResetVersion}',
+                ),
                 child: Form(
                   key: controller.formKey,
                   child: GetBuilder<AddIdCardController>(
                     id: controller.fieldUpdate,
                     builder: (controller) {
                       return ListView(
-                      controller: controller.scrollController,
-                      shrinkWrap: true,
-                      padding: EdgeInsets.all(16),
-                      children: [
-                        TwoLineElement(
-                          title: "Select batch",
-                          child: AppDropdown<String>(
-                            key: ValueKey(
-                              'batch-${controller.formResetVersion}',
-                            ),
-                            hintText: "Select your batch",
-                            items: controller.batch,
-                            value: controller.selectedBatch,
-                            validator: (value) {
-                              if (value == null) {
-                                return "Select your session";
-                              }
-                              return null;
-                            },
-                            onChanged: (value) {
-                              controller.selectedBatch = value!;
-                            },
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        TwoLineElement(
-                          title: "Select session",
-                          child: AppDropdown<String>(
-                            key: ValueKey(
-                              'session-${controller.formResetVersion}',
-                            ),
-                            hintText: "Select your session",
-                            items:
-                                controller.sessions.value?.sessions
-                                    ?.map((e) => e.session ?? "")
-                                    .toList() ??
-                                [],
-                            value: controller.selectedSession,
-                            validator: (value) {
-                              if (value == null) {
-                                return "Select your session";
-                              }
-                              return null;
-                            },
-                            onChanged: (value) {
-                              controller.selectedSession = value!;
-                            },
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        ...controller.fields.map(
-                          (element) => Padding(
-                            key: ValueKey(
-                              '${element.title}-${controller.formResetVersion}',
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 6.0),
-                            child: GetFieldElements(
-                              isFromAddEdit: true,
-                              fieldModel: element,
-                              onChanged: (value, fieldName) {
-                                element.changedValue = value;
-                                element.controller.text = value!;
+                        controller: controller.scrollController,
+                        shrinkWrap: true,
+                        padding: EdgeInsets.all(16),
+                        children: [
+                          TwoLineElement(
+                            title: "Select batch",
+                            child: AppDropdown<String>(
+                              key: ValueKey(
+                                'batch-${controller.formResetVersion}',
+                              ),
+                              hintText: "Select your batch",
+                              items: controller.batch,
+                              value: controller.selectedBatch,
+                              validator: (value) {
+                                if (value == null) {
+                                  return "Select your session";
+                                }
+                                return null;
+                              },
+                              onChanged: (value) {
+                                controller.selectedBatch = value!;
                               },
                             ),
-                            // TwoLineElement(
-                            //   title: e.title,
-                            //   child: AppTextField(
-                            //     hintText: e.hint,
-                            //     validator: e.validator,
-                            //     controller: e.controller,
-                            //     key: e.fieldKey,
-                            //   ),
-                            // ),
                           ),
-                        ),
+                          SizedBox(height: 8),
+                          TwoLineElement(
+                            title: "Select session",
+                            child: AppDropdown<String>(
+                              key: ValueKey(
+                                'session-${controller.formResetVersion}',
+                              ),
+                              hintText: "Select your session",
+                              items:
+                                  controller.sessions.value?.sessions
+                                      ?.map((e) => e.session ?? "")
+                                      .toList() ??
+                                  [],
+                              value: controller.selectedSession,
+                              validator: (value) {
+                                if (value == null) {
+                                  return "Select your session";
+                                }
+                                return null;
+                              },
+                              onChanged: (value) {
+                                controller.selectedSession = value!;
+                              },
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          ...controller.fields.map(
+                            (element) => Padding(
+                              key: ValueKey(
+                                '${element.title}-${controller.formResetVersion}',
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 6.0,
+                              ),
+                              child: GetFieldElements(
+                                isFromAddEdit: true,
+                                fieldModel: element,
+                                onChanged: (value, fieldName) {
+                                  element.changedValue = value;
+                                  element.controller.text = value!;
+                                },
+                              ),
+                              // TwoLineElement(
+                              //   title: e.title,
+                              //   child: AppTextField(
+                              //     hintText: e.hint,
+                              //     validator: e.validator,
+                              //     controller: e.controller,
+                              //     key: e.fieldKey,
+                              //   ),
+                              // ),
+                            ),
+                          ),
 
-                        SizedBox(height: 12),
-                        GetBuilder<AddIdCardController>(
-                          id: controller.builderId,
-                          builder: (controller) {
-                            return _ImageCard(controller: controller);
-                          },
-                        ),
-                      ],
+                          SizedBox(height: 12),
+                          GetBuilder<AddIdCardController>(
+                            id: controller.builderId,
+                            builder: (controller) {
+                              return _ImageCard(controller: controller);
+                            },
+                          ),
+                        ],
                       );
                     },
                   ),
