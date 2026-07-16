@@ -113,9 +113,13 @@ class SchoolInfoCard extends StatelessWidget {
                             : null,
                       ),
                       SizedBox(width: 15),
-                      Text(
-                        schoolUser?.schoolName ?? "",
-                        style: AppTextStyle.display.large.bold.textColor,
+                      Flexible(
+                        child: Text(
+                          schoolUser?.schoolName ?? "",
+
+                          style: AppTextStyle.display.medium.bold.textColor
+                              .copyWith(fontSize: 24, height: 1.2),
+                        ),
                       ),
                       const SizedBox(width: 16),
 

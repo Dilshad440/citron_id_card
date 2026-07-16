@@ -44,14 +44,14 @@ class AddIdCardController extends GetxController {
     student = Get.arguments;
     studentPhoto = student?.photo;
     selectedBatch = batch.first;
-    getSession();
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       getSelectedFields();
     });
     super.onInit();
   }
 
-  void getSession() async {
+  Future<void> getSession() async {
     final sessionsRes = await service.getSessions();
     sessions.value = sessionsRes;
     selectedSession = sessionsRes.defaultSession ?? "";
@@ -66,7 +66,7 @@ class AddIdCardController extends GetxController {
       isLoading = true;
       DialogUtils.showLoading();
       update([fieldUpdate]);
-
+      await getSession();
       final studentData = student?.data?.toJson() ?? {};
       final schoolId = schoolUser!.schoolId!;
 
