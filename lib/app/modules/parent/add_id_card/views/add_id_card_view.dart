@@ -39,7 +39,7 @@ class AddIdCardView extends GetView<AddIdCardController> {
               bool isSuccess = false;
               if (isEdit) {
                 isSuccess = await controller.onEdit();
-              } else if (isAllowedOfflineMode) {
+              } else if (!isAllowedOfflineMode) {
                 isSuccess = await controller.offlineSubmit();
               } else {
                 isSuccess = await controller.onSubmit();

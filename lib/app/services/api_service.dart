@@ -46,6 +46,14 @@ class ApiService {
 
   Future<Response<dynamic>> addIdCard(Map<String, dynamic> request) async {
     final response = await client.dio.post(
+      ApiConstants.addIdCard,
+      data: request,
+    );
+    return response;
+  }
+
+  Future<Response<dynamic>> addBulkIdCard(Map<String, dynamic> request) async {
+    final response = await client.dio.post(
       ApiConstants.addBulkIdCard,
       data: request,
     );

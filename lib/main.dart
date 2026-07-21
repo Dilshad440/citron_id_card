@@ -99,7 +99,8 @@ Future<void> addIdCard() async {
     final apiService = ApiService(client: DioClient());
 
     final schoolId = await SharedPrefs.instance.getInt(AppConstants.schoolId);
-    if(schoolId==null) return;
+    if (schoolId == null) return;
+
     /// Fetch pending records
     final records = await dbService.getFromDb(schoolId: schoolId);
 
@@ -116,26 +117,21 @@ Future<void> addIdCard() async {
         if (record.id != null) record.id!: record,
     };
 
-    final List<int> offlineIds =
-    records.where((e) => e.id != null).map((e) => e.id!).toList();
-
+    final List<int> offlineIds = records
+        .where((e) => e.id != null)
+        .map((e) => e.id!)
+        .toList();
 
     final List<Map<String, dynamic>> recordsList = records.map((record) {
-      return {
-        "OfflineId": record.id,
-        ...record.records,
-      };
+      return {"OfflineId": record.id, ...record.records};
     }).toList();
 
-    final requestData = {
-      "schoolId": schoolId,
-      "records": recordsList,
-    };
+    final requestData = {"schoolId": schoolId, "records": recordsList};
 
     print("Request: ${jsonEncode(requestData)}");
 
     /// Upload records
-    final response = await apiService.addIdCard(requestData);
+    final response = await apiService.addBulkIdCard(requestData);
 
     if (response.statusCode != 200) {
       print("Record Upload Failed");
@@ -178,10 +174,7 @@ Future<void> addIdCard() async {
 
     /// Upload photos
     final imageResponse = await apiService.uploadBulkPhoto(
-      request: {
-        "schoolId": schoolId,
-        "photos": imageRequest,
-      },
+      request: {"schoolId": schoolId, "photos": imageRequest},
     );
 
     if (imageResponse.statusCode == 200) {
