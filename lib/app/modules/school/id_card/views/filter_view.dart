@@ -28,6 +28,7 @@ class FilterView extends StatelessWidget {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         tooltip: "Sync Data",
+        heroTag: "sync",
         onPressed: () {
           addIdCard();
         },
@@ -54,6 +55,7 @@ class FilterView extends StatelessWidget {
                                 tooltip: "Add New Student",
                                 extendedIconLabelSpacing: 5,
                                 isExtended: true,
+                                heroTag: "add-student",
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -67,8 +69,30 @@ class FilterView extends StatelessWidget {
                                   "Add Student",
                                   style: AppTextStyle.body.medium.textColor,
                                 ),
-                                onPressed: () {
-                                  Get.toNamed(AppRoutes.addIdCard);
+                                onPressed: () async {
+                                  final result = await Get.toNamed(
+                                    AppRoutes.addIdCard,
+                                  );
+                                  if (result) {
+                                    final homeController =
+                                        Get.find<HomeController>();
+                                    final hasClassAndSection =
+                                        homeController.fieldModel.any(
+                                          (f) =>
+                                              f.title.toLowerCase() == "class",
+                                        ) &&
+                                        homeController.fieldModel.any(
+                                          (f) =>
+                                              f.title.toLowerCase() ==
+                                              "section",
+                                        );
+                                    if (hasClassAndSection) {
+                                      await homeController.getClassAndSection(
+                                        homeController.selectedSession!,
+                                      );
+                                    }
+                                  }
+                                  print("Result::::$result");
                                 },
                               ),
                             )

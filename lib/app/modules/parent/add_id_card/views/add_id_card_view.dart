@@ -14,7 +14,9 @@ import '../../../../config/network/api_constants.dart';
 import '../controllers/add_id_card_controller.dart';
 
 class AddIdCardView extends GetView<AddIdCardController> {
-  const AddIdCardView({super.key});
+  AddIdCardView({super.key});
+
+  bool isSuccess = false;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,6 @@ class AddIdCardView extends GetView<AddIdCardController> {
                       .value
                       ?.allowOfflineMode ??
                   false;
-              bool isSuccess = false;
               if (isEdit) {
                 isSuccess = await controller.onEdit();
               } else if (!isAllowedOfflineMode) {
@@ -63,7 +64,7 @@ class AddIdCardView extends GetView<AddIdCardController> {
               children: [
                 IconButton(
                   onPressed: () {
-                    Get.back();
+                    Get.back(result: isSuccess);
                   },
                   icon: Icon(Icons.arrow_back),
                 ),

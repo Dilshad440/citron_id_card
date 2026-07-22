@@ -49,6 +49,7 @@ class GetFieldElements extends StatelessWidget {
           hintText: fieldModel.hint,
           value: fieldModel.changedValue,
           items: items,
+          isSearchable: items.length > 3,
           validator: fieldModel.validator,
           onChanged: (value) =>
               onChanged.call(value, fieldModel.title.toLowerCase()),

@@ -38,7 +38,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.addIdCard,
-      page: () => const AddIdCardView(),
+      page: () =>  AddIdCardView(),
       binding: AddIdCardBinding(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),

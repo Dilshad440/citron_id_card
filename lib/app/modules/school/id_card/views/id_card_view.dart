@@ -33,6 +33,44 @@ class IdCardView extends GetView<IdCardController> {
                   "Student Id Card",
                   style: AppTextStyle.title.large.textColor,
                 ),
+                Spacer(),
+                GetBuilder<IdCardController>(
+                  builder: (controller) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text.rich(
+                          TextSpan(
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors
+                                  .black87, // Change to fit your app theme
+                            ),
+                            children: [
+                              TextSpan(
+                                text: '${controller.schoolIds?.length ?? 0} ',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              TextSpan(
+                                text: controller.schoolIds?.length == 1
+                                    ? 'card found'
+                                    : 'cards found',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ],
             ),
             Expanded(
@@ -46,31 +84,33 @@ class IdCardView extends GetView<IdCardController> {
                       controller.schoolIds == null) {
                     return Center(child: Text("No data found!!!"));
                   }
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: controller.schoolIds?.length,
-                    itemBuilder: (_, index) {
-                      final students = controller.schoolIds?[index];
-                      return _StudentIdCard(
-                        student: students,
-                        index: index,
-                        onEdit: (std) async {
-                          if (std == null) return;
-                          final result = await Get.toNamed(
-                            AppRoutes.addIdCard,
-                            arguments: std,
-                          );
-                          if (result == true) {
-                            controller.getIdCards();
-                          }
-                        },
-                        onDelete: (std) async {
-                          controller.deleteIdCard(std!.id!);
-                        },
-                        onExpand: (val) => controller.expandCard(index, val),
-                      );
-                    },
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: controller.schoolIds?.length,
+                      itemBuilder: (_, index) {
+                        final students = controller.schoolIds?[index];
+                        return _StudentIdCard(
+                          student: students,
+                          index: index,
+                          onEdit: (std) async {
+                            if (std == null) return;
+                            final result = await Get.toNamed(
+                              AppRoutes.addIdCard,
+                              arguments: std,
+                            );
+                            if (result == true) {
+                              controller.getIdCards();
+                            }
+                          },
+                          onDelete: (std) async {
+                            controller.deleteIdCard(std!.id!);
+                          },
+                          onExpand: (val) => controller.expandCard(index, val),
+                        );
+                      },
+                    ),
                   );
                 },
               ),
