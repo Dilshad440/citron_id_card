@@ -6,7 +6,6 @@ import 'package:citron_id_card/app/modules/shared/home/controllers/home_controll
 import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_style.dart';
 import '../controllers/id_card_controller.dart';
@@ -27,14 +26,15 @@ class IdCardView extends GetView<IdCardController> {
                   onPressed: () {
                     Get.back();
                   },
-                  icon: Icon(Icons.arrow_back),
+                  icon: const Icon(Icons.arrow_back),
                 ),
                 Text(
                   "Student Id Card",
                   style: AppTextStyle.title.large.textColor,
                 ),
-                Spacer(),
+                const Spacer(),
                 GetBuilder<IdCardController>(
+                  id: "idCard",
                   builder: (controller) {
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -44,8 +44,7 @@ class IdCardView extends GetView<IdCardController> {
                           TextSpan(
                             style: const TextStyle(
                               fontSize: 14,
-                              color: Colors
-                                  .black87, // Change to fit your app theme
+                              color: Colors.black87,
                             ),
                             children: [
                               TextSpan(
@@ -78,11 +77,11 @@ class IdCardView extends GetView<IdCardController> {
                 id: "idCard",
                 builder: (controller) {
                   if (controller.isLoading.value) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }
                   if (!controller.isLoading.value &&
                       controller.schoolIds == null) {
-                    return Center(child: Text("No data found!!!"));
+                    return const Center(child: Text("No data found!!!"));
                   }
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -137,10 +136,19 @@ class _StudentIdCard extends GetView<IdCardController> {
   final Function(bool val) onExpand;
   final int index;
 
+  /// Helper to extract non-null/non-empty entries in exact API sequence
+  List<MapEntry<String, dynamic>> _getValidEntries(Map<String, dynamic>? json) {
+    if (json == null) return [];
+    return json.entries.where((e) {
+      final value = e.value?.toString().trim();
+      return value != null && value.isNotEmpty && value.toLowerCase() != 'null';
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final schoolUser = Get.find<HomeController>().schoolUser.value;
-    final studentObj = student?.data?.toJson() ?? {};
+    final validEntries = _getValidEntries(student?.data?.toJson());
 
     return GestureDetector(
       onTap: () => onExpand.call(student?.isExpanded ?? false),
@@ -149,11 +157,6 @@ class _StudentIdCard extends GetView<IdCardController> {
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.borderColor),
           color: AppColors.generateGradientColors().first,
-          // gradient: LinearGradient(
-          //   colors: AppColors.generateGradientColors(),
-          //   begin: Alignment.topLeft,
-          //   end: Alignment.bottomRight,
-          // ),
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
@@ -171,14 +174,9 @@ class _StudentIdCard extends GetView<IdCardController> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.primaryColor,
-                    // gradient: LinearGradient(
-                    //   colors: AppColors.generateGradientColors(),
-                    //   end: Alignment.topRight,
-                    //   begin: Alignment.topLeft,
-                    // ),
-                    borderRadius: const BorderRadius.vertical(
+                    borderRadius: BorderRadius.vertical(
                       top: Radius.circular(18),
                     ),
                   ),
@@ -186,11 +184,7 @@ class _StudentIdCard extends GetView<IdCardController> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        Get.find<HomeController>()
-                                .schoolUser
-                                .value
-                                ?.schoolName ??
-                            "",
+                        schoolUser?.schoolName ?? "",
                         style: AppTextStyle.title.medium.textColor.bold,
                       ),
                     ],
@@ -228,12 +222,17 @@ class _StudentIdCard extends GetView<IdCardController> {
                 ),
               ],
             ),
+
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 if (student?.isExpanded ?? false) ...[
-                  /// Expanded View
-                  _ExpandedView(index: index, student: student),
+                  /// Expanded View (Top 2 entries under Avatar in API sequence)
+                  _ExpandedView(
+                    index: index,
+                    student: student,
+                    validEntries: validEntries,
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -242,35 +241,27 @@ class _StudentIdCard extends GetView<IdCardController> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        ...studentObj.entries
-                            .where(
-                              (e) =>
-                                  e.value != null &&
-                                  e.value.toString().trim().isNotEmpty &&
-                                  e.value.toString().toLowerCase() != 'null',
-                            )
-                            .skip(2)
-                            .map((e) {
-                              return _infoRow(
-                                label: e.key,
-                                value: e.key.toLowerCase() == "dob"
-                                    ? CommonUtils.formatDateForUI(
-                                        e.value.toString(),
-                                      )
-                                    : e.value.toString(),
-                                bottomPadding: 0,
-                              );
-                            }),
-
+                        /// Remaining entries in API sequence
+                        ...validEntries.skip(2).map((e) {
+                          return _infoRow(
+                            label: e.key,
+                            value: e.key.toLowerCase() == "dob"
+                                ? CommonUtils.formatDateForUI(
+                                    e.value.toString(),
+                                  )
+                                : e.value.toString(),
+                            bottomPadding: 0,
+                          );
+                        }),
                         const SizedBox(height: 12),
                       ],
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.primaryColor,
-                      borderRadius: const BorderRadius.vertical(
+                      borderRadius: BorderRadius.vertical(
                         bottom: Radius.circular(18),
                       ),
                     ),
@@ -280,14 +271,15 @@ class _StudentIdCard extends GetView<IdCardController> {
                         Expanded(
                           child: GetBuilder<HomeController>(
                             builder: (controller) {
-                              final schoolUser = controller.schoolUser.value;
+                              final currentSchoolUser =
+                                  controller.schoolUser.value;
                               return Column(
                                 children: [
                                   Text(
                                     [
-                                          schoolUser?.address1,
-                                          schoolUser?.address2,
-                                          schoolUser?.address3,
+                                          currentSchoolUser?.address1,
+                                          currentSchoolUser?.address2,
+                                          currentSchoolUser?.address3,
                                         ]
                                         .where(
                                           (e) =>
@@ -298,7 +290,7 @@ class _StudentIdCard extends GetView<IdCardController> {
                                     style: AppTextStyle.title.small.textColor,
                                   ),
                                   Text(
-                                    "Mob: ${schoolUser?.contactNo?.trim().isNotEmpty == true ? schoolUser!.contactNo : 'NA'}",
+                                    "Mob: ${currentSchoolUser?.contactNo?.trim().isNotEmpty == true ? currentSchoolUser!.contactNo : 'NA'}",
                                     style: AppTextStyle
                                         .body
                                         .small
@@ -307,8 +299,7 @@ class _StudentIdCard extends GetView<IdCardController> {
                                         .copyWith(fontSize: 13),
                                   ),
                                   Text(
-                                    "Website: ${schoolUser?.website?.trim().isNotEmpty == true ? schoolUser!.website : 'NA'}",
-
+                                    "Website: ${currentSchoolUser?.website?.trim().isNotEmpty == true ? currentSchoolUser!.website : 'NA'}",
                                     style: AppTextStyle
                                         .body
                                         .small
@@ -328,6 +319,7 @@ class _StudentIdCard extends GetView<IdCardController> {
                     ),
                   ),
                 ] else ...[
+                  /// Collapsed View (Top 3 entries in exact API sequence)
                   Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Row(
@@ -337,35 +329,23 @@ class _StudentIdCard extends GetView<IdCardController> {
                           imageUrl: student?.photo,
                           radius: 35,
                         ),
-
-                        SizedBox(width: 20),
-
+                        const SizedBox(width: 20),
                         Expanded(
-                          child: Builder(
-                            builder: (context) {
-                              final entries = _getDisplayEntries(studentObj);
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: entries.map((e) {
-                                  final label =
-                                      e.key.toLowerCase() == 'student name'
-                                      ? 'Name'
-                                      : e.key;
-
-                                  return _infoRow(
-                                    label: label,
-                                    value: e.key.toLowerCase() == "dob"
-                                        ? CommonUtils.formatDateForUI(
-                                            e.value.toString(),
-                                          )
-                                        : e.value.toString(),
-                                    bottomPadding: 0,
-                                    width: Get.size.width * 0.2,
-                                  );
-                                }).toList(),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: validEntries.take(3).map((e) {
+                              return _infoRow(
+                                label: e.key,
+                                value: e.key.toLowerCase() == "dob"
+                                    ? CommonUtils.formatDateForUI(
+                                        e.value.toString(),
+                                      )
+                                    : e.value.toString(),
+                                bottomPadding: 0,
+                                width: Get.size.width * 0.25,
                               );
-                            },
+                            }).toList(),
                           ),
                         ),
                       ],
@@ -374,62 +354,31 @@ class _StudentIdCard extends GetView<IdCardController> {
                 ],
               ],
             ),
-
-            /// 🔹 STUDENT DETAILS
-            // ExpansionTile(
-            //   showTrailingIcon: false,
-            //   internalAddSemanticForOnTap: true,
-            //   onExpansionChanged: onExpand,
-            //   controlAffinity: ListTileControlAffinity.platform,
-            //   initiallyExpanded: student?.isExpanded ?? false,
-            //   title: ,
-            //   children: [
-            //
-            //   ],
-            // ),
           ],
         ),
       ),
     );
   }
-
-  List<MapEntry<String, dynamic>> _getDisplayEntries(
-    Map<String, dynamic> studentObj,
-  ) {
-    final validEntries = studentObj.entries.where((e) {
-      final value = e.value?.toString().trim();
-      return value != null && value.isNotEmpty && value.toLowerCase() != 'null';
-    }).toList();
-
-    // Find Student Name
-    final nameEntry = validEntries.firstWhere(
-      (e) => e.key.toLowerCase() == 'student name',
-      orElse: () => const MapEntry('', ''),
-    );
-
-    // Build final list
-    return [
-      if (nameEntry.key.isNotEmpty) nameEntry,
-      ...validEntries.where((e) => e.key != nameEntry.key).take(2),
-    ];
-  }
 }
 
 class _ExpandedView extends GetView<IdCardController> {
-  const _ExpandedView({this.student, required this.index});
+  const _ExpandedView({
+    this.student,
+    required this.index,
+    required this.validEntries,
+  });
 
   final StudentIdModel? student;
   final int index;
+  final List<MapEntry<String, dynamic>> validEntries;
 
   @override
   Widget build(BuildContext context) {
-    final studentObj = student?.data?.toJson() ?? {};
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Stack(
           alignment: Alignment.bottomRight,
           children: [
@@ -464,56 +413,24 @@ class _ExpandedView extends GetView<IdCardController> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                ...studentObj.entries
-                    .where(
-                      (e) =>
-                          e.value != null &&
-                          e.value.toString().trim().isNotEmpty &&
-                          e.value.toString().toLowerCase() != 'null',
-                    )
-                    .take(2) // 👈 this is the key line
-                    .map((e) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 130,
-                            child: AppTextStyle
-                                .body
-                                .large
-                                .textColor
-                                .bold
-                                .ellipsis
-                                .text('${e.key}  '),
-                          ),
-                          Expanded(
-                            child: AppTextStyle
-                                .body
-                                .large
-                                .textColor
-                                .bold
-                                .ellipsis
-                                .text(
-                                  ':    ${e.key.toLowerCase() == "dob" ? CommonUtils.formatDateForUI(e.value.toString()) : e.value.toString()}',
-                                ),
-                          ),
-                        ],
-                      );
-
-                      AppTextStyle.body.large.textColor.bold.text(
-                        '${e.key}: ${e.key.toLowerCase() == "dob" ? CommonUtils.formatDateForUI(e.value.toString()) : e.value.toString()}',
-                      );
-                      // return _infoRow(
-                      //   label: e.key,
-                      //   value: e.key.toLowerCase() == "dob"
-                      //       ? CommonUtils.formatDateForUI(e.value.toString())
-                      //       : e.value.toString(),
-                      //   bottomPadding: 0,
-                      // );
-                    }),
-              ],
+              children: validEntries.take(2).map((e) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 130,
+                      child: AppTextStyle.body.large.textColor.bold.ellipsis
+                          .text('${e.key}  '),
+                    ),
+                    Expanded(
+                      child: AppTextStyle.body.large.textColor.bold.ellipsis.text(
+                        ':    ${e.key.toLowerCase() == "dob" ? CommonUtils.formatDateForUI(e.value.toString()) : e.value.toString()}',
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
             ),
           ),
         ),
@@ -544,7 +461,7 @@ class UserAvatar extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        padding: EdgeInsets.all(2),
+        padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.generateGradientColors().last.withOpacity(0.7),
@@ -555,12 +472,10 @@ class UserAvatar extends StatelessWidget {
   }
 
   Widget _buildImage() {
-    // 1️⃣ Local file image
     if (file != null) {
       return ClipOval(child: Image.file(file!, fit: BoxFit.cover));
     }
 
-    // 2️⃣ Network image
     if (imageUrl != null && imageUrl!.isNotEmpty) {
       return ClipOval(
         child: Image.network(
@@ -573,7 +488,6 @@ class UserAvatar extends StatelessWidget {
       );
     }
 
-    // 3️⃣ Default placeholder
     return _placeholderIcon();
   }
 
@@ -609,7 +523,6 @@ Widget _infoRow({
           width: 20,
           child: AppTextStyle.body.small.textColor.semiBold.text(":"),
         ),
-
         Flexible(child: AppTextStyle.body.small.textColor.semiBold.text(value)),
       ],
     ),

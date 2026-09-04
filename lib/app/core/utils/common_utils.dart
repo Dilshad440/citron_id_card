@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:citron_id_card/app/core/constants/asset_constant.dart';
+import 'package:citron_id_card/app/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
@@ -209,7 +210,10 @@ class CommonUtils {
 
     if (image == null) return null;
 
-    final croppedFile = await cropImage(image.path);
+    final compressQlty = await _showCompressionDialog();
+    if (compressQlty == null) return null;
+
+    final croppedFile = await cropImage(image.path, compressQlty);
     if (croppedFile == null) return null;
 
     // CommonUtils.show();
@@ -228,12 +232,18 @@ class CommonUtils {
     ;
   }
 
-  static Future<XFile?> cropImage(String path) async {
+  static Future<XFile?> cropImage(
+    String path,
+    CompressQlty? compressQlty,
+  ) async {
+    int compressQuality = _getCompressQlty(compressQlty);
+
+    /// 65 us default
     final cropped = await ImageCropper().cropImage(
       sourcePath: path,
       maxWidth: 390,
       maxHeight: 480,
-      compressQuality: 65,
+      compressQuality: compressQuality,
       compressFormat: ImageCompressFormat.png,
       aspectRatio: const CropAspectRatio(ratioX: 3.25, ratioY: 4),
       uiSettings: [
@@ -256,7 +266,20 @@ class CommonUtils {
     return cropped != null ? XFile(cropped.path) : null;
   }
 
- static String formatDateForUI(String apiDate) {
+  static int _getCompressQlty(CompressQlty? compressQlty) {
+    final compressQuality = compressQlty == CompressQlty.low
+        ? 60
+        : compressQlty == CompressQlty.medium
+        ? 70
+        : compressQlty == CompressQlty.medium
+        ? 80
+        : 65;
+
+    /// 65 us default
+    return compressQuality;
+  }
+
+  static String formatDateForUI(String apiDate) {
     try {
       final parsedDate = DateFormat("yyyy-MM-dd").parseStrict(apiDate);
       return DateFormat("dd-MM-yyyy").format(parsedDate);
@@ -269,4 +292,208 @@ class CommonUtils {
     final bytes = await file.readAsBytes();
     return base64Encode(bytes);
   }
+
+  static Future<CompressQlty?> _showCompressionDialog() async {
+    final colors = AppColors.generateGradientColors();
+
+    return await Get.dialog<CompressQlty>(
+      Dialog(
+        alignment: Alignment.bottomCenter,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle
+              Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.black12,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              const Text(
+                'Select Image Quality',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+
+              const SizedBox(height: 4),
+
+              Text(
+                'Choose quality for your upload',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              ),
+
+              const SizedBox(height: 14),
+
+              _qualityCard(
+                title: 'Low',
+                subtitle: 'Smaller file size',
+                quality: '60%',
+                icon: Icons.compress_rounded,
+                color: colors[2],
+                onTap: () => Get.back(result: CompressQlty.low),
+              ),
+
+              const SizedBox(height: 8),
+
+              _qualityCard(
+                title: 'Medium',
+                subtitle: 'Best balance',
+                quality: '70%',
+                icon: Icons.photo_rounded,
+                color: colors[1],
+                recommended: true,
+                onTap: () => Get.back(result: CompressQlty.medium),
+              ),
+
+              const SizedBox(height: 8),
+
+              _qualityCard(
+                title: 'High',
+                subtitle: 'Best image quality',
+                quality: '80%',
+                icon: Icons.hd_rounded,
+                color: colors[2],
+                onTap: () => Get.back(result: CompressQlty.high),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget _qualityCard({
+    required String title,
+    required String subtitle,
+    required String quality,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+    bool recommended = false,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          height: 64,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.07),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withOpacity(0.25)),
+          ),
+          child: Row(
+            children: [
+              // Icon
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.14),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, size: 22, color: color),
+              ),
+
+              const SizedBox(width: 12),
+
+              // Title + subtitle
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+
+                        if (recommended) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: color,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text(
+                              'Recommended',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 8,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+
+                    const SizedBox(height: 2),
+
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Quality
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    quality,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                    ),
+                  ),
+                  const Text(
+                    'quality',
+                    style: TextStyle(fontSize: 9, color: Colors.grey),
+                  ),
+                ],
+              ),
+
+              const SizedBox(width: 8),
+
+              // Arrow
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: Colors.grey.shade500,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
+
+enum CompressQlty { low, medium, high }
