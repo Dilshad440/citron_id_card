@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_text_style.dart';
@@ -18,6 +19,8 @@ class AppTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.onTap,
     this.readOnly = false,
+    this.textCapitalization = TextCapitalization.none,
+    this.inputFormatters,
   });
 
   final Function(String val)? onChanged;
@@ -32,6 +35,8 @@ class AppTextField extends StatelessWidget {
   final int maxLines;
   final bool isObsecure;
   final TextInputType keyboardType;
+  final TextCapitalization textCapitalization;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
@@ -42,13 +47,14 @@ class AppTextField extends StatelessWidget {
       validator: validator,
       maxLines: maxLines,
       autofocus: false,
+      inputFormatters: [],
       keyboardType: keyboardType,
       onTap: onTap,
       readOnly: readOnly,
       cursorColor: AppColors.primaryColor,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       style: AppTextStyle.body.medium.textColor.medium,
-
+      textCapitalization: textCapitalization,
       decoration: InputDecoration(
         prefixIcon: prefix,
 

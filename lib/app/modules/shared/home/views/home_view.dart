@@ -1,7 +1,10 @@
+import 'package:citron_id_card/app/config/local/shared_prefs.dart';
 import 'package:citron_id_card/app/config/network/api_constants.dart';
 import 'package:citron_id_card/app/core/components/background_gradient.dart';
+import 'package:citron_id_card/app/core/constants/app_constants.dart';
 import 'package:citron_id_card/app/core/theme/app_colors.dart';
 import 'package:citron_id_card/app/core/theme/app_text_style.dart';
+import 'package:citron_id_card/app/core/utils/common_utils.dart';
 import 'package:citron_id_card/app/modules/school/id_card/views/filter_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -83,147 +86,155 @@ class SchoolInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final homeController = Get.find<HomeController>();
     final schoolUser = homeController.schoolUser.value;
+
     return Stack(
-      alignment: Alignment.topRight,
       children: [
+        // Main Card
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: BackgroundGradient(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // School Header
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      // School Logo
                       CircleAvatar(
                         radius: 40,
                         backgroundColor: Colors.grey.shade200,
                         backgroundImage: schoolUser?.logo != null
                             ? NetworkImage(
-                                "${ApiConstants.baseUrl}${schoolUser!.logo!}",
+                                '${ApiConstants.baseUrl}${schoolUser!.logo!}',
                               )
                             : null,
                         child: schoolUser?.logo == null
                             ? const Icon(
-                                Icons.school,
+                                Icons.school_rounded,
                                 size: 30,
                                 color: Colors.grey,
                               )
                             : null,
                       ),
-                      SizedBox(width: 15),
-                      Flexible(
-                        child: Text(
-                          schoolUser?.schoolName ?? "",
 
-                          style: AppTextStyle.display.medium.bold.textColor
-                              .copyWith(fontSize: 24, height: 1.2),
+                      const SizedBox(width: 15),
+
+                      // School Name
+                      Expanded(
+                        child: Padding(
+                          // Space for Settings + Logout buttons
+                          padding: const EdgeInsets.only(right: 85),
+                          child: Text(
+                            schoolUser?.schoolName ?? '',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyle.display.medium.bold.textColor
+                                .copyWith(fontSize: 24, height: 1.2),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 16),
-
-                      // School Info
                     ],
                   ),
-                  const SizedBox(height: 10),
 
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            size: 20,
-                            color: AppColors.textOnGradient,
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              schoolUser?.address1 ?? "",
-                              style: AppTextStyle
-                                  .title
-                                  .medium
-                                  .regular
-                                  .semiBold
-                                  .textColor
-                                  .ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
+                  const SizedBox(height: 14),
 
-                      // Contact
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.phone,
-                            size: 20,
-                            color: AppColors.textOnGradient,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            schoolUser?.contactNo ?? "",
-                            style: AppTextStyle.title.medium.regular.textColor,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
+                  // Address
+                  _infoRow(
+                    icon: Icons.location_on_rounded,
+                    value: schoolUser?.address1,
+                    semiBold: true,
+                  ),
 
-                      // Email
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.email,
-                            size: 20,
-                            color: AppColors.textOnGradient,
-                          ),
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              schoolUser?.email ?? "",
-                              style: AppTextStyle
-                                  .title
-                                  .medium
-                                  .regular
-                                  .textColor
-                                  .ellipsis
-                                  .ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
+                  const SizedBox(height: 6),
 
-                      // Website
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.link,
-                            size: 20,
-                            color: AppColors.textOnGradient,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            schoolUser?.website ?? "",
-                            style: AppTextStyle.title.medium.regular.textColor,
-                          ),
-                        ],
-                      ),
-                    ],
+                  // Contact
+                  _infoRow(
+                    icon: Icons.phone_rounded,
+                    value: schoolUser?.contactNo,
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  // Email
+                  _infoRow(icon: Icons.email_rounded, value: schoolUser?.email),
+
+                  const SizedBox(height: 6),
+
+                  // Website
+                  _infoRow(
+                    icon: Icons.link_rounded,
+                    value: schoolUser?.website,
                   ),
                 ],
               ),
             ),
           ),
         ),
-        IconButton.filled(
-          onPressed: () {
-            homeController.logout();
-          },
-          icon: Icon(Icons.logout),
+
+        // Top Right Actions
+        Positioned(
+          top: 8,
+          right: 8,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Settings
+              IconButton.filled(
+                onPressed: () async {
+                  final quality = await CommonUtils.showCompressionDialog();
+                  if (quality == null) return;
+                  await SharedPrefs.instance.setString(
+                    AppConstants.compressQuality,
+                    quality.name,
+                  );
+                },
+                icon: const Icon(Icons.settings_rounded, size: 20),
+              ),
+
+              const SizedBox(width: 5),
+
+              // Logout
+              IconButton.filled(
+                onPressed: () {
+                  homeController.logout();
+                },
+                icon: const Icon(Icons.logout_rounded, size: 20),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _infoRow({
+    required IconData icon,
+    required String? value,
+    bool semiBold = false,
+  }) {
+    if (value == null || value.trim().isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(icon, size: 20, color: AppColors.textOnGradient),
+
+        const SizedBox(width: 6),
+
+        Expanded(
+          child: Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: semiBold
+                ? AppTextStyle.title.medium.regular.semiBold.textColor
+                : AppTextStyle.title.medium.regular.textColor,
+          ),
         ),
       ],
     );

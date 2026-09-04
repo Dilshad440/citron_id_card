@@ -1,8 +1,13 @@
+import 'package:citron_id_card/app/config/local/shared_prefs.dart';
 import 'package:citron_id_card/app/core/components/two_line_element.dart';
+import 'package:citron_id_card/app/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+
 import '../../modules/school/id_card/model/final _field_model.dart';
 import '../../modules/shared/home/controllers/home_controller.dart';
+import '../utils/text_case_formatter.dart';
 import 'app_date_picker.dart';
 import 'app_dropdown.dart';
 import 'app_textfield.dart';
@@ -21,27 +26,12 @@ class GetFieldElements extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // if (fieldModel.type == FieldType.dropdown && isFromAddEdit) {
-    //   return TwoLineElement(
-    //     title: fieldModel.title,
-    //     isRequired: fieldModel.isRequired,
-    //     child: AppTextField(
-    //       keyboardType: TextInputType.text,
-    //       controller: fieldModel.controller,
-    //       hintText: "Enter ${fieldModel.title}",
-    //       validator: fieldModel.validator,
-    //     ),
-    //   );
-    // }
     if (fieldModel.type == FieldType.list) {
-      // final bool isClass = fieldModel.title.toLowerCase() == "class";
-      // final bool isSection = fieldModel.title.toLowerCase() == "section";
       final items = List<String>.from(
         fieldModel.dropdownList[fieldModel.title]!,
         growable: true,
       );
 
-      // final value = isClass || isSection ? "All" : fieldModel.changedValue;
       return TwoLineElement(
         title: fieldModel.title,
         isRequired: fieldModel.isRequired,
@@ -61,6 +51,8 @@ class GetFieldElements extends StatelessWidget {
         isRequired: fieldModel.isRequired,
         child: AppTextField(
           keyboardType: TextInputType.text,
+          textCapitalization: getTextCapitalisation(),
+          inputFormatters: getInputFormatters(),
           controller: fieldModel.controller,
           hintText: fieldModel.hint,
           validator: fieldModel.validator,
@@ -71,7 +63,7 @@ class GetFieldElements extends StatelessWidget {
         title: fieldModel.title,
         isRequired: fieldModel.isRequired,
         child: AppTextField(
-          keyboardType: TextInputType.numberWithOptions(
+          keyboardType: const TextInputType.numberWithOptions(
             decimal: false,
             signed: false,
           ),
@@ -80,24 +72,7 @@ class GetFieldElements extends StatelessWidget {
           validator: fieldModel.validator,
         ),
       );
-    }
-    /*else if (fieldModel.type == FieldType.datePicker &&
-        fieldModel.enforcementType == false) {
-      return TwoLineElement(
-        title: fieldModel.title,
-        isRequired: fieldModel.isRequired,
-        child: AppTextField(
-          keyboardType: TextInputType.numberWithOptions(
-            decimal: false,
-            signed: false,
-          ),
-          controller: fieldModel.controller,
-          hintText: fieldModel.hint,
-          validator: fieldModel.validator,
-        ),
-      );
-    } */
-    else if (fieldModel.type == FieldType.datePicker &&
+    } else if (fieldModel.type == FieldType.datePicker &&
         fieldModel.enforcementType == true) {
       return TwoLineElement(
         title: fieldModel.title,
@@ -113,6 +88,53 @@ class GetFieldElements extends StatelessWidget {
         ),
       );
     }
+
     return const Placeholder();
+  }
+
+  // ----------------------------------------------------------
+  // Text Capitalisation
+  // ----------------------------------------------------------
+
+  TextCapitalization getTextCapitalisation() {
+    final textCase = Get.find<HomeController>().schoolUser.value?.textCase
+        ?.toLowerCase();
+
+    switch (textCase) {
+      case 'propercase':
+        return TextCapitalization.words;
+
+      case 'uppercase':
+        return TextCapitalization.characters;
+
+      case 'lowercase':
+        return TextCapitalization.none;
+
+      default:
+        return TextCapitalization.none;
+    }
+  }
+
+  // ----------------------------------------------------------
+  // Input Formatters
+  // ----------------------------------------------------------
+
+  List<TextInputFormatter>? getInputFormatters() {
+    final textCase = Get.find<HomeController>().schoolUser.value?.textCase
+        ?.toLowerCase();
+
+    switch (textCase) {
+      case 'propercase':
+        return [ProperCaseFormatter()];
+
+      case 'uppercase':
+        return [UpperCaseFormatter()];
+
+      case 'lowercase':
+        return [LowerCaseFormatter()];
+
+      default:
+        return null;
+    }
   }
 }

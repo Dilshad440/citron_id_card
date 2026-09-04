@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:citron_id_card/app/config/local/shared_prefs.dart';
+import 'package:citron_id_card/app/core/constants/app_constants.dart';
 import 'package:citron_id_card/app/core/constants/asset_constant.dart';
 import 'package:citron_id_card/app/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -210,10 +212,7 @@ class CommonUtils {
 
     if (image == null) return null;
 
-    final compressQlty = await _showCompressionDialog();
-    if (compressQlty == null) return null;
-
-    final croppedFile = await cropImage(image.path, compressQlty);
+    final croppedFile = await cropImage(image.path);
     if (croppedFile == null) return null;
 
     // CommonUtils.show();
@@ -232,18 +231,22 @@ class CommonUtils {
     ;
   }
 
-  static Future<XFile?> cropImage(
-    String path,
-    CompressQlty? compressQlty,
-  ) async {
-    int compressQuality = _getCompressQlty(compressQlty);
+  static Future<XFile?> cropImage(String path) async {
+    final value = await SharedPrefs.instance.getString(
+      AppConstants.compressQuality,
+    );
+    int quality = 65;
+    if (value != null) {
+      final compressQuality = CompressQlty.values.byName(value);
+      quality = _getCompressQlty(compressQuality);
+    }
 
     /// 65 us default
     final cropped = await ImageCropper().cropImage(
       sourcePath: path,
       maxWidth: 390,
       maxHeight: 480,
-      compressQuality: compressQuality,
+      compressQuality: quality,
       compressFormat: ImageCompressFormat.png,
       aspectRatio: const CropAspectRatio(ratioX: 3.25, ratioY: 4),
       uiSettings: [
@@ -293,8 +296,15 @@ class CommonUtils {
     return base64Encode(bytes);
   }
 
-  static Future<CompressQlty?> _showCompressionDialog() async {
+  static Future<CompressQlty?> showCompressionDialog() async {
     final colors = AppColors.generateGradientColors();
+    final value = await SharedPrefs.instance.getString(
+      AppConstants.compressQuality,
+    );
+    CompressQlty? compressQuality;
+    if (value != null) {
+      compressQuality = CompressQlty.values.byName(value);
+    }
 
     return await Get.dialog<CompressQlty>(
       Dialog(
@@ -336,6 +346,7 @@ class CommonUtils {
                 title: 'Low',
                 subtitle: 'Smaller file size',
                 quality: '60%',
+                isSelected: compressQuality == CompressQlty.low,
                 icon: Icons.compress_rounded,
                 color: colors[2],
                 onTap: () => Get.back(result: CompressQlty.low),
@@ -348,6 +359,7 @@ class CommonUtils {
                 subtitle: 'Best balance',
                 quality: '70%',
                 icon: Icons.photo_rounded,
+                isSelected: compressQuality == CompressQlty.medium,
                 color: colors[1],
                 recommended: true,
                 onTap: () => Get.back(result: CompressQlty.medium),
@@ -360,6 +372,7 @@ class CommonUtils {
                 subtitle: 'Best image quality',
                 quality: '80%',
                 icon: Icons.hd_rounded,
+                isSelected: compressQuality == CompressQlty.high,
                 color: colors[2],
                 onTap: () => Get.back(result: CompressQlty.high),
               ),
@@ -377,8 +390,19 @@ class CommonUtils {
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
+    bool isSelected = false,
     bool recommended = false,
   }) {
+    final cardColor = isSelected
+        ? AppColors.primaryColor
+        : color.withOpacity(0.07);
+
+    final contentColor = isSelected ? Colors.white : color;
+
+    final secondaryColor = isSelected
+        ? Colors.white.withOpacity(0.75)
+        : Colors.grey.shade600;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -388,9 +412,13 @@ class CommonUtils {
           height: 64,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.07),
+            color: cardColor,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withOpacity(0.25)),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.primaryColor
+                  : color.withOpacity(0.25),
+            ),
           ),
           child: Row(
             children: [
@@ -399,10 +427,12 @@ class CommonUtils {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.14),
+                  color: isSelected
+                      ? Colors.white.withOpacity(0.15)
+                      : color.withOpacity(0.14),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, size: 22, color: color),
+                child: Icon(icon, size: 22, color: contentColor),
               ),
 
               const SizedBox(width: 12),
@@ -417,9 +447,10 @@ class CommonUtils {
                       children: [
                         Text(
                           title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
+                            color: contentColor,
                           ),
                         ),
 
@@ -431,13 +462,15 @@ class CommonUtils {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: color,
+                              color: isSelected ? Colors.white : color,
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Recommended',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: isSelected
+                                    ? AppColors.primaryColor
+                                    : Colors.white,
                                 fontSize: 8,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -451,10 +484,7 @@ class CommonUtils {
 
                     Text(
                       subtitle,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey.shade600,
-                      ),
+                      style: TextStyle(fontSize: 12, color: secondaryColor),
                     ),
                   ],
                 ),
@@ -470,12 +500,12 @@ class CommonUtils {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: color,
+                      color: contentColor,
                     ),
                   ),
-                  const Text(
+                  Text(
                     'quality',
-                    style: TextStyle(fontSize: 9, color: Colors.grey),
+                    style: TextStyle(fontSize: 12, color: secondaryColor),
                   ),
                 ],
               ),
@@ -486,7 +516,7 @@ class CommonUtils {
               Icon(
                 Icons.chevron_right_rounded,
                 size: 20,
-                color: Colors.grey.shade500,
+                color: secondaryColor,
               ),
             ],
           ),

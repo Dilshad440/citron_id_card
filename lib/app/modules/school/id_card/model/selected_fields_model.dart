@@ -13,10 +13,9 @@ class SelectedFieldsModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.selectedFields != null) {
-      data['selectedFields'] =
-          this.selectedFields!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (selectedFields != null) {
+      data['selectedFields'] = selectedFields!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -28,14 +27,16 @@ class SelectedFields {
   String? fieldType;
   bool? isRequired;
   bool? enforceType;
+  int? sequenceNo;
 
-
-  SelectedFields(
-      {this.fieldId,
-        this.fieldName,
-        this.fieldType,
-        this.isRequired,
-        this.enforceType});
+  SelectedFields({
+    this.fieldId,
+    this.fieldName,
+    this.fieldType,
+    this.isRequired,
+    this.enforceType,
+    this.sequenceNo,
+  });
 
   SelectedFields.fromJson(Map<String, dynamic> json) {
     fieldId = json['fieldId'];
@@ -43,15 +44,17 @@ class SelectedFields {
     fieldType = json['fieldType'];
     isRequired = json['isRequired'];
     enforceType = json['enforceType'];
+    sequenceNo = json['sequenceNo'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['fieldId'] = this.fieldId;
-    data['fieldName'] = this.fieldName;
-    data['fieldType'] = this.fieldType;
-    data['isRequired'] = this.isRequired;
-    data['enforceType'] = this.enforceType;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['fieldId'] = fieldId;
+    data['fieldName'] = fieldName;
+    data['fieldType'] = fieldType;
+    data['isRequired'] = isRequired;
+    data['enforceType'] = enforceType;
+    data['sequenceNo'] = sequenceNo;
     return data;
   }
 }

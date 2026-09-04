@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 class SchoolUserRes {
   int? schoolId;
   String? schoolName;
@@ -22,6 +24,7 @@ class SchoolUserRes {
   String? customer;
   bool? allowOfflineMode;
   String? user;
+  String? textCase;
 
   SchoolUserRes({
     this.schoolId,
@@ -47,6 +50,7 @@ class SchoolUserRes {
     this.customer,
     this.allowOfflineMode,
     this.user,
+    this.textCase,
   });
 
   SchoolUserRes.fromJson(Map<String, dynamic> json) {
@@ -73,34 +77,46 @@ class SchoolUserRes {
     customer = json['customer'];
     allowOfflineMode = json['allowOfflineMode'];
     user = json['user'];
+    textCase = json['textCase'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['schoolId'] = this.schoolId;
-    data['schoolName'] = this.schoolName;
-    data['address1'] = this.address1;
-    data['address2'] = this.address2;
-    data['address3'] = this.address3;
-    data['contactNo'] = this.contactNo;
-    data['email'] = this.email;
-    data['website'] = this.website;
-    data['logo'] = this.logo;
-    data['schoolCode'] = this.schoolCode;
-    data['isActive'] = this.isActive;
-    data['updatedOn'] = this.updatedOn;
-    data['customerId'] = this.customerId;
-    data['userId'] = this.userId;
-    data['updatedBy'] = this.updatedBy;
-    data['password'] = this.password;
-    data['canAdd'] = this.canAdd;
-    data['canDelete'] = this.canDelete;
-    data['canEdit'] = this.canEdit;
-    data['selectedFields'] = this.selectedFields;
-    data['customer'] = this.customer;
-    data['user'] = this.user;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['schoolId'] = schoolId;
+    data['schoolName'] = schoolName;
+    data['address1'] = address1;
+    data['address2'] = address2;
+    data['address3'] = address3;
+    data['contactNo'] = contactNo;
+    data['email'] = email;
+    data['website'] = website;
+    data['logo'] = logo;
+    data['schoolCode'] = schoolCode;
+    data['isActive'] = isActive;
+    data['updatedOn'] = updatedOn;
+    data['customerId'] = customerId;
+    data['userId'] = userId;
+    data['updatedBy'] = updatedBy;
+    data['password'] = password;
+    data['canAdd'] = canAdd;
+    data['canDelete'] = canDelete;
+    data['canEdit'] = canEdit;
+    data['selectedFields'] = selectedFields;
+    data['customer'] = customer;
+    data['user'] = user;
     data['allowOfflineMode'] = allowOfflineMode;
+    data['textCase'] = textCase;
 
     return data;
+  }
+
+  TextCapitalization get textCapitalization {
+    if (textCase?.toLowerCase() == "propercase") {
+      return TextCapitalization.words;
+    } else if (textCase?.toLowerCase() == "uppercase") {
+      return TextCapitalization.characters;
+    } else {
+      return TextCapitalization.none;
+    }
   }
 }

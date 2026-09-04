@@ -84,6 +84,10 @@ class HomeController extends GetxController {
         return;
       }
       await SharedPrefs.instance.setInt(AppConstants.schoolId, schoolId);
+      await SharedPrefs.instance.setString(
+        AppConstants.textCase,
+        schoolUser.value?.textCase ?? "",
+      );
 
       final selectedFiledRes = await service.getSelectedFields(schoolId);
 
