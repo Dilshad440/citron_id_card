@@ -40,7 +40,7 @@ dependencies:
   dropdown_button2: ^2.3.9
   image_picker: ^1.2.1
   permission_handler:
-  image_cropper: 
+  image_cropper:
   shared_preferences: ^2.5.4
   get_it: ^9.2.0
   overlay_loader_with_app_icon: ^0.0.4
@@ -137,9 +137,9 @@ flutter_native_splash:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "asset/images/Citron ID.png"
+  image_path: "asset/images/appicon.png"
   # Remove the old launcher icon before generating new ones
   remove_alpha_ios: true
   # Adaptive icon configuration for Android
   adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "asset/images/Citron ID.png"
+  adaptive_icon_foreground: "asset/images/appicon.png"

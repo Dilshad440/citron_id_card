@@ -19,26 +19,25 @@ class LoginView extends GetView<LoginController> {
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-
           /// ✅ Main UI (NO Obx here)
           _buildStack(context),
 
           /// ✅ Loader Overlay (separate)
-
-
-          GetBuilder<LoginController>(builder: (controller) {
-            return OverlayIdCardLoader(child: (isLoading) => SizedBox(),
-                isLoading: controller.isLoading.value);
-          },)
+          GetBuilder<LoginController>(
+            builder: (controller) {
+              return OverlayIdCardLoader(
+                child: (isLoading) => SizedBox(),
+                isLoading: controller.isLoading.value,
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
   Widget _buildStack(BuildContext context) {
-    final size = MediaQuery
-        .of(context)
-        .size;
+    final size = MediaQuery.of(context).size;
     final double topHeight = size.height * 0.24;
     final double bottomHeight = size.height * 0.22;
 
@@ -55,10 +54,7 @@ class LoginView extends GetView<LoginController> {
               20,
               24,
               20,
-              MediaQuery
-                  .of(context)
-                  .viewInsets
-                  .bottom + 20,
+              MediaQuery.of(context).viewInsets.bottom + 20,
             ),
             child: _loginCard(),
           ),
@@ -129,29 +125,20 @@ class LoginView extends GetView<LoginController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.borderColor, width: 1.5),
-              ),
-              child: CircleAvatar(
-                radius: 45,
-                backgroundImage: AssetImage(AssetConstant.logo),
-              ),
-            ),
+            Image.asset(AssetConstant.logo, height: 80),
             const SizedBox(height: 10),
-            Text(
-              "Powered By Citron Software",
-              style: AppTextStyle.title.medium.regular.textOnGradient,
-            ),
-            Text(
-              "© ${DateTime
-                  .now()
-                  .year} Citron Software. All rights reserved.",
-              style: AppTextStyle.title.small.lightWeight.italic.copyWith(
-                color: AppColors.borderColor,
-              ),
-            ),
+            // Text(
+            //   "Powered By Citron Software",
+            //   style: AppTextStyle.title.medium.regular.textOnGradient,
+            // ),
+            // Text(
+            //   "© ${DateTime
+            //       .now()
+            //       .year} Citron Software. All rights reserved.",
+            //   style: AppTextStyle.title.small.lightWeight.italic.copyWith(
+            //     color: AppColors.borderColor,
+            //   ),
+            // ),
           ],
         ),
       ),
@@ -199,27 +186,23 @@ class LoginView extends GetView<LoginController> {
             const SizedBox(height: 10),
 
             Obx(
-                  () =>
-                  TwoLineElement(
-                    title: "Password",
-                    child: AppTextField(
-                      controller: controller.passwordController,
-                      isObsecure: controller.isPasswordVisible.value,
-                      hintText: "Enter password",
-                      suffix: IconButton(
-                        onPressed: controller.togglePasswordVisibility,
-                        icon: Icon(
-                          controller.isPasswordVisible.value
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                      ),
-                      validator: (val) =>
-                      val!.isEmpty
-                          ? "Password required"
-                          : null,
+              () => TwoLineElement(
+                title: "Password",
+                child: AppTextField(
+                  controller: controller.passwordController,
+                  isObsecure: controller.isPasswordVisible.value,
+                  hintText: "Enter password",
+                  suffix: IconButton(
+                    onPressed: controller.togglePasswordVisibility,
+                    icon: Icon(
+                      controller.isPasswordVisible.value
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                     ),
                   ),
+                  validator: (val) => val!.isEmpty ? "Password required" : null,
+                ),
+              ),
             ),
 
             const SizedBox(height: 28),

@@ -4,7 +4,7 @@ class AppColors {
   AppColors._();
 
   /// 🌈 Brand color (only input)
-  static const Color primaryColor = Colors.blue;
+  static const Color primaryColor = Colors.blueGrey;
   static const Color red = Colors.red;
 
   /* ───────────────── GRADIENT ───────────────── */

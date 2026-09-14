@@ -2,6 +2,8 @@ import 'package:citron_id_card/app/routes/app_routes.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 
+import '../../local/shared_prefs.dart';
+
 typedef TokenProvider = Future<String?> Function();
 
 class AuthInterceptor extends Interceptor {
@@ -22,8 +24,12 @@ class AuthInterceptor extends Interceptor {
   }
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
+  Future<void> onError(
+    DioException err,
+    ErrorInterceptorHandler handler,
+  ) async {
     if (err.response?.statusCode == 401) {
+      await SharedPrefs.instance.clear();
       Get.offAllNamed(AppRoutes.login);
     }
     super.onError(err, handler);
