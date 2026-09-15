@@ -8,7 +8,7 @@ class AppTheme {
 
   static ThemeData getAppTheme() {
     return ThemeData(
-      scaffoldBackgroundColor: AppColors.textOnGradient,
+      scaffoldBackgroundColor: AppColors.surfaceColor,
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.primaryColor,
         centerTitle: true,

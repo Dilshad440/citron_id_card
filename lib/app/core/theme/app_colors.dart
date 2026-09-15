@@ -4,7 +4,7 @@ class AppColors {
   AppColors._();
 
   /// 🌈 Brand color (only input)
-  static const Color primaryColor = Colors.blueGrey;
+  static const Color primaryColor = Color(0xFFFFAE42);
   static const Color red = Colors.red;
 
   /* ───────────────── GRADIENT ───────────────── */
@@ -55,4 +55,18 @@ class AppColors {
 
   /// Error border (fixed for UX clarity)
   static const Color borderError = Colors.redAccent;
+
+  /// Main app background
+  static Color get scaffoldColor {
+    final hsl = HSLColor.fromColor(primaryColor);
+
+    return hsl.withSaturation(0.12).withLightness(0.97).toColor();
+  }
+
+  /// Slightly stronger surface color for cards/containers
+  static Color get surfaceColor {
+    final hsl = HSLColor.fromColor(primaryColor);
+
+    return hsl.withSaturation(0.08).withLightness(0.99).toColor();
+  }
 }
