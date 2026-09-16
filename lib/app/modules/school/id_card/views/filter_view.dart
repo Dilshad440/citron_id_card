@@ -51,7 +51,7 @@ class FilterView extends StatelessWidget {
                           ? SizedBox(
                               height: 35,
                               child: FloatingActionButton.extended(
-                                backgroundColor: AppColors.textOnGradient,
+                                backgroundColor: AppColors.surfaceColor,
                                 tooltip: "Add New Student",
                                 extendedIconLabelSpacing: 5,
                                 isExtended: true,
