@@ -93,7 +93,7 @@ class LoginView extends GetView<LoginController> {
             const SizedBox(height: 20),
             Image.asset(AssetConstant.idCard, height: 80),
             const SizedBox(height: 12),
-            AppTextStyle.display.large.textColor.bold.text("ID Card Generator"),
+            AppTextStyle.display.large.textColor.bold.text("Riya ID Card"),
             const SizedBox(height: 6),
             AppTextStyle.body.medium.textColor.regular.text(
               "Create & Manage ID Cards",

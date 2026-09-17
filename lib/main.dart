@@ -23,8 +23,8 @@ import 'package:citron_id_card/app/services/local/sqf_lite_service.dart';
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:flutter_background_service_android/flutter_background_service_android.dart';
+// import 'package:flutter_background_service/flutter_background_service.dart';
+// import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 
 import 'app/modules/school/id_card/model/offline_cards_model.dart';
@@ -36,7 +36,7 @@ void main() async {
   /// INIT BACKGROUND SERVICE
   /// ============================
 
-  await initializeBackgroundService();
+  // await initializeBackgroundService();
 
   /// ============================
   /// APP DEPENDENCIES
@@ -56,42 +56,42 @@ void main() async {
 /// INITIALIZE BACKGROUND SERVICE
 /// ===============================================
 
-Future<void> initializeBackgroundService() async {
-  final service = FlutterBackgroundService();
-
-  await service.configure(
-    androidConfiguration: AndroidConfiguration(
-      onStart: onStart,
-      autoStart: true,
-      autoStartOnBoot: true,
-      isForegroundMode: true,
-      notificationChannelId: 'citron_sync_service',
-      initialNotificationTitle: 'Citron Sync',
-      initialNotificationContent: 'Syncing data in background...',
-      foregroundServiceNotificationId: 888,
-    ),
-    iosConfiguration: IosConfiguration(),
-  );
-
-  // ❌ DO NOT call this when autoStart is true
-  // await service.startService();
-}
+// Future<void> initializeBackgroundService() async {
+//   final service = FlutterBackgroundService();
+//
+//   await service.configure(
+//     androidConfiguration: AndroidConfiguration(
+//       onStart: onStart,
+//       autoStart: true,
+//       autoStartOnBoot: true,
+//       isForegroundMode: true,
+//       notificationChannelId: 'citron_sync_service',
+//       initialNotificationTitle: 'Citron Sync',
+//       initialNotificationContent: 'Syncing data in background...',
+//       foregroundServiceNotificationId: 888,
+//     ),
+//     iosConfiguration: IosConfiguration(),
+//   );
+//
+//   // ❌ DO NOT call this when autoStart is true
+//   // await service.startService();
+// }
 
 /// ===============================================
 /// BACKGROUND START FUNCTION
 /// ===============================================
 
-@pragma('vm:entry-point')
-void onStart(ServiceInstance service) async {
-  DartPluginRegistrant.ensureInitialized();
-  if (service is AndroidServiceInstance) {
-    service.setAsForegroundService();
-  }
-
-  Timer.periodic(const Duration(minutes: 1), (timer) async {
-    await addIdCard();
-  });
-}
+// @pragma('vm:entry-point')
+// void onStart(ServiceInstance service) async {
+//   DartPluginRegistrant.ensureInitialized();
+//   if (service is AndroidServiceInstance) {
+//     service.setAsForegroundService();
+//   }
+//
+//   Timer.periodic(const Duration(minutes: 1), (timer) async {
+//     await addIdCard();
+//   });
+// }
 
 Future<void> addIdCard() async {
   try {
