@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:citron_id_card/app/config/network/error_handler.dart';
 import 'package:citron_id_card/app/core/theme/app_text_style.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +48,8 @@ class AppSnackBar {
   }) {
     final isSuccess = type == SnackBarType.success;
     final title = isSuccess ? "Success" : "Error";
-    final message = _resolveMessage(error);
+    final message = ErrorHandler.resolveMessage(error);
+    ErrorHandler.logError(error);
 
     Get.snackbar(
       "",
@@ -78,64 +80,5 @@ class AppSnackBar {
       forwardAnimationCurve: Curves.easeOutBack,
       reverseAnimationCurve: Curves.easeIn,
     );
-  }
-
-  /// Centralized message resolver
-  static String _resolveMessage(dynamic e) {
-    // 1️⃣ Dio (API / Network)
-    if (e is DioException) {
-      // Timeout
-      if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.sendTimeout ||
-          e.type == DioExceptionType.receiveTimeout) {
-        return 'Connection timed out. Please try again.';
-      }
-
-      // No internet
-      if (e.type == DioExceptionType.connectionError) {
-        return 'No internet connection.';
-      }
-
-      // Server response
-      final data = e.response?.data;
-      if (data is Map) {
-        if (data['message'] != null) {
-          return data['message'].toString();
-        }
-        if (data['error'] != null) {
-          return data['error'].toString();
-        }
-      }
-
-      return 'Something went wrong. Please try again.';
-    }
-
-    // 2️⃣ Socket (No Internet)
-    if (e is SocketException) {
-      return 'No internet connection.';
-    }
-
-    // 3️⃣ Timeout
-    if (e is TimeoutException) {
-      return 'Request timed out. Please try again.';
-    }
-
-    // 4️⃣ Format / Parsing
-    if (e is FormatException) {
-      return 'Invalid response format.';
-    }
-
-    // 5️⃣ Flutter framework errors
-    if (e is FlutterError) {
-      return 'Unexpected app error occurred.';
-    }
-
-    // 6️⃣ Custom string message
-    if (e is String && e.isNotEmpty) {
-      return e;
-    }
-
-    // 7️⃣ Fallback
-    return 'Something went wrong.';
   }
 }

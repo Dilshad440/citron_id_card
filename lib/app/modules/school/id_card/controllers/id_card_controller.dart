@@ -26,16 +26,20 @@ class IdCardController extends GetxController {
   }
 
   void getIdCards() async {
-    isLoading.value = true;
-    update(["idCard"]);
-    final response = await source.getSchoolId(data);
-    schoolIds = response;
-    isLoading.value = false;
-    update(["idCard"]);
+    try {
+      isLoading.value = true;
+      update(["idCard"]);
+      final response = await source.getSchoolId(data);
+      schoolIds = response;
+      isLoading.value = false;
+      update(["idCard"]);
+    } catch (e) {
+      AppSnackBar.show(error: e, type: SnackBarType.error);
+    }
   }
 
   void expandCard(int index, bool expand) {
-    schoolIds?[index].isExpanded = !(schoolIds?[index].isExpanded??false);
+    schoolIds?[index].isExpanded = !(schoolIds?[index].isExpanded ?? false);
     update(['idCard']);
   }
 

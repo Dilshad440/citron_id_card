@@ -36,6 +36,7 @@ class HomeController extends GetxController {
   List<String> sectionList = ["All"];
   RxList<Sessions> sessions = <Sessions>[].obs;
   Map<String, List<dynamic>> dropdownList = {};
+  List<SelectedFields> fields = [];
 
   @override
   void onInit() {
@@ -89,22 +90,25 @@ class HomeController extends GetxController {
         schoolUser.value?.textCase ?? "",
       );
 
-      final selectedFiledRes = await service.getSelectedFields(schoolId);
+      try {
+        final selectedFiledRes = await service.getSelectedFields(schoolId);
 
-      final fields = selectedFiledRes.selectedFields ?? [];
+        fields = selectedFiledRes.selectedFields ?? [];
 
-      fields.removeWhere((field) {
-        final name = field.fieldName?.trim().toLowerCase();
-        return name != "class" && name != "section";
-      });
-
+        fields.removeWhere((field) {
+          final name = field.fieldName?.trim().toLowerCase();
+          return name != "class" && name != "section";
+        });
+      } catch (e) {
+        AppSnackBar.show(error: e, type: SnackBarType.error);
+      }
       try {
         final sessionsRes = await service.getSessions();
 
         sessions.value = sessionsRes.sessions ?? [];
         selectedSession = sessionsRes.defaultSession ?? "";
       } catch (e) {
-        debugPrint("Error fetching sessions: $e");
+        AppSnackBar.show(error: e, type: SnackBarType.error);
       }
 
       fieldModel.clear();
@@ -118,21 +122,25 @@ class HomeController extends GetxController {
         final fieldType = getFieldType(field.fieldType ?? "");
 
         if (fieldType == FieldType.list) {
-          final dropdownValue = await service.getListValuesByFieldName(
-            fieldName: fieldName,
-            schoolId: schoolId,
-          );
+          try {
+            final dropdownValue = await service.getListValuesByFieldName(
+              fieldName: fieldName,
+              schoolId: schoolId,
+            );
 
-          final values = List<String>.from(
-            dropdownValue['values'] ?? [],
-            growable: true,
-          );
+            final values = List<String>.from(
+              dropdownValue['values'] ?? [],
+              growable: true,
+            );
 
-          if (isClassOrSection) {
-            values.insert(0, "All");
+            if (isClassOrSection) {
+              values.insert(0, "All");
+            }
+
+            dropdownList[fieldName] = values;
+          } catch (e) {
+            AppSnackBar.show(error: e, type: SnackBarType.error);
           }
-
-          dropdownList[fieldName] = values;
         }
 
         final isTextField = fieldType == FieldType.textField;
@@ -176,13 +184,8 @@ class HomeController extends GetxController {
         );
       }
     } catch (e, stack) {
-      debugPrint("getSchoolUserRes error: $e");
-      debugPrintStack(stackTrace: stack);
-
-      AppSnackBar.show(
-        error: "Something went wrong. Please try again.",
-        type: SnackBarType.error,
-      );
+      isLoading.value = false;
+      AppSnackBar.show(error: e, type: SnackBarType.error);
     } finally {
       isLoading.value = false;
     }
@@ -258,7 +261,7 @@ class HomeController extends GetxController {
       update(["class"]);
     } catch (e) {
       isOverlayLoading.value = false;
-      AppSnackBar.show(error: e.toString(), type: SnackBarType.error);
+      AppSnackBar.show(error: e, type: SnackBarType.error);
     }
   }
 

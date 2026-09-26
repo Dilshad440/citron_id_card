@@ -52,9 +52,13 @@ class AddIdCardController extends GetxController {
   }
 
   Future<void> getSession() async {
-    final sessionsRes = await service.getSessions();
-    sessions.value = sessionsRes;
-    selectedSession = sessionsRes.defaultSession ?? "";
+    try {
+      final sessionsRes = await service.getSessions();
+      sessions.value = sessionsRes;
+      selectedSession = sessionsRes.defaultSession ?? "";
+    } catch (e) {
+      AppSnackBar.show(error: e, type: SnackBarType.error);
+    }
   }
 
   Future<void> getSelectedFields() async {
@@ -398,10 +402,7 @@ class AddIdCardController extends GetxController {
 
       return true; // ✅ FIX
     } catch (e) {
-      AppSnackBar.show(
-        error: e.toString().replaceFirst('Exception: ', ''),
-        type: SnackBarType.error,
-      );
+      AppSnackBar.show(error: e, type: SnackBarType.error);
       return false;
     } finally {
       DialogUtils.hideLoading();
