@@ -26,16 +26,12 @@ class IdCardController extends GetxController {
   }
 
   void getIdCards() async {
-    try {
-      isLoading.value = true;
-      update(["idCard"]);
-      final response = await source.getSchoolId(data);
-      schoolIds = response;
-      isLoading.value = false;
-      update(["idCard"]);
-    } catch (e) {
-      AppSnackBar.show(error: e, type: SnackBarType.error);
-    }
+    isLoading.value = true;
+    update(["idCard"]);
+    final response = await source.getSchoolId(data);
+    schoolIds = response;
+    isLoading.value = false;
+    update(["idCard"]);
   }
 
   void expandCard(int index, bool expand) {
@@ -90,5 +86,23 @@ class IdCardController extends GetxController {
   Future<String> _fileToBase64(File file) async {
     final bytes = await file.readAsBytes();
     return base64Encode(bytes);
+  }
+
+  Future<void> acceptOrRejectCard({
+    required String status,
+    required int id,
+  }) async {
+    try {
+      DialogUtils.showLoading();
+      final response = await source.acceptOrRejectCard(id: id, status: status);
+      if (response.statusCode == 200) {
+        AppSnackBar.show(error: "Id card ${response.data['correct']} successfully");
+        getIdCards();
+      }
+      DialogUtils.hideLoading();
+    } catch (e) {
+      DialogUtils.hideLoading();
+      AppSnackBar.show(error: e, type: SnackBarType.error);
+    }
   }
 }

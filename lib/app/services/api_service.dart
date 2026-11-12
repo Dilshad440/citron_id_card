@@ -4,6 +4,7 @@ import 'package:citron_id_card/app/config/network/api_constants.dart';
 import 'package:citron_id_card/app/modules/school/id_card/model/get_sessions.dart';
 import 'package:citron_id_card/app/modules/school/id_card/model/student_id_model.dart';
 import 'package:dio/dio.dart';
+import 'package:get/utils.dart';
 import '../config/network/dio_client.dart';
 import '../modules/school/id_card/model/selected_fields_model.dart';
 import '../modules/shared/home/model/school_user_res.dart';
@@ -195,6 +196,22 @@ class ApiService {
     } catch (e) {
       // Log the error for debugging
       print("Error in getClassAndSection: $e");
+      rethrow;
+    }
+  }
+
+  Future<Response<dynamic>> acceptOrRejectCard({
+    required String status,
+    required int id,
+  }) async {
+    try {
+      final response = await client.dio.put(
+        ApiConstants.acceptOrReject(id),
+        data: {"status": status.capitalizeFirst},
+      );
+      return response;
+    } catch (e) {
+      print("Error in $status Api: $e");
       rethrow;
     }
   }

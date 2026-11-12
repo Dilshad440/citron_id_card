@@ -318,6 +318,7 @@ class _StudentIdCard extends GetView<IdCardController> {
                       ],
                     ),
                   ),
+                  _acceptRejectButton(controller, student?.id),
                 ] else ...[
                   /// Collapsed View (Top 3 entries in exact API sequence)
                   Padding(
@@ -351,11 +352,63 @@ class _StudentIdCard extends GetView<IdCardController> {
                       ],
                     ),
                   ),
+                  Divider(color: Colors.grey),
+                  _acceptRejectButton(controller, student?.id),
                 ],
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Padding _acceptRejectButton(IdCardController controller, int? id) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      child: Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: () {
+                controller.acceptOrRejectCard(status: "Rejected", id: id!);
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.red,
+                side: BorderSide(color: Colors.red, width: 1.5),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text(
+                "Correct",
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12), // Spacing between buttons
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                controller.acceptOrRejectCard(status: "Rejected", id: id!);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text(
+                "Accept",
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -16,6 +16,8 @@ class ApiConstants {
   static const String editIdCard = '/api/IDRecords/';
   static const String sessions = '/api/Sessions';
 
+  static String acceptOrReject(id) => '/api/IDRecords/$id/review';
+
   static String listValuesByFieldName({
     required int schoolId,
     required String fieldName,
