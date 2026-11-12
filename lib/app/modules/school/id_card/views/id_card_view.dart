@@ -525,7 +525,7 @@ class _StudentIdCard extends GetView<IdCardController> {
                 ),
               ),
               child: const Text(
-                "Correct",
+                "Reject",
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
               ),
             ),
@@ -534,7 +534,7 @@ class _StudentIdCard extends GetView<IdCardController> {
           Expanded(
             child: ElevatedButton(
               onPressed: () {
-                controller.acceptOrRejectCard(status: "Rejected", id: id!);
+                controller.acceptOrRejectCard(status: "Correct", id: id!);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
