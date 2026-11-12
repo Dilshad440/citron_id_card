@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:citron_id_card/app/config/network/api_constants.dart';
 import 'package:citron_id_card/app/core/components/background_gradient.dart';
+import 'package:citron_id_card/app/core/constants/asset_constant.dart';
 import 'package:citron_id_card/app/core/utils/common_utils.dart';
 import 'package:citron_id_card/app/modules/shared/home/controllers/home_controller.dart';
 import 'package:citron_id_card/app/routes/app_routes.dart';
@@ -28,50 +29,68 @@ class IdCardView extends GetView<IdCardController> {
                   },
                   icon: const Icon(Icons.arrow_back),
                 ),
-                Text(
-                  "Student Id Card",
-                  style: AppTextStyle.title.large.textColor,
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Student Id Card",
+                      style: AppTextStyle.title.large.textColor,
+                    ),
+                    GetBuilder<IdCardController>(
+                      id: "idCard",
+                      builder: (controller) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text.rich(
+                              TextSpan(
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text:
+                                        '${controller.schoolIds?.length ?? 0} ',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: controller.schoolIds?.length == 1
+                                        ? 'card found'
+                                        : 'cards found',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
                 ),
                 const Spacer(),
-                GetBuilder<IdCardController>(
-                  id: "idCard",
-                  builder: (controller) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text.rich(
-                          TextSpan(
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: '${controller.schoolIds?.length ?? 0} ',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              TextSpan(
-                                text: controller.schoolIds?.length == 1
-                                    ? 'card found'
-                                    : 'cards found',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
+                IconButton(
+                  onPressed: () {
+                    _showFilterBottomSheet(context);
                   },
+                  icon: Image.asset(
+                    AssetConstant.filter,
+                    height: 38,
+                    width: 38,
+                  ),
                 ),
               ],
             ),
+            SizedBox(height: 15),
             Expanded(
               child: GetBuilder<IdCardController>(
                 id: "idCard",
@@ -117,6 +136,130 @@ class IdCardView extends GetView<IdCardController> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showFilterBottomSheet(BuildContext context) {
+    // Track the selected filters (Map or List of booleans)
+    final Map<String, bool> filterOptions = {
+      "ID cards with Photo": false,
+      "Generated ID Cards": false,
+      "Printed ID Cards": false,
+      "Accepted ID Cards": false,
+      "Rejected ID Cards": false,
+    };
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              padding: EdgeInsets.fromLTRB(
+                20,
+                20,
+                20,
+                MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Filter ID Cards",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            filterOptions.updateAll((key, value) => false);
+                          });
+                        },
+                        child: const Text(
+                          "Reset All",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 20),
+
+                  // Filter Options List
+                  ...filterOptions.keys.map((String key) {
+                    return CheckboxListTile(
+                      title: Text(
+                        key,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      value: filterOptions[key],
+                      activeColor: Colors.blue.shade600,
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.trailing,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      onChanged: (bool? value) {
+                        setState(() {
+                          filterOptions[key] = value ?? false;
+                        });
+                      },
+                    );
+                  }),
+
+                  const SizedBox(height: 20),
+
+                  // Apply Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Handle the selected filters here
+                        // e.g., print(filterOptions);
+                        Navigator.pop(context); // Close bottom sheet
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue.shade600,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        "Apply Filters",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
